@@ -10,7 +10,7 @@ import os
 discord_webhook = ''
 pushover_app_token = ''
 pushover_api = ''
-send_discord = False
+send_discord = True
 send_pushover = False
 mute_hickory = True
 os.chdir('C:\\Users\\bitcoinbart\\subspace') # Where your node executable file is located
@@ -128,21 +128,12 @@ def run_command(command, **kwargs):
             file.write(local_time(line.decode()) + '\n')
     
 # RUN COMMAND - run specific file with arguments to capture output.
-# Every argument must be added in quotes and comma separated for the key and value.
-# i.e.: farm is its own, --reward address is its own, the value for the reward address is on its own, etc.
-# Do not add extra spaces, make sure you close your quotes and use a comma in between.
-
-#Below is multi farms on Windows
+# Surround your normal startup line with quotes
 
 # TODO Make the params easier to add
-run_command(
-    ['subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe', 
-     'farm', 
-     '--reward-address',
-     'YOUR_WALLET_ADDRESS', 
-     'path=z:\\subspace-farm,size=900G',
-     'path=x:\\subspace-farm,size=460G', 
-     'path=y:\\subspace-farm,size=890G', 
-     '--farm-during-initial-plotting=true'],
+
+cmd = 'subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe farm --reward-address xxxxxxxxx path=z:\\subspace-farm,size=900G  path=x:\\subspace-farm,size=460G path=y:\\subspace-farm,size=890G --farm-during-initial-plotting=true'
+
+run_command(cmd.split(),
     
     cwd=Path(__file__).parent.absolute())
