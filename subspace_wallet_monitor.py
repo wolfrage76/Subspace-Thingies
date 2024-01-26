@@ -15,7 +15,7 @@ class WalletMon(object):
         
         self.discord_url = ""
         
-        self.wallet = "YOUR WALLET HERE"  
+        self.wallet = "YOUR_WALLET"  
                                      # Wallet address to monitor. Singular for now.
         
         nodeip = "192.168.1.205"     # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever

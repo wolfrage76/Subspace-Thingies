@@ -5,15 +5,19 @@ from pathlib import Path
 from datetime import datetime 
 import os
 
+
+### CONFIG ###
 discord_webhook = ''
 pushover_app_token = ''
 pushover_api = ''
-send_discord = True
+send_discord = False
 send_pushover = False
 mute_hickory = True
+os.chdir('C:\\Users\\bitcoinbart\\subspace') # Where your node executable file is located
 
-#os.chdir('C:\\Users\\BitcoinBart\\subspace')
-reward_phrase = 'reward_signing: Successfully signed reward hash'
+#################
+
+reward_phrase = 'reward_signing: Successfully signed reward hash' # This is dumb. Need to handle better.
 
 
 def send(msg=None):
@@ -126,12 +130,19 @@ def run_command(command, **kwargs):
 # RUN COMMAND - run specific file with arguments to capture output.
 # Every argument must be added in quotes and comma separated for the key and value.
 # i.e.: farm is its own, --reward address is its own, the value for the reward address is on its own, etc.
+# Do not add extra spaces, make sure you close your quotes and use a comma in between.
 
 #Below is multi farms on Windows
 
 # TODO Make the params easier to add
 run_command(
-    ['subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe', 'farm', '--reward-address',
-     'YOUR WALLET HERE', 'path=z:\\subspace-farm,size=900G',
-     'path=x:\\subspace-farm,size=460G', 'path=y:\\subspace-farm,size=890G', '--farm-during-initial-plotting=true'],
+    ['subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe', 
+     'farm', 
+     '--reward-address',
+     'YOUR_WALLET_ADDRESS', 
+     'path=z:\\subspace-farm,size=900G',
+     'path=x:\\subspace-farm,size=460G', 
+     'path=y:\\subspace-farm,size=890G', 
+     '--farm-during-initial-plotting=true'],
+    
     cwd=Path(__file__).parent.absolute())
