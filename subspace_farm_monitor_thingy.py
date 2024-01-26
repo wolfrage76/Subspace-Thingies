@@ -3,12 +3,12 @@
 import subprocess
 from pathlib import Path
 from datetime import datetime 
-
+import os
 
 discord_webhook = ''
 pushover_app_token = ''
 pushover_api = ''
-send_discord = False
+send_discord = True
 send_pushover = False
 mute_hickory = True
 
@@ -132,6 +132,6 @@ def run_command(command, **kwargs):
 # TODO Make the params easier to add
 run_command(
     ['subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe', 'farm', '--reward-address',
-     'YOUR_WALLET_ADDRESS_HERE', 'path=z:\\subspace-farm,size=900G',
+     'YOUR WALLET HERE', 'path=z:\\subspace-farm,size=900G',
      'path=x:\\subspace-farm,size=460G', 'path=y:\\subspace-farm,size=890G', '--farm-during-initial-plotting=true'],
     cwd=Path(__file__).parent.absolute())
