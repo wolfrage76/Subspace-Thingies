@@ -1,0 +1,16 @@
+Imma gonna do:
+Track "Proving for solution skipped due to farming time limit" msgs
+Track Plot %, drive # and letter, 
+Generate table with each farm in each row, number of plotted sector, number of reward 
+Save table data as csv for spreadsheet nerds
+Track counts of specific errors and warnings
+Organize multiple check terms/filters into something better
+Get a pet monkey
+GUI frontend to monitor
+Pull in data from remote farmers
+Get jiggy wit it
+Combine the Farm monitor thingy and wallet monitor thingy into 1 tool
+Launch and monitor Node functionality (need community input)
+Control Farms/Nodes
+Add additional Notification systems
+
