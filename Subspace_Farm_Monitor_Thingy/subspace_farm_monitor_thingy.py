@@ -109,7 +109,7 @@ def run_command(command, **kwargs):
             # TODO save to csv block, farm, time, total (pdragon)
             
             send('WINNER! You were rewarded!')
-        elif '100% complete' in line.decode():
+        elif 'Initial plotting complete' in line.decode():
             print('\n\n************************************* Plot Complete! *************************************\n\n')
             # TODO Save to csv data as above
             send('Plot complete: ' + line.decode().split()[2] + ' 100%!')
