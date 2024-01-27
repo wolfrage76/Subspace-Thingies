@@ -1,0 +1,13 @@
+SEND_DISCORD: False
+DISCORD_WEBHOOK: # 'https://discord.com/api/webhooks/1199928287/XXXXXXXXXXX
+
+SEND_PUSHOVER: False
+PUSHOVER_APP_TOKEN: 
+PUSHOVER_USER_KEY: 
+
+WALLET: # Your wallet address
+NODE_FOLDER: 'C:\\Users\\bitcoinbart\\subspace'  # Node folder. Windows needs double slashes 
+
+MUTE_HICKORY: True  
+
+COMMANDLINE: 'subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe farm --reward-address xxxxxxxxx path=z:\\subspace-farm,size=900G  path=x:\\subspace-farm,size=460G path=y:\\subspace-farm,size=890G --farm-during-initial-plotting=true'  # Put in the commandline you use to launch farmer, as a string in quotes

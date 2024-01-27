@@ -8,19 +8,23 @@ class WalletMon(object):
     
     
     def __init__(self):
-        print('Starting wallet monitoring...')
+    
+        import yaml
+
+        with open('config.yaml', 'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        
         
         ####CONFIG####
-        self.wait_period = 60  # How long between wallet checks
         
-        self.discord_url = ""
+        self.discord_url = config['DISCORD_WEBHOOK']
+        self.wallet = config['WALLET']  
+        self.wait_period = config['WAIT_PERIOD']                                        
         
-        self.wallet = ""  
-                                     # Wallet address to monitor. Singular for now.
-        
-        nodeip = "192.168.1.205"     # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
-        nodeport = "9944"            # Port the node is using
+        nodeip = config['NODE_IP']     # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
+        nodeport = config['NODE_PORT']            # Port the node is using
         self.show_ping = True        # Show Ping notice in console to show it's alive
+        
         ##############
         
         self.substrate = SubstrateInterface(url="ws://" + nodeip + ":" + nodeport)  
@@ -28,7 +32,8 @@ class WalletMon(object):
         self.first_time = True  # We don't want to tell people their balance has changed on first run
         self.last_balance = 0.0
         
-
+        print('Starting wallet monitoring...')
+        send(self,'Starting wallet monitoring...')
         # map multiple wallets in query  # Eventually
         '''
         hash = substrate.get_chain_finalised_head()
@@ -85,7 +90,7 @@ class WalletMon(object):
     
     
 def send(self, msg=None, image=None):
-        if msg and self.discord_url != "": 
+        if msg and self.discord_url: 
         
 ##### Discord
             import requests

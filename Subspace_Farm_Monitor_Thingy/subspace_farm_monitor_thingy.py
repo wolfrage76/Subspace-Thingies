@@ -4,16 +4,14 @@ import subprocess
 from pathlib import Path
 from datetime import datetime 
 import os
+import yaml
 
+with open("config.yaml") as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
 
-### CONFIG ###
-discord_webhook = ''
-pushover_app_token = ''
-pushover_api = ''
-send_discord = True
-send_pushover = False
-mute_hickory = True
-os.chdir('C:\\Users\\bitcoinbart\\subspace') # Where your node executable file is located
+if config['NODE_FOLDER']:
+    os.chdir(config['NODE_FOLDER']) # Where your node executable file is located
+
 
 #################
 
@@ -23,24 +21,24 @@ reward_phrase = 'reward_signing: Successfully signed reward hash' # This is dumb
 def send(msg=None):
     #### Discord
 
-    if send_discord and msg:
+    if config['SEND_DISCORD'] and config['DISCORD_WEBHOOK'] and msg:
 
         import requests
         data = {"content": msg}
-        response = requests.post(discord_webhook, json=data)
+        response = requests.post(config['DISCORD_WEBHOOK'], json=data)
         success_list = [204]
         if response.status_code not in success_list:
             print('Error sending Discord: ' + str(response.status_code))
 
     ##### Pushover
 
-    if send_pushover and pushover_app_token != '' and pushover_api != '' and msg:
+    if config['SEND_PUSHOVER'] and config['PUSHOVER_APP_TOKEN'] and config['PUSHOVER_USER_KEY'] and msg:
         import http.client, urllib
         conn = http.client.HTTPSConnection("api.pushover.net:443")
         conn.request("POST", "/1/messages.json",
                      urllib.parse.urlencode({
-                         "token": pushover_app_token,
-                         "user": pushover_api,
+                         "token": config['PUSHOVER_APP_TOKEN'],
+                         "user": config['PUSHOVER_USER_KEY'],
                          "message": msg,
                      }), {"Content-type": "application/x-www-form-urlencoded"})
         conn.getresponse()
@@ -96,7 +94,7 @@ def run_command(command, **kwargs):
         stderr=subprocess.STDOUT,
         **kwargs,
     )
-
+    send('Starting farmer monitor...')
     while True:
         line = process.stdout.readline()
 
@@ -116,7 +114,7 @@ def run_command(command, **kwargs):
             # TODO Save to csv data as above
             send('Plot complete: ' + line.decode().split()[2] + ' 100%!')
             
-        elif 'hickory_proto::xfer::dns_exchange: failed to associate send_message response to the sender' in line.decode() and mute_hickory:
+        elif 'failed to associate send_message response to the sender' in line.decode() and config['MUTE_HICKORY']:
             continue
         
         elif "INFO single_disk_farm{disk_farm_index=" in line.decode() and "subspace_farmer::single_disk_farm::plotting: Plotting sector" in line.decode():
@@ -128,11 +126,8 @@ def run_command(command, **kwargs):
             file.write(local_time(line.decode()) + '\n')
     
 # RUN COMMAND - run specific file with arguments to capture output.
-# Surround your normal startup line with quotes
 
-# TODO Make the params easier to add
-
-cmd = 'subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe farm --reward-address xxxxxxxxx path=z:\\subspace-farm,size=900G  path=x:\\subspace-farm,size=460G path=y:\\subspace-farm,size=890G --farm-during-initial-plotting=true'
+cmd = config['COMMANDLINE']
 
 run_command(cmd.split(),
     
