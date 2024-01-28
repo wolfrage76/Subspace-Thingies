@@ -2,6 +2,7 @@
 My tools and utils for the Subspace Network.  
 
 -Wallet Monitor Thingy:  Will run and monitor your wallet address for balance changes, and will send you notifications on the new balance and the change.
+
 -Farm Monitor Thingy: Will launch the Farmer and capture its output to a log and to screen, filtering the log to notify you (log, screen, discord, etc) of events. It also converts log timestamp to your local timezone. More features coming. 
 
 
