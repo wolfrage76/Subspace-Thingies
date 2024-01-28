@@ -1,0 +1,4 @@
+PyYAML==6.0.1
+PyYAML==6.0.1
+Requests==2.31.0
+substrate_interface==1.7.5
