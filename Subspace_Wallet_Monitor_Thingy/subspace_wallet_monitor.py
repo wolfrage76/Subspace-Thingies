@@ -23,7 +23,7 @@ class WalletMon(object):
         
         nodeip = config['NODE_IP']     # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
         nodeport = config['NODE_PORT']            # Port the node is using
-        self.show_ping = True        # Show Ping notice in console to show it's alive
+        show_ping = config['SHOW_PING']         # Show Ping notice in console to show it's alive
         
         ##############
         while True:
