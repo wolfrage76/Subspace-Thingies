@@ -5,13 +5,16 @@ from pathlib import Path
 from datetime import datetime 
 import os
 import yaml
+import time
+import sys
 
 with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
-if config['NODE_FOLDER']:
-    os.chdir(config['NODE_FOLDER']) # Where your node executable file is located
-
+if config['NODE_EXECUTABLE_FOLDER']:
+    os.chdir(config['NODE_EXECUTABLE_FOLDER']) # Where your node executable file is located
+elif config['NODE_FOLDER']:
+    os.chdir(config['NODE_FOLDER']) # In case someone has an old config
 
 #################
 
@@ -88,43 +91,87 @@ def get_plot_stats(str):
 
 
 def run_command(command, **kwargs):
-    process = subprocess.Popen(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        **kwargs,
-    )
-    send('Starting farmer monitor...')
-    while True:
-        line = process.stdout.readline()
-
-        # TODO convert to a list of filters vs singlar
-        
-        if not line and process.poll() is not None:
-            break
-        
-        
-        elif reward_phrase in line.decode():
-            print('\n\n************************************* WINNER! *************************************\n\n')
-            # TODO save to csv block, farm, time, total (pdragon)
-            
-            send('WINNER! You were rewarded!')
-        elif 'Initial plotting complete' in line.decode():
-            print('\n\n************************************* Plot Complete! *************************************\n\n')
-            # TODO Save to csv data as above
-            send('Plot complete: ' + line.decode().split()[2] + ' 100%!')
-            
-        elif 'failed to associate send_message response to the sender' in line.decode() and config['MUTE_HICKORY']:
-            continue
-        
-        elif "INFO single_disk_farm{disk_farm_index=" in line.decode() and "subspace_farmer::single_disk_farm::plotting: Plotting sector" in line.decode():
-            get_plot_stats(line.decode())
-        # TODO Print chart of above data points
-        
-        print(local_time(line.decode()))
-        with open("farmlog.txt", "a+") as file:
-            file.write(local_time(line.decode()) + '\n')
     
+        while True:
+            #send('Starting farmer monitor...')
+            try:
+                process = subprocess.Popen(
+                    command,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    **kwargs,
+                )
+                
+                #output,error = process.communicate()
+                
+                
+                while True:
+                    try:
+                        line = process.stdout.readline()
+                        
+                        
+                        # TODO convert to a list of filters vs singlar
+                        
+                        if not line and process.poll() is not None: 
+                            break
+                        
+                        elif "(os error " in line.decode():
+                            process.kill()
+                            print(line.decode())
+                            print('retrying shortly')
+                            time.sleep(3)
+                            break
+                            
+                        elif reward_phrase in line.decode():
+                            print('\n\n************************************* WINNER! *************************************\n\n')
+                            # TODO save to csv block, farm, time, total (pdragon)
+                            
+                            send('WINNER! You were rewarded!')
+                        elif 'Initial plotting complete' in line.decode():
+                            print('\n\n************************************* Plot Complete! *************************************\n\n')
+                            # TODO Save to csv data as above
+                            send('Plot complete: ' + line.decode().split()[2] + ' 100%!')
+                            
+                        elif 'failed to associate send_message response to the sender' in line.decode() and config['MUTE_HICKORY']:
+                            continue
+                        
+                        elif "INFO single_disk_farm{disk_farm_index=" in line.decode() and "subspace_farmer::single_disk_farm::plotting: Plotting sector" in line.decode():
+                            get_plot_stats(line.decode())
+                        # TODO Print chart of above data points
+                        
+                        if process.poll() is not None: 
+                            print('Process poll: ' + str(process.poll() ) )
+                            break
+                    
+                        if  datetime_valid(local_time(line.decode())):
+                            print(local_time(line.decode()))
+                            with open("farmlog.txt", "a+") as file:
+                                file.write(local_time(line.decode()) + '\n')
+                        else: 
+                            print(line.decode())
+                            with open("farmlog.txt", "a+") as file:
+                                file.write(line.decode() + '\n')
+                    except OSError as e:
+                        print("OSError > " + e.errno)
+                        print("OSError > " + e.strerror)
+                        print("OSError > " + e.filename)
+                    except:
+                        print("Error > " + str(sys.exc_info()[0]))
+                        
+                        print('Exception: Retrying in 5 minutes ') # Set correct after testing
+                        time.sleep(10)
+            except OSError as e:
+                print("OSError > " + e.errno)
+                print("OSError > " + e.strerror)
+                print("OSError > " + e.filename)
+            except:
+                print("Error > " + str(sys.exc_info()[0]))
+                
+                print('Exception: Retrying in 5 minutes ') # Set correct after testing
+                time.sleep(10)
+   
+        
+
 # RUN COMMAND - run specific file with arguments to capture output.
 
 cmd = config['COMMANDLINE']

@@ -26,58 +26,68 @@ class WalletMon(object):
         self.show_ping = True        # Show Ping notice in console to show it's alive
         
         ##############
-        
-        self.substrate = SubstrateInterface(url="ws://" + nodeip + ":" + nodeport)  
-
-        self.first_time = True  # We don't want to tell people their balance has changed on first run
-        self.last_balance = 0.0
-        
-        print('Starting wallet monitoring...')
-        send(self,'Starting wallet monitoring...')
-        # map multiple wallets in query  # Eventually
-        '''
-        hash = substrate.get_chain_finalised_head()
-        result = substrate.query_map('System', 'Account', block_hash = hash, max_results=2)
-        for account, account_info in result:
-             print(f"Free balance of account '{account.value}': {account_info.value['data']['free']}")
-         '''
-
         while True:
-            balance = (self.query_wallet(self.substrate).value["data"]["free"] +
-                       self.query_wallet(self.substrate).value["data"]["reserved"])
-            balance_from_exp = (balance / 10 ** self.substrate.properties.get('tokenDecimals', 0))
+            try:
+                self.substrate = SubstrateInterface(url="ws://" + nodeip + ":" + nodeport)  
 
-            if self.first_time:
-                self.last_balance = balance # 
+                self.first_time = True  # We don't need to tell people their balance has changed on first run
+                self.last_balance = 0.0
                 
-            if balance != self.last_balance and not self.first_time:
-                if balance_from_exp > (self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)):
+            
+            
+ #       print('Starting wallet monitoring...')
+ #       send(self,'Starting wallet monitoring...')
+        # map multiple wallets in query  # Eventually
+                '''
+                hash = substrate.get_chain_finalised_head()
+                result = substrate.query_map('System', 'Account', block_hash = hash, max_results=2)
+                for account, account_info in result:
+                    print(f"Free balance of account '{account.value}': {account_info.value['data']['free']}")
+                '''
 
-                    chng = balance_from_exp - (
-                            self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0))
-                    result = (
-                        f"Wallet {self.wallet[-5:]} received coins! \nBalance @ {self.format_balance(balance)}  (Change: +{round(chng, 4)})")
+                while True:
+             
+                    balance = (self.query_wallet(self.substrate).value["data"]["free"] +
+                            self.query_wallet(self.substrate).value["data"]["reserved"])
+                    balance_from_exp = (balance / 10 ** self.substrate.properties.get('tokenDecimals', 0))
 
-                    print(result)
-                    send(self, result)
+                    if self.first_time:
+                        self.last_balance = balance # 
+                        print('Starting Balance: ' + str(self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)) )
+                        
+                    if balance != self.last_balance and not self.first_time:
+                        if balance_from_exp > (self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)):
 
-                elif balance_from_exp < (self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)):
-                    chng = (balance_from_exp - (
-                            self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)))
-                    result = f"Wallet {self.wallet[-5:]} removed coins! \nBalance @ {self.format_balance(balance)}  (Change: -{round(chng, 4)})"
+                            chng = balance_from_exp - (
+                                    self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0))
+                            result = (
+                                f"Wallet {self.wallet[-5:]} received coins! \nBalance @ {self.format_balance(balance)}  (Change: +{round(chng, 4)})")
 
-                    print(result)
-                    send(self, result)
-                else:
-                    pass
+                            print(result)
+                            send(self, result)
 
-            self.first_time = False
-            self.last_balance = balance
+                        elif balance_from_exp < (self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)):
+                            chng = (balance_from_exp - (
+                                    self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)))
+                            result = f"Wallet {self.wallet[-5:]} removed coins! \nBalance @ {self.format_balance(balance)}  (Change: -{round(chng, 4)})"
 
-            if self.show_ping: 
-                print(time.strftime("%H:%M |", time.localtime()) + ' Ping! Still alive!')
-            time.sleep(self.wait_period)
+                            print(result)
+                            send(self, result)
+                        else:
+                            pass
 
+                    self.first_time = False
+                    self.last_balance = balance
+
+                    if self.show_ping: 
+                        print(time.strftime("%H:%M |", time.localtime()) + ' Ping! Still alive!')
+                    time.sleep(self.wait_period)
+            except:
+                print('Exception... Retrying in ' + str(self.wait_period) + ' seconds...') # Yeah, needs real error 
+                                                                                           # handling next
+                time.sleep(self.wait_period)
+                
+        
     def query_wallet(self, substrate):
         result = substrate.query(
             "System", "Account", [self.wallet]

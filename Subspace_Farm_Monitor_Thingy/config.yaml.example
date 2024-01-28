@@ -1,12 +1,12 @@
 SEND_DISCORD: False
-DISCORD_WEBHOOK: # 'https://discord.com/api/webhooks/1199928287/XXXXXXXXXXX
+DISCORD_WEBHOOK: # 'https://discord.com/api/webhooks/11998287/XXXXXXXXXXX
 
-SEND_PUSHOVER: False
+SEND_PUSHOVER: False # https://pushover.net/
 PUSHOVER_APP_TOKEN: 
 PUSHOVER_USER_KEY: 
 
 WALLET: # Your wallet address
-NODE_FOLDER: 'C:\\Users\\bitcoinbart\\subspace'  # Node folder. Windows needs double slashes 
+NODE_EXECUTABLE_FOLDER: 'C:\\Users\\bitcoinbart\\subspace'  
 
 MUTE_HICKORY: True  
 

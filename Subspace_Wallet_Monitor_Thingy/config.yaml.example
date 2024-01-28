@@ -1,4 +1,4 @@
-WAIT_PERIOD: 60 # How frequesntly to check 
+WAIT_PERIOD: 300 # How frequesntly to check in seconds.  Default 300 is 5 minutes.
 
 WALLET:  # Your Subspace wallet address
 
