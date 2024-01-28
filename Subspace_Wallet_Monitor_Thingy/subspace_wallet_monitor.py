@@ -20,10 +20,11 @@ class WalletMon(object):
         self.discord_url = config['DISCORD_WEBHOOK']
         self.wallet = config['WALLET']  
         self.wait_period = config['WAIT_PERIOD']                                        
+        self.show_ping = config['SHOW_PING']         # Show Ping notice in console to show it's alive
         
         nodeip = config['NODE_IP']     # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
         nodeport = config['NODE_PORT']            # Port the node is using
-        show_ping = config['SHOW_PING']         # Show Ping notice in console to show it's alive
+        
         
         ##############
         while True:
