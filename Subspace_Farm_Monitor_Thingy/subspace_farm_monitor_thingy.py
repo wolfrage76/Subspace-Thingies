@@ -134,6 +134,8 @@ def run_command(command, **kwargs):
                             
                         elif 'failed to associate send_message response to the sender' in line.decode() and config['MUTE_HICKORY']:
                             continue
+                        elif 'WARN quinn_udp: sendmsg error: Os { code:' in line.decode() :
+                            continue
                         
                         elif "INFO single_disk_farm{disk_farm_index=" in line.decode() and "subspace_farmer::single_disk_farm::plotting: Plotting sector" in line.decode():
                             get_plot_stats(line.decode())

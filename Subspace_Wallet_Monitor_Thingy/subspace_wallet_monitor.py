@@ -5,8 +5,6 @@ from substrateinterface import SubstrateInterface
 
 class WalletMon(object):
     
-    
-    
     def __init__(self):
     
         import yaml
@@ -22,11 +20,11 @@ class WalletMon(object):
         self.wait_period = config['WAIT_PERIOD']                                        
         self.show_ping = config['SHOW_PING']         # Show Ping notice in console to show it's alive
         
-        nodeip = config['NODE_IP']     # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
-        nodeport = config['NODE_PORT']            # Port the node is using
-        
+        nodeip = config['NODE_IP']                   # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
+        nodeport = config['NODE_PORT']               # Port the node is using
         
         ##############
+        
         while True:
             try:
                 self.substrate = SubstrateInterface(url="ws://" + nodeip + ":" + nodeport)  
@@ -34,7 +32,6 @@ class WalletMon(object):
                 self.first_time = True  # We don't need to tell people their balance has changed on first run
                 self.last_balance = 0.0
                 
-            
             
  #       print('Starting wallet monitoring...')
  #       send(self,'Starting wallet monitoring...')
