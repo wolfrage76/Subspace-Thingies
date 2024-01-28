@@ -118,8 +118,8 @@ def run_command(command, **kwargs):
                         elif "(os error " in line.decode():
                             process.kill()
                             print(line.decode())
-                            print('retrying shortly')
-                            time.sleep(3)
+                            print('retrying in 30 seconds')
+                            time.sleep(30)
                             break
                             
                         elif reward_phrase in line.decode():
@@ -138,10 +138,6 @@ def run_command(command, **kwargs):
                         elif "INFO single_disk_farm{disk_farm_index=" in line.decode() and "subspace_farmer::single_disk_farm::plotting: Plotting sector" in line.decode():
                             get_plot_stats(line.decode())
                         # TODO Print chart of above data points
-                        
-                        if process.poll() is not None: 
-                            print('Process poll: ' + str(process.poll() ) )
-                            break
                     
                         if  datetime_valid(local_time(line.decode())):
                             print(local_time(line.decode()))
