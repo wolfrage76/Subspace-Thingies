@@ -250,8 +250,8 @@ def run_command(command, **kwargs):
             except:
                 print("Error > " + str(sys.exc_info()[0]))
                 
-                print('Exception: Retrying in 5 minutes ') # Set correct after testing
-                time.sleep(10)
+                print('Exception: Retrying in 2 minutes ') # Set correct after testing
+                time.sleep(120)
 
         
 
