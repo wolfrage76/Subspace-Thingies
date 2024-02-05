@@ -137,7 +137,7 @@ def main():
         
     )
             
-            for farm in sorted(disk_farms):
+            for farm in sorted(disk_farms, key=int):
                     psd = "{:.2f}".format(float(farm_plot_size[farm]))
                     sector = curr_sector_disk[farm]
                     ipds = round(float(psd))
