@@ -1,14 +1,30 @@
-SEND_DISCORD: False
-DISCORD_WEBHOOK: # 'https://discord.com/api/webhooks/11998287/XXXXXXXXXXX
+################
+# True streams from Farmer directly, not from log.
+# False means to read farmer log instead
 
-SEND_PUSHOVER: False # https://pushover.net/
-PUSHOVER_APP_TOKEN: 
-PUSHOVER_USER_KEY: 
+IS_LIVE: False
 
-WALLET: # Your wallet address
-NODE_EXECUTABLE_FOLDER: 'C:\\Users\\bitcoinbart\\subspace'  
+###############
 
-MUTE_HICKORY: True  
-SHOW_PING: True # Keeps timestamping to screen to show you it's alive
+FARMER_LOG: 'c:\\Users\\bitcoinbart\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, it reads this log
 
-COMMANDLINE: 'subspace-farmer-windows-x86_64-skylake-gemini-3g-2024-jan-24.exe farm --reward-address xxxxxxxxx path=z:\\subspace-farm,size=900G  path=x:\\subspace-farm,size=460G path=y:\\subspace-farm,size=890G --farm-during-initial-plotting=true'  # Put in the commandline you use to launch farmer, as a string in quotes
+WALLET: "xxxxxxxxxxxxxxxxxxxx"
+
+#NODE_EXECUTABLE_FOLDER: #'z:\\dev' # Optional - Windows needs double slashes
+NODE_LOG_FILE: "c:\\Users\\bitcoinbart\\subspace\\nodelog.txt" # Windows uses double \'s'
+
+NODE_IP: "192.168.1.205" # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
+NODE_PORT: "9944" # Port the node is using
+
+SEND_DISCORD: True
+SEND_PUSHOVER: False
+DISCORD_WEBHOOK: #  "https://discord.com/api/webhooks/xxxxxxxxxxxxxx02/xxxxxxxxxxxxxxxxxxU"
+PUSHOVER_APP_TOKEN:
+PUSHOVER_USER_KEY:
+
+WAIT_PERIOD: 300 # wallet check interval seconds
+
+SHOW_PING: False
+MUTE_HICKORY: True
+
+COMMANDLINE: '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxxxxxxxxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB --farm-during-initial-plotting false'
