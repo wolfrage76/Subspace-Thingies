@@ -16,7 +16,7 @@ NODE_LOG_FILE: "c:\\Users\\bitcoinbart\\subspace\\nodelog.txt" # Windows uses do
 NODE_IP: "192.168.1.205" # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
 NODE_PORT: "9944" # Port the node is using
 
-SEND_DISCORD: True
+SEND_DISCORD: False
 SEND_PUSHOVER: False
 DISCORD_WEBHOOK: #  "https://discord.com/api/webhooks/xxxxxxxxxxxxxx02/xxxxxxxxxxxxxxxxxxU"
 PUSHOVER_APP_TOKEN:
