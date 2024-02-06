@@ -240,19 +240,21 @@ def run_command(command, **kwargs):
                         print("OSError > " + e.errno)
                         print("OSError > " + e.strerror)
                         print("OSError > " + e.filename)
+                        send("OSError > " + str(e.errno) + ' ' + e.strerror + ' '  +  e.filename)
                     except:
 
                         print("Error > " + str(sys.exc_info()[0]))
-                        
+                        send("Error > " + str(sys.exc_info()[0]) + ' \nRetrying 5mins...')
                         print('Exception: Retrying in 5 minutes ') # Set correct after testing
                         time.sleep(300)
             except OSError as e:
                     print("OSError > " + str(e.errno))
                     print("OSError > " + e.strerror)
                     print("OSError > " + e.filename)
+                    send("OSError > " + str(e.errno) + ' ' + e.strerror + ' '  +  e.filename)
             except:
                 print("Error > " + str(sys.exc_info()[0]))
-                
+                send("Error > " + str(sys.exc_info()[0]) + ' \nRetrying 5mins...')
                 print('Exception: Retrying in 5 minutes ') # Set correct after testing
                 time.sleep(300)
 
