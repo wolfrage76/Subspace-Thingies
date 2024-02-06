@@ -1,16 +1,35 @@
 Imma gonna do:
 Track "Proving for solution skipped due to farming time limit" msgs
-Track Plot %, drive # and letter, 
+Track letter/dir (partially done)
 Generate table with each farm in each row, number of plotted sector, number of reward 
 Save table data as csv for spreadsheet nerds
 Track counts of specific errors and warnings
 Organize multiple check terms/filters into something better
 Get a pet monkey
-GUI frontend to monitor
 Pull in data from remote farmers
 Get jiggy wit it
-Combine the Farm monitor thingy and wallet monitor thingy into 1 tool
-Launch and monitor Node functionality (need community input)
+Launch and monitor Node functionality
 Control Farms/Nodes
 Add additional Notification systems
+Best Times
+Display rewards per farm
+Monitor Block rewards
+Average plot Times
+Best plot Times
+Error event logging
+Checkpoint logging
+Improved Last5 logging
+Improved error handling
+Upload screenshot log to Website for online monitoring
+Attach screenshot log to Notifications
+Finish separating GUI from backend
+Add websocket for remote farmers
+Add websocket to allow data pulling to other tools
+Tell my wife I love her
+Remote command to request log
+JSON banner import
+Dutch Oven my wife
+Crop dust my kid
+Version checks
+Then I can get to the good stuff.
 
