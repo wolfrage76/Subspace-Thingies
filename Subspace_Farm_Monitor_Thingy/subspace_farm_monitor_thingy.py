@@ -8,6 +8,7 @@ import yaml
 import time
 import sys
 import threading
+import os
 
 from rich import print
 import conf as c
@@ -41,7 +42,9 @@ with open("config.yaml") as f:
 #################
 c.wallet = config['WALLET']
 c.node_log_file = config['NODE_LOG_FILE']
-
+#if config['NODE_EXECUTABLE_FOLDER']:
+   # os.chdir(config['NODE_FOLDER']) # Where your node executable file is located
+    
 reward_phrase = 'reward_signing: Successfully signed reward hash' # This is dumb. Need to handle better.
 
 c.startTime = time.time()

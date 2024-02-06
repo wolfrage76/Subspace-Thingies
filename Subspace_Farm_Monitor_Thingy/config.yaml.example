@@ -6,19 +6,19 @@ IS_LIVE: False
 
 ###############
 
-FARMER_LOG: 'c:\\Users\\bitcoinbart\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, it reads this log
+FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, it reads this log
 
-WALLET: "xxxxxxxxxxxxxxxxxxxx"
+WALLET: "xxxxxxxxxxxxxxxxxxxxx"
 
-#NODE_EXECUTABLE_FOLDER: #'z:\\dev' # Optional - Windows needs double slashes
-NODE_LOG_FILE: "c:\\Users\\bitcoinbart\\subspace\\nodelog.txt" # Windows uses double \'s'
+NODE_EXECUTABLE_FOLDER: 'z:\\dev' 
+NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double \'s'
 
 NODE_IP: "192.168.1.205" # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
 NODE_PORT: "9944" # Port the node is using
 
 SEND_DISCORD: False
 SEND_PUSHOVER: False
-DISCORD_WEBHOOK: #  "https://discord.com/api/webhooks/xxxxxxxxxxxxxx02/xxxxxxxxxxxxxxxxxxU"
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/XXXXXX/gLIVElpW-xxxxxxxxxxxxxxxxx"
 PUSHOVER_APP_TOKEN:
 PUSHOVER_USER_KEY:
 
@@ -27,4 +27,4 @@ WAIT_PERIOD: 300 # wallet check interval seconds
 SHOW_PING: False
 MUTE_HICKORY: True
 
-COMMANDLINE: '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxxxxxxxxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB --farm-during-initial-plotting false'
+COMMANDLINE: '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1 --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB --farm-during-initial-plotting false'
