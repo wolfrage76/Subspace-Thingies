@@ -1,4 +1,5 @@
 Imma gonna do:
+Make Notifications check timestamp so it doesn't trigger on old ones when using log
 Track "Proving for solution skipped due to farming time limit" msgs
 Track letter/dir (partially done)
 Generate table with each farm in each row, number of plotted sector, number of reward 

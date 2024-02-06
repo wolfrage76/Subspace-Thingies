@@ -1,8 +1,8 @@
 # Subspace-Thingies
 
-##My tools and utils for the Subspace Network.
+## My tools and utils for the Subspace Network.
 
-![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/daaa7110-a50c-4f05-837c-9802b4049a08)
+![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/8834e8a3-5001-4cea-9db2-4117cfffcaaa)
 
 ### Farm Monitor Thingy
 
@@ -46,6 +46,7 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 `IS_LIVE:` True         - If set to `False` then it will read from your Farmer Log (details below if you need to set it up)
            -            - If set `True` then it will launch your Farmer and process the stream live. 
                          **NO** quotes around True or False
+`TOGGLE_ENCODING" ` False  - If Disk list doesn't appear when IS_LIVE is set False, set this to True instead.
 
 `FARMER_LOG:` "c:\\Users\\wolfrage\\subspace\\farmlog.txt" - States what Farmer Log to read if IS_LIVE is set to True.  Equired if IS_LIVE is False.
                        -Windows uses double \'s'
@@ -56,16 +57,23 @@ Reqs: Tested on Windows -- Linux should work but not tested.
                         -Windows uses double \'s'                       
 
 `NODE_IP:` "127.0.0.1"  - Your nodes internal IP (127.0.0.1, 192.168.1.69, whatever)
+
 `NODE_PORT:` "9944"     - Port the node is using -- 9944 is default
 
 `WALLET:`  "xxxxxxxxxx" - Wallet address to monitor for balance changes
 
 `SEND_DISCORD:` False   - Send notifications to Discord?
+
 `SEND_PUSHOVER:` False  - Send notifications to Pushover?
+
 `DISCORD_WEBHOOK:`      - Webhook for the Discord channel you want notifications to reach
-                             Format is "https://discord.com/api/webhooks/xxxxxx/xxxxxxxxxxxxx"
+                                 Format is "https://discord.com/api/webhooks/xxxxxx/xxxxxxxxxxxxx"
+                             
+                             
 `PUSHOVER_APP_TOKEN:`     - APP Token from Pushover.com  Format: "xxxxxxxxxxxxxx"
+
 `PUSHOVER_USER_KEY:`      - User Key from Pushover.com Format: "yyyyyyyyyyyyy"
+
 
 `WAIT_PERIOD:` 300        -Wallet check interval seconds.  No quotes around it.
 
@@ -74,13 +82,9 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 
 `COMMANDLINE:` '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
 
-##Commandline Field Above##
-###To use IS_LIVE: True  put your WHOLE launch command above.   
+## Commandline Field Above - To use IS_LIVE: True  put your WHOLE launch command above. 
 
-Need to configure a node or farmer log to be saved?  
-If running `IS_LIVE: True` then that is already done for you automatically!
-
-Otherwise if `IS_LIVE: False`, or for your Node, edit the command you use to launch it and add this to the end: `*> nodelog.txt`
+Need to configure a node or farmer log file?  Add this to the end of your launch command: `*> <FILENAME>.txt`
 
 Farmer sample:```.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx  path=z:\\dev-farm2,size=2GiB *> farmerlog.txt```
 
