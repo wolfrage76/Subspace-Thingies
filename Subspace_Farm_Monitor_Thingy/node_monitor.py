@@ -20,7 +20,8 @@ def main():
                                 c.finalized = line_plain.split()[12]
                                 c.ul = line_plain.split()[15]
                                 c.dl = line_plain.split()[17]
-                                
+                            elif "INFO Consensus: substrate: Γ£¿ Imported" in line_plain:
+                                 c.imported = line_plain.split()[6].replace('#[1;37m','').replace('[0m','')
                                 
                     except:
                         print("Error > " + str(sys.exc_info()[0]))

@@ -154,7 +154,8 @@ def run_command(command, **kwargs):
                             
                             if line_plain == "\r\n" or line_plain == "\n" or line_plain == "":
                                 continue
-                           
+                            
+                            
                             c.last_logs.pop(0)
                             c.last_logs.append(local_time(line_plain.replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]'))
                             
@@ -185,16 +186,15 @@ def run_command(command, **kwargs):
                             elif "plotting" in line_plain and not "Subscribing to archived segments" in line_plain :
                                 farm =   line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}")]
                                 if farm:
-                                    disk_info = farm
                                     curr_farm = farm
                                     if "Replotting complete" in line_plain or "Initial plotting complete" in line_plain:
-                                        farm_plot_size[disk_info] = "100"
+                                        farm_plot_size[farm] = "100"
                                     else:
                                         plot_size = line_plain[line_plain.find("(")+1:line_plain.find("%")]
                                         if plot_size:
-                                            farm_plot_size[disk_info] = line_plain[line_plain.find("(")+1:line_plain.find("%")]
-                                            curr_sector_disk[disk_info] = line_plain[line_plain.find("sector_index=")+ len("sector_index="):line_plain.find("\n")]
-                                            event_times[disk_info] = line_plain.split()[0]
+                                            farm_plot_size[farm] = line_plain[line_plain.find("(")+1:line_plain.find("%")]
+                                            curr_sector_disk[farm] = line_plain[line_plain.find("sector_index=")+ len("sector_index="):line_plain.find("\n")]
+                                            event_times[farm] = line_plain.split()[0]
                             
                             elif 'Allocated space: ' in line_plain and curr_farm:
                                 allocated_space = line_plain[line_plain.find(":") + 2:line_plain.find("(")-1]
@@ -245,7 +245,7 @@ def run_command(command, **kwargs):
                         print("Error > " + str(sys.exc_info()[0]))
                         
                         print('Exception: Retrying in 5 minutes ') # Set correct after testing
-                        time.sleep(10)
+                        time.sleep(300)
             except OSError as e:
                     print("OSError > " + str(e.errno))
                     print("OSError > " + e.strerror)
@@ -253,8 +253,8 @@ def run_command(command, **kwargs):
             except:
                 print("Error > " + str(sys.exc_info()[0]))
                 
-                print('Exception: Retrying in 2 minutes ') # Set correct after testing
-                time.sleep(120)
+                print('Exception: Retrying in 5 minutes ') # Set correct after testing
+                time.sleep(300)
 
         
 

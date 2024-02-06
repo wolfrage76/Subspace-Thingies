@@ -67,7 +67,6 @@ def make_recent_logs() -> Panel:
     )
 
     message = Table.grid()
-    message.add_column()
     message.add_column(no_wrap=True)
     message.add_row(log_event_msg)
 
@@ -94,13 +93,13 @@ class Header:
         
         grid = Table.grid(expand=True)
         grid.add_column(justify="left")
-        grid.add_column(justify="left")
         grid.add_column(justify="center")
-        grid.add_column(justify="left")
+        grid.add_column(justify="center")
+        grid.add_column(justify="center")
         grid.add_column(justify="right")
         grid.add_row(getUptime(),
-            "Peers: " + c.peers+ ' (' + c.ul + ' | ' + c.dl + ') ', '', " Best Block: " + c.best_block + '    Finalized: ' + c.finalized ,
-            balance_info,
+            "Peers: " + c.peers+ ' (' + c.ul + ' | ' + c.dl + ') ', 'Overall Plotting: ' + str(round(c.total_completed,2)) + '%' , " Best Block: " + c.best_block + '    Imported: #' + c.imported ,
+            '' + balance_info,
         )
         return Panel(grid, style="white on blue")
 
@@ -136,7 +135,7 @@ def main():
         TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
         
     )
-            
+            overall = 0
             for farm in sorted(disk_farms, key=int):
                     psd = "{:.2f}".format(float(farm_plot_size[farm]))
                     sector = curr_sector_disk[farm]
@@ -147,6 +146,12 @@ def main():
                         ps = '----'
                         
                     job_progress.add_task(color_by_status(int(ipds)) + farm + ' (' +  ps +') Sector: ' + str(sector), completed=int(ipds))
+                    overall += int(ipds)
+                    
+            if job_progress.tasks and len(job_progress.tasks) > 0:                    
+                c.total_completed = overall / (len(job_progress.tasks))
+            else:
+                c.total_completed = 0
             
                         
             progress_table = Table.grid(expand=True)
