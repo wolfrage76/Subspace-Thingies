@@ -81,14 +81,9 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 
 `COMMANDLINE:` '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
 
-##Commandline Field Above##
+## Commandline Field Above - To use IS_LIVE: True  put your WHOLE launch command above. 
 
-###To use IS_LIVE: True  put your WHOLE launch command above.   
-
-Need to configure a node or farmer log to be saved?  
-If running `IS_LIVE: True` then that is already done for you automatically!
-
-Otherwise if `IS_LIVE: False`, or for your Node, edit the command you use to launch it and add this to the end: `*> nodelog.txt`
+Need to configure a node or farmer log file?  Add this to the end of your launch command: `*> <FILENAME>.txt`
 
 Farmer sample:```.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx  path=z:\\dev-farm2,size=2GiB *> farmerlog.txt```
 
