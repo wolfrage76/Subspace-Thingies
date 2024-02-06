@@ -56,16 +56,23 @@ Reqs: Tested on Windows -- Linux should work but not tested.
                         -Windows uses double \'s'                       
 
 `NODE_IP:` "127.0.0.1"  - Your nodes internal IP (127.0.0.1, 192.168.1.69, whatever)
+
 `NODE_PORT:` "9944"     - Port the node is using -- 9944 is default
 
 `WALLET:`  "xxxxxxxxxx" - Wallet address to monitor for balance changes
 
 `SEND_DISCORD:` False   - Send notifications to Discord?
+
 `SEND_PUSHOVER:` False  - Send notifications to Pushover?
+
 `DISCORD_WEBHOOK:`      - Webhook for the Discord channel you want notifications to reach
-                             Format is "https://discord.com/api/webhooks/xxxxxx/xxxxxxxxxxxxx"
+                                 Format is "https://discord.com/api/webhooks/xxxxxx/xxxxxxxxxxxxx"
+                             
+                             
 `PUSHOVER_APP_TOKEN:`     - APP Token from Pushover.com  Format: "xxxxxxxxxxxxxx"
+
 `PUSHOVER_USER_KEY:`      - User Key from Pushover.com Format: "yyyyyyyyyyyyy"
+
 
 `WAIT_PERIOD:` 300        -Wallet check interval seconds.  No quotes around it.
 
@@ -75,6 +82,7 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 `COMMANDLINE:` '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
 
 ##Commandline Field Above##
+
 ###To use IS_LIVE: True  put your WHOLE launch command above.   
 
 Need to configure a node or farmer log to be saved?  
