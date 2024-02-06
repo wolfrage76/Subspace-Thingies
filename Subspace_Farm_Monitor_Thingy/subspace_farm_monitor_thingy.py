@@ -8,7 +8,6 @@ import yaml
 import time
 import sys
 import threading
-import os
 
 from rich import print
 import conf as c
@@ -139,7 +138,10 @@ def run_command(command, **kwargs):
                    pass
                
                 if not config['IS_LIVE']:
-                            file = open(config['FARMER_LOG'], 'r') # These 3 work
+                            if config['TOGGLE_ENCODING']:
+                                file = open(config['FARMER_LOG'], 'r', )
+                            else:
+                                file = open(config['FARMER_LOG'], 'r', encoding='utf-16' )
                 
                 while True:              
                     try:

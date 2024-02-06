@@ -171,3 +171,4 @@ def main():
             #layout["box1"].update(Panel(layout.tree, border_style="red"))
              
             layout["footer"].update(Align.center("BitcoinBart was here"))
+            

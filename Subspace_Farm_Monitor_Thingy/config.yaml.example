@@ -3,7 +3,7 @@
 # False means to read farmer log instead
 
 IS_LIVE: False
-
+TOGGLE_ENCODING: False # If reading Farmer log but disk list doesnt' appear, set True
 ###############
 
 FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, it reads this log
