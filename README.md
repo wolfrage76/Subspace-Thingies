@@ -6,13 +6,19 @@
 
 ### Farm Monitor Thingy
 
--Can launch the Farmer and capture its live, OR be configured to monitor a farmer log
--Output to a log and to screen
--Filters the log
--Notifications to Discord or Pushover (more coming!) of events
--It converts log timestamp to your local timezone
--Monitors your wallet for balance changes
--If streaming live Farmer, can auto restart if there's an error (i.e. if the node dropped)
+*Can launch the Farmer and capture its live, OR be configured to monitor a farmer log
+
+*Output to a log and to screen
+
+*Filters the log
+
+*Notifications to Discord or Pushover (more coming!) of events
+
+*It converts log timestamp to your local timezone
+
+*Monitors your wallet for balance changes
+
+*If streaming live Farmer, can auto restart if there's an error (i.e. if the node dropped)
 
 More features coming!
 
@@ -23,9 +29,9 @@ Installation:
 I'm high and writing this on the fly, so hopefully you'll be able to get by, my guy.
 
 Reqs: Tested on Windows -- Linux should work but not tested.
--Latest-ish Python
--A working Node
--A working Farmer
+*Latest-ish Python
+*A working Node
+*A working Farmer
 
 (You should usually setup a VENV for a python app but whatever)
 
@@ -68,13 +74,15 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 
 `COMMANDLINE:` '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
 
-##Commandline##
+##Commandline Field Above##
 ###To use IS_LIVE: True, in quotes, put your WHOLE launch command above.   
 
 Need to configure a node or farmer log to be saved?  If running `IS_LIVE: True` then that is already done for you automartically!
+
 Otherwise in `IS_LIVE: False`, or for your Node, edit the command you use to launch them and add this to the end: `*> nodelog.txt`
 
 Farmer sample:```.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx  path=z:\\dev-farm2,size=2GiB *> farmerlog.txt```
+
 Node sample: ``` .\subspace-node-windows-x86_64-skylake-gemini-3h-2024-feb-01 run --chain gemini-3h --blocks-pruning 256 --state-pruning archive-canonical --base-path z:\subspace-node --farmer --name "BitcoinBart" --allow-private-ips  --rpc-methods unsafe --rpc-cors all --rpc-listen-on 127.0.0.1:9944 *> -file nodelog.txt	```
 
 
