@@ -46,6 +46,7 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 `IS_LIVE:` True         - If set to `False` then it will read from your Farmer Log (details below if you need to set it up)
            -            - If set `True` then it will launch your Farmer and process the stream live. 
                          **NO** quotes around True or False
+`TOGGLE_ENCODING" ` False  - If Disk list doesn't appear when IS_LIVE is set False, set this to True instead.
 
 `FARMER_LOG:` "c:\\Users\\wolfrage\\subspace\\farmlog.txt" - States what Farmer Log to read if IS_LIVE is set to True.  Equired if IS_LIVE is False.
                        -Windows uses double \'s'
