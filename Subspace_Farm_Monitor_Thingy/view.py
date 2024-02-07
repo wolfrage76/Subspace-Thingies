@@ -1,4 +1,5 @@
 import requests
+import psutil 
 
 import datetime
 from rich import box
@@ -11,6 +12,7 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 import time
 import utilities.conf as c
+import platform
 
 console = Console()
 
@@ -200,8 +202,11 @@ def main():
            # progress_table.add_row(progress2) 
             
             
-            footer_txt = Table.grid(expand=True)
-            footer_txt.add_row(Align.center('*Insert witty comment here*',))
+            footer_txt = Table.grid(expand=True,)
+            
+            my_system = platform.uname()
+            footer_txt.add_row(Align.center(
+f"CPU: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total / (1024.0 ** 3))}GB ({psutil.virtual_memory().percent}%)   CPUs: {psutil.cpu_count(logical=False)} ({psutil.cpu_count(logical=True)})  Load: {psutil.getloadavg()[1]}" ,))
             
             layout["header"].update(Header())
             layout["body"].visible = c.show_logging
@@ -219,7 +224,7 @@ def main():
             
             layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100%"))
              
-            layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green", subtitle='[b white]SPACE: Toggle Logs', subtitle_align='left'))
+            layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green", subtitle='[b white]SPACE: Toggle Logs', subtitle_align='left', height=3),)
             
             
            
