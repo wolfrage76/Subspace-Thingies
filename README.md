@@ -4,8 +4,6 @@
 
 ![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/aa034718-dfa9-41ea-bc8d-9420ba58ae7a)
 
-![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/4424076f-c8df-4456-b154-ed7c9b49bad7)
-
 
 ### Farm Monitor Thingy
 
