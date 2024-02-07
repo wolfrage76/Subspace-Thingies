@@ -217,7 +217,7 @@ def main():
             # Panel(job_progress, title="BitcoinBart Was Here", border_style="green", padding=(1, 2))
             
             
-            layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b yellow]>25% | [dark_orange]> 75% | [b green]=100%"))
+            layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100%"))
              
             layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green", subtitle='[b white]SPACE: Toggle Logs', subtitle_align='left'))
             
