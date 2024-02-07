@@ -219,7 +219,7 @@ def main():
             
             layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b yellow]>25% | [dark_orange]> 75% | [b green]=100%"))
              
-            layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green", subtitle='[b white]SPACE: Toggles Log panels', subtitle_align='left'))
+            layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green", subtitle='[b white]SPACE: Toggle Logs', subtitle_align='left'))
             
             
            
