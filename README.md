@@ -3,22 +3,26 @@
 ## My tools and utils for the Subspace Network.
 
 ![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/558829f7-f363-4fb3-b1b6-5ea1048e3e1f)
+![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/4424076f-c8df-4456-b154-ed7c9b49bad7)
+
 
 ### Farm Monitor Thingy
 
-*Can launch the Farmer and capture its live, OR be configured to monitor a farmer log
+* Can launch the Farmer and capture it live, OR configured to monitor a farmer log
 
-*Output to a log and to screen
+* Has a smaller display option without logs, if preferred
 
-*Filters the log
+* Output to a log and screen
 
-*Notifications to Discord or Pushover (more coming!) of events
+* Filters the log
 
-*It converts log timestamp to your local timezone
+* Notifications to Discord or Pushover (more coming!) of events
 
-*Monitors your wallet for balance changes
+* It converts log timestamp to your local timezone
 
-*If streaming live Farmer, can auto restart if there's an error (i.e. if the node dropped)
+* Monitors your wallet for balance changes
+
+* If streaming live Farmer, can auto restart if there's an error (i.e. if the node dropped)
 
 More features coming!
 
