@@ -197,7 +197,7 @@ def main():
             
             
             footer_txt = Table.grid(expand=True)
-            footer_txt.add_row(Align.center('This is a test of some text!',))
+            footer_txt.add_row(Align.center('How do you catch a unique rabbit? You \'neak up on it!\nHow do you catch a tame rabbit? \'tame way! You \'neak up on it!',))
             
             layout["header"].update(Header())
             layout["body1"].update(make_recent_logs())
