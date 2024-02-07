@@ -8,9 +8,10 @@ import yaml
 import time
 import sys
 import threading
-import utilities.utils as u
+import utilities.menu_keys as menu
 from rich import print
 import utilities.conf as c
+import utilities.socket as s
 
 import wallet
 import view
@@ -41,6 +42,8 @@ with open("config.yaml") as f:
 #################
 c.wallet = config['WALLET']
 c.node_log_file = config['NODE_LOG_FILE']
+c.show_logging = config['SHOW_LOGGING']
+c.hour_24 = config['HOUR_24']
 #if config['NODE_EXECUTABLE_FOLDER']:
    # os.chdir(config['NODE_FOLDER']) # Where your node executable file is located
     
@@ -57,14 +60,21 @@ def console_thread():
 def node_thread():
  node_monitor.main()
  
-def utils_thread():
- u.main()
+def menu_thread():
+ menu.main()
+ 
+#def socket_thread():
+# s.start()
  
  
 consoleguithread = threading.Thread(target=console_thread, name='Console', daemon=True)
 walletthread = threading.Thread(target=wallet_thread, name='Wallet', daemon=True)
 nodethread = threading.Thread(target=node_thread, name='Node', daemon=True)
-utilsthread = threading.Thread(target=utils_thread, name='Utils', daemon=True)
+menuthread = threading.Thread(target=menu_thread, name='Menu', daemon=True)
+#socketthread = threading.Thread(target=socket_thread, name='Socket', daemon=True)
+
+menuthread.start()
+
 
 def send(msg=None):
     #### Discord
@@ -91,6 +101,8 @@ def send(msg=None):
                      }), {"Content-type": "application/x-www-form-urlencoded"})
         conn.getresponse()
 
+ 
+
 def datetime_valid(dt_str):
     try:
         datetime.fromisoformat(dt_str)
@@ -100,13 +112,16 @@ def datetime_valid(dt_str):
 
 def local_time(string):
     my_string = ''
-    string2 = string.split()
+    string2 = string.split() 
     convert = string2[0]
     
     if datetime_valid(convert):    
 
         datestamp = datetime.fromisoformat(str(convert)).astimezone(tz=None)
-        string2[0] = datestamp.strftime("%m-%d-%Y %H:%M:%S|")
+        if c.hour_24:
+            string2[0] = datestamp.strftime("%m-%d %H:%M:%S|")    
+        else:
+            string2[0] = datestamp.strftime("%m-%d %I:%M %p|").replace(' PM','pm').replace(' AM', 'am')
 
         for piece in string2:
 
@@ -126,6 +141,9 @@ def run_command(command, **kwargs):
     consoleguithread.start() # View
     walletthread.start()
     nodethread.start()
+    
+    #socketthread.start()
+    
     send('Starting farmer monitor...')
            
     while True:

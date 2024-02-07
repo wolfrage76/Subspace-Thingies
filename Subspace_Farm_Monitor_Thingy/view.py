@@ -50,8 +50,10 @@ def make_layout() -> Layout:
     )
     layout["main"].split_row(
         Layout(name="side",),
-        Layout(name="body", ratio=2, minimum_size=20),
+        Layout(name="body", ratio=2, minimum_size=20, visible=c.show_logging),
     )
+    
+    
     layout["body"].split_column(
         Layout(name="body1",),
         Layout(name="body2"),
@@ -97,7 +99,7 @@ def make_recent_node_logs() -> Panel:
     )
 
     message = Table.grid()
-    message.add_column(no_wrap=True)
+    #message.add_column(no_wrap=True)
     message.add_row(log_event_msg)
 
     message_panel = Panel(
@@ -105,7 +107,7 @@ def make_recent_node_logs() -> Panel:
         box=box.ROUNDED,
         title="[b white]Node LOG ENTRIES",
         subtitle="[white]INFO [yellow]WARN [red]ERROR", subtitle_align='left',
-        border_style="bright_blue",
+        border_style="bright_blue", 
     )
     return message_panel
 
@@ -125,7 +127,7 @@ class Header:
         grid.add_column(justify="center")
         grid.add_column(justify="right")
         grid.add_row(getUptime(),
-            "Peers: " + c.peers+ ' (' + c.ul + ' | ' + c.dl + ') ', ' ', " Best Block: " + c.best_block + '    Imported: #' + c.imported , balance_info + " ",
+            "Peers: " + c.peers+ '   (' + c.ul + ' | ' + c.dl + ') ', ' ', " Blocks: " + c.best_block + '/#' + c.imported , balance_info + " ",
         )
         return Panel(grid, style="white on blue")
 
@@ -148,12 +150,14 @@ def color_by_status(percent):
 def main():
     
     layout = make_layout()
+    
     from time import sleep
 
     from rich.live import Live
     
     with Live(layout, refresh_per_second=10):
         while True:
+            
             sector = 0
             sleep(0.1)
             job_progress = Progress(
@@ -197,14 +201,15 @@ def main():
             
             
             footer_txt = Table.grid(expand=True)
-            footer_txt.add_row(Align.center('How do you catch a unique rabbit? You \'neak up on it!\nHow do you catch a tame rabbit? \'tame way! You \'neak up on it!',))
+            footer_txt.add_row(Align.center('*Insert witty comment here*',))
             
             layout["header"].update(Header())
+            layout["body"].visible = c.show_logging
             layout["body1"].update(make_recent_logs())
             layout["body2"].update(make_recent_node_logs())
             
             progress_table.add_row(Panel(progress2, border_style="green",subtitle='Rewards: ' + str(c.reward_count) ))
-            
+                              
             progress_table.add_row(job_progress)
             
             #layout["box2"].update(Panel(job_progress, title="[blue]Farms   [b white]< 25%  [b yellow]>25% [dark_orange]> 75%  [b green]-100%-" , subtitle='Rewards: ' + str(c.reward_count), border_style="green", ), )
@@ -214,6 +219,9 @@ def main():
             
             layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b yellow]>25% | [dark_orange]> 75% | [b green]=100%"))
              
-            layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green",),)
+            layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green", subtitle='[b white]SPACE: Toggles Log panels', subtitle_align='left'))
+            
+            
+           
    
             

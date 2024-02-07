@@ -5,6 +5,7 @@
 IS_LIVE: False
 TOGGLE_ENCODING: False # If reading Farmer log but disk list doesnt' appear, set True
 ###############
+SHOW_LOGGING: True # If False, it will hide the Log scroll and only show farms.
 
 FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, it reads this log
 
@@ -26,5 +27,6 @@ WAIT_PERIOD: 300 # wallet check interval seconds
 
 SHOW_PING: False
 MUTE_HICKORY: True
+24_HOUR: False
 
 COMMANDLINE: '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1 --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB --farm-during-initial-plotting false'

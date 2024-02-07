@@ -22,8 +22,11 @@ def local_time(string):
     if datetime_valid(convert):    
 
         datestamp = datetime.fromisoformat(str(convert)).astimezone(tz=None)
-        string2[0] = datestamp.strftime("%m-%d-%Y %H:%M:%S|")
-
+        if c.hour_24:
+            string2[0] = datestamp.strftime("%m-%d %H:%M:%S|")    
+        else:
+            string2[0] = datestamp.strftime("%m-%d %I:%M %p|").replace(' PM','pm').replace(' AM', 'am')
+        
         for piece in string2:
 
             my_string += '{} '.format(piece)
