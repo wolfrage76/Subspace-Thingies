@@ -41,20 +41,22 @@ def main():
                         while True:
                             
                             line = file.readline()
-                            line_plain = line#.decode()  
-                            
+                            line_plain = line.encode('ascii', 'ignore').decode()                             
                             
                             if line == "\r\n" or line == "\n" or line == "":
                                 continue
                             elif "peers), best: " in line_plain:
-                                c.peers = line_plain.split()[6][+1:]
-                                c.best_block = line_plain.split()[9]
-                                c.finalized = line_plain.split()[12]
-                                c.ul = line_plain.split()[15]
-                                c.dl = line_plain.split()[17]
+                                c.peers = line_plain.split()[5][+1:]
+                                c.best_block = line_plain.split()[8]
+                                c.finalized = line_plain.split()[11]
+                                c.ul = line_plain.split()[13]
+                                c.dl = line_plain.split()[14]
                                 
                             elif "INFO Consensus: substrate:" in line_plain and "Imported" in line_plain:
-                                 c.imported = line_plain.split()[6].replace('#\x1b[1;37m','').replace('\x1b[0m','')
+                                 test = line_plain.split()
+                                 c.imported = line_plain.split()[5].replace('#\x1b[1;37m','').replace('\x1b[0m','')
+                                 line_plain =  line_plain.replace('#\x1b[1;37m','').replace('\x1b[0m','').format(line_plain)
+                                 
                             elif "Claimed block at slot" in line_plain:
                                 last_claimed = line_plain[7]
                             elif "Pre-sealed block for proposal at" in line_plain:
@@ -64,6 +66,7 @@ def main():
                                     c.farm_rewards[farm] += c.farm_rewards[farm]
                                 else:
                                     last_claimed = 0
+                            
                             c.last_node_logs.pop(0)
                             c.last_node_logs.append(local_time(line_plain)) #.replace('\n','').replace(' INFO', '[white]').replace(' WARN','[yellow]').replace('ERROR','[red]')))                     
                     except:

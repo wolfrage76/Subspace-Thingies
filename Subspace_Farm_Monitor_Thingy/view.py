@@ -73,16 +73,14 @@ def make_recent_logs() -> Panel:
     )
 
     message = Table.grid()
-    message.add_column(no_wrap=True)
+    message.add_column(no_wrap=False)
     message.add_row(log_event_msg)
 
     message_panel = Panel(
-        Align.left(
-            Group("\n", Align.left(log_event_msg)),
-        ),
+        Align.left(log_event_msg, vertical='middle'),
         box=box.ROUNDED,
         title="[b white]FARMER LOG ENTRIES",
-        subtitle="[white]INFO [yellow]WARN [red]ERROR",
+        subtitle="[white]INFO [yellow]WARN [red]ERROR", subtitle_align='right',
         border_style="bright_blue",
     )
     return message_panel
@@ -92,7 +90,7 @@ def make_recent_node_logs() -> Panel:
     """Some example content."""
     log_event_msg = Table.grid()
     #sponsor_message.add_column(style="green", justify="right")
-    log_event_msg.add_column(no_wrap=False)
+    #log_event_msg.add_column(no_wrap=False)
     for log in c.last_node_logs:
         log_event_msg.add_row(
             log,
@@ -103,12 +101,10 @@ def make_recent_node_logs() -> Panel:
     message.add_row(log_event_msg)
 
     message_panel = Panel(
-        Align.left(
-            Group("\n", Align.left(log_event_msg)),
-        ),
+        Align.left(log_event_msg, vertical='middle'),
         box=box.ROUNDED,
         title="[b white]Node LOG ENTRIES",
-        subtitle="[white]INFO [yellow]WARN [red]ERROR",
+        subtitle="[white]INFO [yellow]WARN [red]ERROR", subtitle_align='left',
         border_style="bright_blue",
     )
     return message_panel
@@ -129,8 +125,7 @@ class Header:
         grid.add_column(justify="center")
         grid.add_column(justify="right")
         grid.add_row(getUptime(),
-            "Peers: " + c.peers+ ' (' + c.ul + ' | ' + c.dl + ') ', 'Overall Plotting: ' + str(round(c.total_completed,2)) + '%' , " Best Block: " + c.best_block + '    Imported: #' + c.imported ,
-            '' + balance_info,
+            "Peers: " + c.peers+ ' (' + c.ul + ' | ' + c.dl + ') ', ' ', " Best Block: " + c.best_block + '    Imported: #' + c.imported , balance_info + " ",
         )
         return Panel(grid, style="white on blue")
 

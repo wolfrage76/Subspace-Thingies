@@ -26,7 +26,7 @@ imported = str()
 ul = str()
 dl = str()
 node_log_file = str()
-last_logs = [str(), str(), str(), str(), str(), str(),]
+last_logs = [str(), str(), str(), str(), str(), str(),str(),]
 last_node_logs = [str(), str(), str(), str(), str(), str(),]  # However many initialized is how many it'll show
 total_completed = 0 
 
