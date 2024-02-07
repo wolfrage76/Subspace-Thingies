@@ -47,28 +47,30 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 6. ***Enjoy your SSD empire***
 
 ## Configuration: config.yaml
-`IS_LIVE:` True         - If set to `False` then it will read from your Farmer Log (details below if you need to set it up)
+`IS_LIVE: True`         - If set to `False` then it will read from your Farmer Log (details below if you need to set it up)
            -            - If set `True` then it will launch your Farmer and process the stream live. 
                          **NO** quotes around True or False
-`TOGGLE_ENCODING" ` False  - If Disk list doesn't appear when IS_LIVE is set False, set this to True instead.
+`SHOW_LOGGING: True` # If False, it will hide the Log scroll and only show farms for smaller screen space
+                         
+`TOGGLE_ENCODING:  False`  - If Disk list doesn't appear when IS_LIVE is set False, set this to True instead.
 
-`FARMER_LOG:` "c:\\Users\\wolfrage\\subspace\\farmlog.txt" - States what Farmer Log to read if IS_LIVE is set to True.  Equired if IS_LIVE is False.
+`FARMER_LOG: "c:\\Users\\wolfrage\\subspace\\farmlog.txt"` - States what Farmer Log to read if IS_LIVE is set to True.  Equired if IS_LIVE is False.
                        -Windows uses double \'s'
 
-`NODE_EXECUTABLE_FOLDER:` 'z:\\dev' - Where your node executable file is located
+`NODE_EXECUTABLE_FOLDER: 'z:\\dev'` - Where your node executable file is located
 
-`NODE_LOG_FILE:` "c:\\Users\\wolfrage\\subspace\\nodelog.txt" - States your Node log file to monitor - required for Node data 
+`NODE_LOG_FILE:` `"c:\\Users\\wolfrage\\subspace\\nodelog.txt"` - States your Node log file to monitor - required for Node data 
                         -Windows uses double \'s'                       
 
-`NODE_IP:` "127.0.0.1"  - Your nodes internal IP (127.0.0.1, 192.168.1.69, whatever)
+`NODE_IP: "127.0.0.1"`  - Your nodes internal IP (127.0.0.1, 192.168.1.69, whatever)
 
-`NODE_PORT:` "9944"     - Port the node is using -- 9944 is default
+`NODE_PORT: "9944"`     - Port the node is using -- 9944 is default
 
-`WALLET:`  "xxxxxxxxxx" - Wallet address to monitor for balance changes
+`WALLET:  "xxxxxxxxxx"` - Wallet address to monitor for balance changes
 
-`SEND_DISCORD:` False   - Send notifications to Discord?
+`SEND_DISCORD: False`   - Send notifications to Discord?
 
-`SEND_PUSHOVER:` False  - Send notifications to Pushover?
+`SEND_PUSHOVER: False`  - Send notifications to Pushover?
 
 `DISCORD_WEBHOOK:`      - Webhook for the Discord channel you want notifications to reach
                                  Format is "https://discord.com/api/webhooks/xxxxxx/xxxxxxxxxxxxx"
@@ -79,9 +81,9 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 `PUSHOVER_USER_KEY:`      - User Key from Pushover.com Format: "yyyyyyyyyyyyy"
 
 
-`WAIT_PERIOD:` 300        -Wallet check interval seconds.  No quotes around it.
+`WAIT_PERIOD: 300`        -Wallet check interval seconds.  No quotes around it.
 
-`MUTE_HICKORY:` True      - Blocks an annoying msg :)
+`MUTE_HICKORY: True`      - Blocks an annoying msg :)
 
 
 `COMMANDLINE:` '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
