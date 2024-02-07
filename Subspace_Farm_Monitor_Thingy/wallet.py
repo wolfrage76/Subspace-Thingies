@@ -8,7 +8,7 @@ class WalletMon(object):
     def __init__(self):
     
         import yaml
-        import conf as c
+        import utilities.conf as c
         
 
         with open('config.yaml', 'r') as f:

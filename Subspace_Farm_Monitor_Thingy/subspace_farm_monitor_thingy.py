@@ -8,9 +8,9 @@ import yaml
 import time
 import sys
 import threading
-
+import utilities.utils as u
 from rich import print
-import conf as c
+import utilities.conf as c
 
 import wallet
 import view
@@ -57,10 +57,14 @@ def console_thread():
 def node_thread():
  node_monitor.main()
  
+def utils_thread():
+ u.main()
+ 
  
 consoleguithread = threading.Thread(target=console_thread, name='Console', daemon=True)
 walletthread = threading.Thread(target=wallet_thread, name='Wallet', daemon=True)
 nodethread = threading.Thread(target=node_thread, name='Node', daemon=True)
+utilsthread = threading.Thread(target=utils_thread, name='Utils', daemon=True)
 
 def send(msg=None):
     #### Discord
@@ -216,6 +220,7 @@ def run_command(command, **kwargs):
                                 
                                 if farm:
                                     farm_rewards[ line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")]] += 1
+                                    
                                     
                                 print('\n****************** Vote Winner! ******************\n')
                                 # TODO save to csv block, time (pdragon)

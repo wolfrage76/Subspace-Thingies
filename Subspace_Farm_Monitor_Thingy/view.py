@@ -10,7 +10,7 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 #from rich.syntax import Syntax
 from rich.table import Table
 import time
-import conf as c
+import utilities.conf as c
 
 console = Console()
 
@@ -52,7 +52,13 @@ def make_layout() -> Layout:
         Layout(name="side",),
         Layout(name="body", ratio=2, minimum_size=20),
     )
-    layout["side"].split(Layout(name="box2", minimum_size=10))
+    layout["body"].split_column(
+        Layout(name="body1",),
+        Layout(name="body2"),
+    )
+    
+    layout["side"].split(Layout(name="box1")) # ,Layout(name="box2", )
+    
     return layout
 
 
@@ -82,6 +88,31 @@ def make_recent_logs() -> Panel:
     return message_panel
 
 
+def make_recent_node_logs() -> Panel:
+    """Some example content."""
+    log_event_msg = Table.grid()
+    #sponsor_message.add_column(style="green", justify="right")
+    log_event_msg.add_column(no_wrap=False)
+    for log in c.last_node_logs:
+        log_event_msg.add_row(
+            log,
+    )
+
+    message = Table.grid()
+    message.add_column(no_wrap=True)
+    message.add_row(log_event_msg)
+
+    message_panel = Panel(
+        Align.left(
+            Group("\n", Align.left(log_event_msg)),
+        ),
+        box=box.ROUNDED,
+        title="[b white]Node LOG ENTRIES",
+        subtitle="[white]INFO [yellow]WARN [red]ERROR",
+        border_style="bright_blue",
+    )
+    return message_panel
+
 class Header:
    
     def __rich__(self) -> Panel:
@@ -109,10 +140,12 @@ def flip_flop_color(farmer):
     return colors[int(farmer) % 2]  # Todo: Set color based on % 
 
 def color_by_status(percent):
-    colors = ['[b white]', '[b yellow]', '[b green]']
-    if percent > 74:
+    colors = ['[b white]', '[dark_orange]','[b yellow]', '[b green]']
+    if percent == 100:
+        return colors[3]
+    elif percent >= 75:
         return colors[2]
-    elif percent > 25:
+    elif percent >= 25:
         return colors[1]
     else:
         return colors[0]
@@ -145,7 +178,7 @@ def main():
                     else:
                         ps = '----'
                         
-                    job_progress.add_task(color_by_status(int(ipds)) + farm + ' (' +  ps +') Sector: ' + str(sector), completed=int(ipds))
+                    job_progress.add_task(color_by_status(int(ipds)) + farm + ': (' +  ps +') Sector: ' + str(sector), completed=int(ipds))
                     overall += int(ipds)
                     
             if job_progress.tasks and len(job_progress.tasks) > 0:                    
@@ -155,20 +188,37 @@ def main():
             
                         
             progress_table = Table.grid(expand=True)
-          
-            """ progress_table.add_row(
-                Panel(job_progress, title="[blue]Farms: [b white] < 25% [b yellow] >25% [b green] > 75%", subtitle='Total Rewards: ' + str(c.reward_count), border_style="red", padding=(1, 2)),
-                
-            ) """
+            
+            
+            progress2 = Progress(
+        "{task.description}",
+        SpinnerColumn(),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%")
+            )
+            if job_progress.tasks and len(job_progress.tasks) > 0:
+                progress2.add_task('Overall Progress: ', completed = (overall / (len(job_progress.tasks))))
+           # progress_table.add_row(progress2) 
+            
+            
             footer_txt = Table.grid(expand=True)
-            footer_txt.add_column(justify="center")
-
-            footer_txt.add_row('','This is a test of some text!','',)
+            footer_txt.add_row(Align.center('This is a test of some text!',))
             
             layout["header"].update(Header())
-            layout["body"].update(make_recent_logs())
-            layout["box2"].update(Panel(job_progress, title="[blue]Farms  [b white] < 25% [b yellow] >25% [b green] > 75%", subtitle='Rewards: ' + str(c.reward_count), border_style="green", padding=(1, 2)))
-            #layout["box1"].update(Panel(layout.tree, border_style="red"))
+            layout["body1"].update(make_recent_logs())
+            layout["body2"].update(make_recent_node_logs())
+            
+            progress_table.add_row(Panel(progress2, border_style="green",subtitle='Rewards: ' + str(c.reward_count) ))
+            
+            progress_table.add_row(job_progress)
+            
+            #layout["box2"].update(Panel(job_progress, title="[blue]Farms   [b white]< 25%  [b yellow]>25% [dark_orange]> 75%  [b green]-100%-" , subtitle='Rewards: ' + str(c.reward_count), border_style="green", ), )
+            
+            # Panel(job_progress, title="BitcoinBart Was Here", border_style="green", padding=(1, 2))
+            
+            
+            layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b yellow]>25% | [dark_orange]> 75% | [b green]=100%"))
              
-            layout["footer"].update(Align.center("BitcoinBart was here"))
+            layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green",),)
+   
             
