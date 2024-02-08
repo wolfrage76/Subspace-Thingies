@@ -216,7 +216,7 @@ f"CPU: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total
                               
             progress_table.add_row(job_progress)
             
-            #layout["box2"].update(Panel(job_progress, title="[blue]Farms   [b white]< 25%  [b yellow]>25% [dark_orange]> 75%  [b green]-100%-" , subtitle='Rewards: ' + str(c.reward_count), border_style="green", ), )
+            #layout["box2"].update(Panel(job_progress, title="[blue]Farms   [b white]< 25%  [b yellow]>=25% [dark_orange]>=75%  [b green]=100%" , subtitle='Rewards: ' + str(c.reward_count), border_style="green", ), )
             
             # Panel(job_progress, title="BitcoinBart Was Here", border_style="green", padding=(1, 2))
             

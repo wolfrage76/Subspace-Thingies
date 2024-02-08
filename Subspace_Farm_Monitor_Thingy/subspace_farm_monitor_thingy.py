@@ -189,12 +189,15 @@ def run_command(command, **kwargs):
                             
                             
                             c.last_logs.pop(0)
-                            c.last_logs.append(local_time(line_plain.replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]'))
+                            c.last_logs.append(local_time(line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}: ','').replace('sector_index=', 'Current Sector: ').replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]'))
+                            
+                           # if 'single_disk_farm{disk_farm_index=' in line_plain
+                           # line_plain = line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}:',)
+                            
                             
                             if not line and process.poll() is not None and config['IS_LIVE']: 
                                 break
-                            
-                            
+                                                        
                             elif line == '' or line == '\r\n' or line == '\n':
                                 continue
                             elif "(os error " in line_plain:
@@ -235,7 +238,7 @@ def run_command(command, **kwargs):
                                             datetime_2 = parse(c.sector_times[farm])
 
                                             delta = relativedelta(datetime_1, datetime_2)
-                                            c.deltas[farm] = str(delta.minutes) + ':' + str(delta.seconds).rjust(2,')')
+                                            c.deltas[farm] = str(delta.minutes) + ':' + str(delta.seconds).rjust(2,'0')
                                            
                                         
                                         c.sector_times[farm] = t
