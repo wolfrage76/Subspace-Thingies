@@ -3,15 +3,18 @@
 # False means to read farmer log instead
 
 IS_LIVE: False
-TOGGLE_ENCODING: False # If reading Farmer log but disk list doesnt' appear, set True
+TOGGLE_ENCODING: True # If reading Farmer log but disk list doesn't appear, set False
+
 ###############
+FARMER_NAME: "Wolfrage1"
+
 SHOW_LOGGING: True # If False, it will hide the Log scroll and only show farms.
 
 FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, it reads this log
 
-WALLET: "xxxxxxxxxxxxxxxxxxxxx"
+WALLET: "xxxxxxxxxxxx"
 
-NODE_EXECUTABLE_FOLDER: 'z:\\dev' 
+NODE_EXECUTABLE_FOLDER: 'c:\\Users\\wolfrage\\subspace' # Optional - Windows needs double slashes
 NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double \'s'
 
 NODE_IP: "192.168.1.205" # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
@@ -19,14 +22,14 @@ NODE_PORT: "9944" # Port the node is using
 
 SEND_DISCORD: False
 SEND_PUSHOVER: False
-DISCORD_WEBHOOK: "https://discord.com/api/webhooks/XXXXXX/gLIVElpW-xxxxxxxxxxxxxxxxx"
-PUSHOVER_APP_TOKEN:
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxx
 PUSHOVER_USER_KEY:
+PUSHOVER_APP_TOKEN:
 
 WAIT_PERIOD: 300 # wallet check interval seconds
 
 SHOW_PING: False
 MUTE_HICKORY: True
-24_HOUR: False
+HOUR_24: False
 
-COMMANDLINE: '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1 --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB --farm-during-initial-plotting false'
+COMMANDLINE: '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB --farm-during-initial-plotting false'
