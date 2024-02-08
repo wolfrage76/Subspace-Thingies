@@ -38,7 +38,7 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 
 (You should usually setup a VENV for a python app but whatever)
 
-1. Run: `pip install -r requirements`
+1. Run: `pip install -r requirements.txt`
 2. Copy: `config.yaml.example` to `config.yaml`
 3. Edit: `config.yaml` (Details below)
 4. Run: `python Subspace_Farm_Monitor_Thingy.py`
