@@ -2,7 +2,7 @@
 
 ## My tools and utils for the Subspace Network.
 
-![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/aa034718-dfa9-41ea-bc8d-9420ba58ae7a)
+[[![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/aa034718-dfa9-41ea-bc8d-9420ba58ae7a)](https://github.com/irbujam/ss_log_event_monitor)](https://github.com/irbujam/ss_log_event_monitor)
 
 
 ### Farm Monitor Thingy
@@ -38,7 +38,7 @@ Reqs: Tested on Windows -- Linux should work but not tested.
 
 (You should usually setup a VENV for a python app but whatever)
 
-1. Run: `pip install -r requirements`
+1. Run: `pip install -r requirements.txt`
 2. Copy: `config.yaml.example` to `config.yaml`
 3. Edit: `config.yaml` (Details below)
 4. Run: `python Subspace_Farm_Monitor_Thingy.py`
