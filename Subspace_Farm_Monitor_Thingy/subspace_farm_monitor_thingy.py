@@ -12,7 +12,7 @@ import utilities.menu_keys as menu
 from rich import print
 import utilities.conf as c
 import utilities.socket as s
-
+import dateutil.parser as dp
 import wallet
 import view
 import node_monitor
@@ -134,12 +134,20 @@ def local_time(string):
 def make_csv(str):  #setup .csv to import into other stuff
     pass
 
+def iso_to_seconds(t):
+
+    parsed_t = dp.parse(t)
+    parsed_dt = datetime(parsed_t.year,parsed_t.month, parsed_t.day, parsed_t.hour, parsed_t.minute).timestamp()
+    return parsed_dt
     
 def run_command(command, **kwargs):
     
     
     consoleguithread.start() # View
-    walletthread.start()
+    
+    if config['WALLET']:
+        walletthread.start()
+    
     nodethread.start()
     
     #socketthread.start()
@@ -214,6 +222,25 @@ def run_command(command, **kwargs):
                                     if "Replotting complete" in line_plain or "Initial plotting complete" in line_plain:
                                         farm_plot_size[farm] = "100"
                                     else:
+                                        t = line_plain.split()[0] 
+                                        #s_time = iso_to_seconds(t)
+                                        
+                                        from dateutil.parser import parse
+                                        from dateutil.relativedelta import relativedelta
+                                        if c.sector_times[farm] == 0:
+                                             delta = 0
+                                        #     print(time_diff)
+                                        else:
+                                            datetime_1 = parse(t)
+                                            datetime_2 = parse(c.sector_times[farm])
+
+                                            delta = relativedelta(datetime_1, datetime_2)
+                                            c.deltas[farm] = str(delta.minutes) + ':' + str(delta.seconds).rjust(2,')')
+                                           
+                                        
+                                        c.sector_times[farm] = t
+                                        #c.sector_times[farm] = c.sector_times[farm] + datetime.timedelta(seconds=sec)
+                                        
                                         plot_size = line_plain[line_plain.find("(")+1:line_plain.find("%")]
                                         if plot_size:
                                             farm_plot_size[farm] = line_plain[line_plain.find("(")+1:line_plain.find("%")]

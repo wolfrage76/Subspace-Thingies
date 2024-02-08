@@ -11,7 +11,9 @@ plot_space = {}
 drive_directory = {}
 farm_plot_size = defaultdict(lambda: "0")
 curr_line = str()
-curr_sector_disk = defaultdict(int)
+curr_sector_disk = defaultdict(lambda: 0)
+sector_times = defaultdict(lambda: 0)
+
 errors = []
 total_error_count = 0
 curr_farm = None
@@ -31,4 +33,7 @@ last_node_logs = [str(), str(), str(), str(), str(), str(),]  # However many ini
 total_completed = 0 
 show_logging = True
 hour_24 = False
+deltas = defaultdict(lambda: '00:00')
+
+
 

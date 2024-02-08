@@ -7,8 +7,7 @@ from rich.align import Align
 from rich.console import Console, Group
 from rich.layout import Layout
 from rich.panel import Panel
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
-#from rich.syntax import Syntax
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeRemainingColumn
 from rich.table import Table
 import time
 import utilities.conf as c
@@ -166,7 +165,7 @@ def main():
         "{task.description}",
         SpinnerColumn(),
         BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%")
         
     )
             overall = 0
@@ -178,8 +177,8 @@ def main():
                         ps = c.plot_space[farm]
                     else:
                         ps = '----'
-                        
-                    job_progress.add_task(color_by_status(int(ipds)) + farm + ': (' +  ps +') Sector: ' + str(sector), completed=int(ipds))
+                    
+                    job_progress.add_task(color_by_status(int(ipds)) + farm + ': (' +  ps +') Sector: ' + str(sector) + ' [' + c.deltas[farm] + ']', completed=int(ipds),)
                     overall += int(ipds)
                     
             if job_progress.tasks and len(job_progress.tasks) > 0:                    

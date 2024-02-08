@@ -1,7 +1,7 @@
 # Bitcoin Bart was here
 
 import time
-from substrateinterface import SubstrateInterface
+
 
 class WalletMon(object):
     
