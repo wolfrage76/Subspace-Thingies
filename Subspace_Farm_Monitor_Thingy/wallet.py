@@ -1,6 +1,7 @@
 # Bitcoin Bart was here
 
 import time
+import substrateinterface
 
 
 class WalletMon(object):
@@ -29,7 +30,7 @@ class WalletMon(object):
         if self.wallet:
          while True:
             try:
-                self.substrate = SubstrateInterface(url="ws://" + nodeip + ":" + nodeport)  
+                self.substrate = substrateinterface.SubstrateInterface(url="ws://" + nodeip + ":" + nodeport)  
 
                 self.first_time = True  # We don't need to tell people their balance has changed on first run
                 self.last_balance = 0.0

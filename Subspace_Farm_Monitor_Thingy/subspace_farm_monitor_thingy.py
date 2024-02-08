@@ -112,7 +112,7 @@ def datetime_valid(dt_str):
 
 def local_time(string):
     my_string = ''
-    string2 = string.split() 
+    string2 = string.split(' ') 
     convert = string2[0]
     
     if datetime_valid(convert):    
@@ -292,6 +292,7 @@ def run_command(command, **kwargs):
                                 file2.write(local_time(line_plain)+'\n')
                             
                     except OSError as e:
+                        print("OSError"  + str(e))
                         print("OSError > " + e.errno)
                         print("OSError > " + e.strerror)
                         print("OSError > " + e.filename)
