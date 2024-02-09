@@ -2,7 +2,7 @@
 # True streams from Farmer directly, not from log.
 # False means to read farmer log instead
 
-IS_LIVE: False
+IS_LIVE: False # I broke Live somehow.  Working on it.  Please set False and use logging for now. My apologies. 
 TOGGLE_ENCODING: True # If reading Farmer log but disk list doesn't appear, set False
 
 ###############
@@ -15,14 +15,14 @@ FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, 
 WALLET: "xxxxxxxxxxxx"
 
 NODE_EXECUTABLE_FOLDER: 'c:\\Users\\wolfrage\\subspace' # Optional - Windows needs double slashes
-NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double \'s'
+NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double slashes
 
 NODE_IP: "192.168.1.205" # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
 NODE_PORT: "9944" # Port the node is using
 
 SEND_DISCORD: False
 SEND_PUSHOVER: False
-DISCORD_WEBHOOK: "https://discord.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxx
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxx"
 PUSHOVER_USER_KEY:
 PUSHOVER_APP_TOKEN:
 

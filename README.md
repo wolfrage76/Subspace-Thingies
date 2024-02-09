@@ -2,8 +2,7 @@
 
 ## My tools and utils for the Subspace Network.
 
-[[![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/aa034718-dfa9-41ea-bc8d-9420ba58ae7a)](https://github.com/irbujam/ss_log_event_monitor)](https://github.com/irbujam/ss_log_event_monitor)
-
+![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/2b50b961-36f2-4e2e-9242-76a449fc32f8)
 
 ### Farm Monitor Thingy
 
