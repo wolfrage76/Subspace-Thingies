@@ -156,16 +156,16 @@ def main():
 
     from rich.live import Live
     
-    with Live(layout, refresh_per_second=10):
+    with Live(layout, refresh_per_second=10,screen=True):
         while True:
             
             sector = 0
-            sleep(0.1)
+#            sleep(0.4)
             job_progress = Progress(
         "{task.description}",
         SpinnerColumn(),
         BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%")
+        TextColumn("[progress.percentage][white]{task.percentage:>3.0f}%")
         
     )
             overall = 0
@@ -194,10 +194,10 @@ def main():
         "{task.description}",
         SpinnerColumn(),
         BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%")
+        TextColumn("[progress.percentage][white]{task.percentage:>3.0f}%")
             )
             if job_progress.tasks and len(job_progress.tasks) > 0:
-                progress2.add_task('Overall Progress: ', completed = (overall / (len(job_progress.tasks))))
+                progress2.add_task('[white]Overall Progress: ', completed = (overall / (len(job_progress.tasks))))
            # progress_table.add_row(progress2) 
             
             

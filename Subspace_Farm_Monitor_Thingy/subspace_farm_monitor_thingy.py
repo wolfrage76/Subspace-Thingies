@@ -9,11 +9,10 @@ import time
 import sys
 import threading
 import utilities.menu_keys as menu
-from rich import print
+#from rich import print
 import utilities.conf as c
 import utilities.socket as s
 import dateutil.parser as dp
-import wallet
 import view
 import node_monitor
 
@@ -40,7 +39,7 @@ with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 #################
-c.wallet = config['WALLET']
+
 c.node_log_file = config['NODE_LOG_FILE']
 c.show_logging = config['SHOW_LOGGING']
 c.hour_24 = config['HOUR_24']
@@ -52,7 +51,10 @@ reward_phrase = 'reward_signing: Successfully signed reward hash' # This is dumb
 c.startTime = time.time()
 
 def wallet_thread():
-    wallet.WalletMon()
+    c.wallet = config['WALLET']
+    if config['WALLET']:
+        import wallet
+        wallet.WalletMon()
 
 def console_thread():
  view.main()
@@ -73,7 +75,7 @@ nodethread = threading.Thread(target=node_thread, name='Node', daemon=True)
 menuthread = threading.Thread(target=menu_thread, name='Menu', daemon=True)
 #socketthread = threading.Thread(target=socket_thread, name='Socket', daemon=True)
 
-menuthread.start()
+#menuthread.start()
 
 
 def send(msg=None):
@@ -169,19 +171,19 @@ def run_command(command, **kwargs):
                
                 if not config['IS_LIVE']:
                             if config['TOGGLE_ENCODING']:
-                                file = open(config['FARMER_LOG'], 'r', )
-                            else:
+                                
                                 file = open(config['FARMER_LOG'], 'r', encoding='utf-16' )
-                
+                            else:
+                                file = open(config['FARMER_LOG'], 'r', )
                 while True:              
                     try:
     #                      
                
-                            if config['IS_LIVE'] == False:
+                            if not config['IS_LIVE']:
                                 line = file.readline()
                                 line_plain = line                              
                             else:
-                                line = process.stdout.readline()
+                                line = process.stdout.readline() #.decode()
                                 line_plain = line.decode()
                             
                             if line_plain == "\r\n" or line_plain == "\n" or line_plain == "":
@@ -323,3 +325,4 @@ cmd = config['COMMANDLINE']
 run_command(cmd.split(),
     
     cwd=Path(__file__).parent.absolute())
+
