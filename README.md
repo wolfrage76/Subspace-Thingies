@@ -2,6 +2,8 @@
 
 ## My tools and utils for the Subspace Network.
 
+NOTE: Live mode is NOT working for some reason.  For the moment, please use the logging mode instead.  Working on it though!
+
 [[![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/aa034718-dfa9-41ea-bc8d-9420ba58ae7a)](https://github.com/irbujam/ss_log_event_monitor)](https://github.com/irbujam/ss_log_event_monitor)
 
 
