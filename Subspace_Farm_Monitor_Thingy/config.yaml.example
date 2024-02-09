@@ -15,7 +15,7 @@ FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, 
 WALLET: "xxxxxxxxxxxx"
 
 NODE_EXECUTABLE_FOLDER: 'c:\\Users\\wolfrage\\subspace' # Optional - Windows needs double slashes
-NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double \'s'
+NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double slashes
 
 NODE_IP: "192.168.1.205" # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
 NODE_PORT: "9944" # Port the node is using
