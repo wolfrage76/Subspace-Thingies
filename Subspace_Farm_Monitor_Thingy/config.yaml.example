@@ -22,7 +22,7 @@ NODE_PORT: "9944" # Port the node is using
 
 SEND_DISCORD: False
 SEND_PUSHOVER: False
-DISCORD_WEBHOOK: "https://discord.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxx
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxx"
 PUSHOVER_USER_KEY:
 PUSHOVER_APP_TOKEN:
 
