@@ -2,7 +2,7 @@
 # True streams from Farmer directly, not from log.
 # False means to read farmer log instead
 
-IS_LIVE: False
+IS_LIVE: False # I broke Live somehow.  Working on it.  Please set False and use logging for now. My apologies. 
 TOGGLE_ENCODING: True # If reading Farmer log but disk list doesn't appear, set False
 
 ###############
