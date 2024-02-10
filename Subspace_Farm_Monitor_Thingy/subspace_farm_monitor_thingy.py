@@ -51,11 +51,9 @@ reward_phrase = 'reward_signing: Successfully signed reward hash' # This is dumb
 c.startTime = time.time()
 
 def wallet_thread():
-    import wallet
     c.wallet = config['WALLET']
     if config['WALLET']:
         import wallet
-        wallet.WalletMon()
         wallet.WalletMon()
 
 def console_thread():

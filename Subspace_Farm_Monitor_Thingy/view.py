@@ -43,11 +43,12 @@ def getUptime():
 def make_layout() -> Layout:
     """Define the layout."""
     layout = Layout(name="root")
+
     layout.split(
-        Layout(name="header", size=3, ),
-        Layout(name="main", ratio=1,),
-        Layout(name="footer", size=4,),
-        Layout(name="msgs",),
+        Layout(name="header", size=3),
+        Layout(name="main", ratio=1),
+        Layout(name="footer", size=4),
+       #Layout(name="msgs",),
     )
     layout["main"].split_row(
         Layout(name="side",),
@@ -57,12 +58,12 @@ def make_layout() -> Layout:
     
     layout["body"].split_column(
         Layout(name="body1",),
-        Layout(name="body2"),
-    )
+        Layout(name="body2",),
+    ),
     
     layout["side"].split(Layout(name="box1")) # ,Layout(name="box2", )
     
-    layout["msgs"].split_row(Layout(name="errors",  ) ,Layout(name="warnings",))
+    #layout["msgs"].split_row(Layout(name="errors",  ) ,Layout(name="warnings",))
     
     return layout
 
@@ -80,7 +81,7 @@ def make_errors() -> Panel:
         title="[b red]Recent ERRORs",
         border_style="red"
     )
-    message_panel.height = 7
+    #message_panel.height = 7
     return message_panel
 
 def make_warnings() -> Panel:
@@ -122,6 +123,7 @@ def make_recent_logs() -> Panel:
         subtitle="[white]INFO [yellow]WARN [red]ERROR", subtitle_align='right',
         border_style="bright_blue",
     )
+
     return message_panel
 
 
@@ -146,6 +148,7 @@ def make_recent_node_logs() -> Panel:
         subtitle="[white]INFO [yellow]WARN [red]ERROR", subtitle_align='left',
         border_style="bright_blue", 
     )
+
     return message_panel
 
 class Header:
@@ -245,12 +248,12 @@ f"CPU: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total
             
             layout["header"].update(Header())
             layout["body"].visible = c.show_logging
-            layout["body1"].update(make_recent_logs())
+            layout["body2"].update(make_recent_logs())
             #layout["errors"].update(make_error_logs())
-            layout["warnings"].update(make_warnings())
-            layout["body2"].update(make_recent_node_logs())
-            layout["errors"].update(make_errors())
+           #layout["warnings"].update(make_warnings())
+            layout["body1"].update(make_recent_node_logs())
             
+            #layout["errors"].update(make_errors())
             
             progress_table.add_row(Panel(progress2, border_style="green",subtitle='Rewards: ' + str(c.reward_count) ))
                               
