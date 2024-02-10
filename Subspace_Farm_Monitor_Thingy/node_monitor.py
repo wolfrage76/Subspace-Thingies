@@ -71,7 +71,7 @@ def main():
                                     last_claimed = 0
                             
                             c.last_node_logs.pop(0)
-                            c.last_node_logs.append(local_time(line_plain)) #.replace('\n','').replace(' INFO', '[white]').replace(' WARN','[yellow]').replace('ERROR','[red]')))                     
+                            c.last_node_logs.append(local_time(line_plain.replace('substrate:','')).replace(' INFO', '[white]').replace(' WARN','[yellow]').replace('ERROR','[red]'))                   
                     except:
                         print("Node Error > " + str(sys.exc_info()[0]))
                         print('Exception: Retrying in 5 minutes ') # Set correct after testing

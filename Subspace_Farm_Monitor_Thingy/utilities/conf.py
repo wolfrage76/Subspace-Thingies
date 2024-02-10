@@ -13,8 +13,10 @@ farm_plot_size = defaultdict(lambda: "0")
 curr_line = str()
 curr_sector_disk = defaultdict(lambda: 0)
 sector_times = defaultdict(lambda: 0)
-
-errors = []
+warnings = [str(), str(), str(), str(), str(), str(),str(),]
+errors = [str(), str(), str(), str(), str(), str(),str(),]
+node_warnings = [str(), str(), str(), str(), str(), str(),str(),]
+node_errors = [str(), str(), str(), str(), str(), str(),str(),]
 total_error_count = 0
 curr_farm = None
 no_more_drives = False

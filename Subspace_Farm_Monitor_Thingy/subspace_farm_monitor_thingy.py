@@ -51,9 +51,11 @@ reward_phrase = 'reward_signing: Successfully signed reward hash' # This is dumb
 c.startTime = time.time()
 
 def wallet_thread():
+    import wallet
     c.wallet = config['WALLET']
     if config['WALLET']:
         import wallet
+        wallet.WalletMon()
         wallet.WalletMon()
 
 def console_thread():
@@ -142,6 +144,7 @@ def iso_to_seconds(t):
     parsed_dt = datetime(parsed_t.year,parsed_t.month, parsed_t.day, parsed_t.hour, parsed_t.minute).timestamp()
     return parsed_dt
     
+    
 def run_command(command, **kwargs):
     
     
@@ -178,10 +181,12 @@ def run_command(command, **kwargs):
                 while True:              
                     try:
     #                      
-               
+
                             if not config['IS_LIVE']:
+                                import re
+                                reg = re.compile(r'\x1b[^m]*m')
                                 line = file.readline()
-                                line_plain = line                              
+                                line_plain = reg.sub('', line)
                             else:
                                 line = process.stdout.readline() #.decode()
                                 line_plain = line.decode()
@@ -189,13 +194,22 @@ def run_command(command, **kwargs):
                             if line_plain == "\r\n" or line_plain == "\n" or line_plain == "":
                                 continue
                             
-                            
+                            if "[red]" in line_plain:
+                                pass
+                            if "ERROR" in line_plain:
+                                c.errors.pop(0)
+                                c.errors.append(local_time(line_plain.replace('\n','').replace(' ERROR','[b red]')))
+                                
+                            if "WARN" in line_plain:
+                                c.warnings.pop(0)
+                                c.warnings.append(local_time(line_plain.replace('\n','').replace(' WARN','[b yellow]')))
+                                
                             c.last_logs.pop(0)
-                            c.last_logs.append(local_time(line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}: ','').replace('sector_index=', 'Current Sector: ').replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]'))
+                            c.last_logs.append(local_time(line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}: ','').replace('sector_index=', 'Current Sector: ').replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]').replace('subspace_farmer::', ''))
                             
                            # if 'single_disk_farm{disk_farm_index=' in line_plain
                            # line_plain = line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}:',)
-                            
+                           
                             
                             if not line and process.poll() is not None and config['IS_LIVE']: 
                                 break
@@ -208,6 +222,13 @@ def run_command(command, **kwargs):
                                 print('retrying in 30 seconds')
                                 time.sleep(30)
                                 break
+                            
+                            elif 'hickory' in line_plain and config['MUTE_HICKORY']:
+                                continue
+
+                            elif 'WARN quinn_udp: sendmsg error:' in line_plain :
+                                continue
+                            
                             elif "Single disk farm" in line_plain:
                             
                                 check_header = True
@@ -266,28 +287,25 @@ def run_command(command, **kwargs):
                         
                             elif reward_phrase in line_plain:
                                 c.reward_count += 1
-                                farm = line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")]
+                                line_plain = line_plain.replace('{disk_farm_index=', '{disk_farm_index= ')
+                                farm = line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")].replace()
                                 
                                 if farm:
                                     farm_rewards[ line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")]] += 1
                                     
                                     
-                                print('\n****************** Vote Winner! ******************\n')
+                                #print('\n****************** Vote Winner! ******************\n')
                                 # TODO save to csv block, time (pdragon)
                                 
                                 send('WINNER! You were rewarded for Vote!')
                             elif 'Initial plotting complete' in line_plain:
-                                print('\n\n************************************* Plot Complete! *************************************\n\n')
+                               # print('\n\n************************************* Plot Complete! *************************************\n\n')
                                 
                                 # TODO Save to csv data as above - update Recent Events in footer
                                 send('Plot complete: ' + line_plain.split()[2] + ' 100%!')
                                 #continue
                                                     
-                            elif 'failed to associate send_message response to the sender' in line_plain and config['MUTE_HICKORY']:
-                                pass
-
-                            elif 'WARN quinn_udp: sendmsg error:' in line_plain :
-                                continue
+                           
                                         
                             
                             with open("farmlog.txt", "a+") as file2:

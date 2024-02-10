@@ -2,120 +2,106 @@
 
 import time
 import substrateinterface
-
-
-class WalletMon(object):
     
-    def __init__(self):
-    
-        import yaml
-        import utilities.conf as c
-        
+import yaml
+import utilities.conf as c
 
+global substrate
+    
+def WalletMon():
         with open('config.yaml', 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         
         
         ####CONFIG####
         
-        self.discord_url = config['DISCORD_WEBHOOK']
-        self.wallet = config['WALLET']  
-        self.wait_period = config['WAIT_PERIOD']                                        
-        self.show_ping = False # config['SHOW_PING']         # Show Ping notice in console to show it's alive
+        c.discord_url = config['DISCORD_WEBHOOK']
+        c.wallet = config['WALLET']  
+        c.wait_period = config['WAIT_PERIOD']                                        
+        c.show_ping = False # config['SHOW_PING']         # Show Ping notice in console to show it's alive
         
-        nodeip = config['NODE_IP']                   # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
-        nodeport = config['NODE_PORT']               # Port the node is using
+        c.nodeip = config['NODE_IP']                   # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
+        c.nodeport = config['NODE_PORT']               # Port the node is using
         
         ##############
-        if self.wallet:
+        if c.wallet:
          while True:
             try:
-                self.substrate = substrateinterface.SubstrateInterface(url="ws://" + nodeip + ":" + nodeport)  
-
-                self.first_time = True  # We don't need to tell people their balance has changed on first run
-                self.last_balance = 0.0
-                
-            
- #       print('Starting wallet monitoring...')
- #       send(self,'Starting wallet monitoring...')
-        # map multiple wallets in query  # Eventually
-                '''
-                hash = substrate.get_chain_finalised_head()
-                result = substrate.query_map('System', 'Account', block_hash = hash, max_results=2)
-                for account, account_info in result:
-                    print(f"Free balance of account '{account.value}': {account_info.value['data']['free']}")
-                '''
+                substrate = substrateinterface.SubstrateInterface(url="ws://" + c.nodeip +":" + c.nodeport)  
+                #runtime_calls = substrate.get_metadata_runtime_call_functions()
+                #runtime_calls = substrate.get_block('0xcb2f6be14111ff6e1a4ecdd71c4d10fbf629e4293fb980a8fabd6818fe89f33d')
+                #print(runtime_calls)
+                first_time = True  # We don't need to tell people their balance has changed on first run
+                last_balance = 0.0
 
                 while True:
              
-                    balance = (self.query_wallet(self.substrate).value["data"]["free"] +
-                            self.query_wallet(self.substrate).value["data"]["reserved"])
-                    balance_from_exp = (balance / 10 ** self.substrate.properties.get('tokenDecimals', 0))
-                    c.balance = str(balance_from_exp)
+                    balance = (query_wallet(substrate).value["data"]["free"] +
+                            query_wallet(substrate).value["data"]["reserved"])
+                    balance_from_exp = (balance / 10 ** substrate.properties.get('tokenDecimals', 0))
+                    balance = str(balance_from_exp)
                     
-                    if self.first_time:
-                        self.last_balance = balance # 
+                    if first_time:
+                        last_balance = balance # 
                         #print('Starting Balance: ' + str(self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)) )
                       
-                    if balance != self.last_balance and not self.first_time:
+                    if balance != last_balance and not first_time:
                        
                         
-                        if balance_from_exp > (self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)):
+                        if balance_from_exp > (last_balance / 10 ** substrate.properties.get('tokenDecimals', 0)):
 
                             chng = balance_from_exp - (
-                                    self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0))
+                                    last_balance / 10 ** substrate.properties.get('tokenDecimals', 0))
                             result = (
-                                f"Wallet {self.wallet[-5:]} received coins! \nBalance @ {self.format_balance(balance)}  (Change: +{round(chng, 4)})")
+                                f"Wallet {c.nodeipwallet[-5:]} received coins! \nBalance @ {format_balance(balance)}  (Change: +{round(chng, 4)})")
 
                             #(result)
-                            send(self, result)
+                            send(result)
 
-                        elif balance_from_exp < (self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)):
+                        elif balance_from_exp < (last_balance / 10 ** substrate.properties.get('tokenDecimals', 0)):
                             chng = (balance_from_exp - (
-                                    self.last_balance / 10 ** self.substrate.properties.get('tokenDecimals', 0)))
-                            result = f"Wallet {self.wallet[-5:]} removed coins! \nBalance @ {self.format_balance(balance)}  (Change: -{round(chng, 4)})"
+                                    last_balance / 10 ** substrate.properties.get('tokenDecimals', 0)))
+                            result = f"Wallet {c.wallet[-5:]} removed coins! \nBalance @ {format_balance(balance)}  (Change: -{round(chng, 4)})"
 
                             print(result)
-                            send(self, result)
+                            send( result)
                         else:
                             pass
 
-                    self.first_time = False
-                    self.last_balance = balance
+                    first_time = False
+                    last_balance = balance
 
-                    if self.show_ping: 
-                        print(time.strftime("%H:%M |", time.localtime()) + ' Ping! Still alive!')
-                    time.sleep(self.wait_period)
+                    time.sleep(60)
             except:
-                print('Exception... Retrying in ' + str(self.wait_period) + ' seconds...') # Yeah, needs real error 
+                print('Exception... Retrying in ' + str(60) + ' seconds...') # Yeah, needs real error 
                                                                                            # handling next
-                time.sleep(self.wait_period)
-                
-        
-    def query_wallet(self, substrate):
-        result = substrate.query(
-            "System", "Account", [self.wallet]
-        )
-        return result
+                time.sleep(60)
 
-    def format_balance(self, amount: int):
-        amount = format(amount / 10 ** self.substrate.properties.get('tokenDecimals', 0), ".15g")
-        return f"{amount} {self.substrate.properties.get('tokenSymbol', 'UNIT')}"
     
-    
-def send(self, msg=None, image=None):
-        if msg and self.discord_url: 
+def send(msg=None, image=None):
+        if msg and c.discord_url: 
         
 ##### Discord
             import requests
             data = {"content": msg}
             # self.discord_url = self.cfg['DISCORD_WEBHOOK']
 
-            response = requests.post(self.discord_url, json=data)
+            response = requests.post(c.discord_url, json=data)
             success_list = [204]
             if response.status_code not in success_list:
                 print('Error sending Discord: ' + str(response.status_code))
                 
+        
+def query_wallet(substrate):
+    result = substrate.query(
+        "System", "Account", [c.wallet]
+    )
+    return result
+
+def format_balance(amount: int):
+    amount = format(amount / 10 ** substrate.properties.get('tokenDecimals', 0), ".15g")
+    return f"{amount} {substrate.properties.get('tokenSymbol', 'UNIT')}"
+
                 
 if __name__ == '__main__':
 
