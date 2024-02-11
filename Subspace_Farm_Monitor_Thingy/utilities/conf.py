@@ -10,6 +10,7 @@ event_times = defaultdict(str)
 plot_space = {}
 drive_directory = {}
 farm_plot_size = defaultdict(lambda: "0")
+replotting = defaultdict(lambda: False)
 curr_line = str()
 curr_sector_disk = defaultdict(lambda: 0)
 sector_times = defaultdict(lambda: 0)

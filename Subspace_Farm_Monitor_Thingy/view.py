@@ -4,7 +4,7 @@ import psutil
 import datetime
 from rich import box
 from rich.align import Align
-from rich.console import Console, Group
+from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeRemainingColumn
@@ -176,9 +176,11 @@ def flip_flop_color(farmer):
     colors = ['[b white]', '[b cyan]']
     return colors[int(farmer) % 2]  # Todo: Set color based on % 
 
-def color_by_status(percent):
+def color_by_status(percent, farm):
     colors = ['[b white]', '[dark_orange]','[b yellow]', '[b green]']
-    if percent == 100:
+    if c.replotting[farm]:
+        return '[blue]'
+    elif percent == 100:
         return colors[3]
     elif percent >= 75:
         return colors[2]
@@ -217,7 +219,7 @@ def main():
                     else:
                         ps = '----'
                     
-                    job_progress.add_task(color_by_status(int(ipds)) + farm + ': (' +  ps +') Sector: ' + str(sector) + ' [' + c.deltas[farm] + ']', completed=int(ipds),)
+                    job_progress.add_task(color_by_status(int(ipds), farm) + farm + ': (' +  ps +') Sector: ' + str(sector) + ' [' + c.deltas[farm] + ']', completed=int(ipds),)
                     overall += int(ipds)
                     
             if job_progress.tasks and len(job_progress.tasks) > 0:                    
@@ -244,7 +246,7 @@ def main():
             
             my_system = platform.uname()
             footer_txt.add_row(Align.center(
-f"CPU: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total / (1024.0 ** 3))}GB ({psutil.virtual_memory().percent}%)   CPUs: {psutil.cpu_count(logical=False)} ({psutil.cpu_count(logical=True)})  Load: {psutil.getloadavg()[1]}" ,))
+f"Cores: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total / (1024.0 ** 3))}gb ({psutil.virtual_memory().percent}%)   CPUs: {psutil.cpu_count(logical=False)} ({psutil.cpu_count(logical=True)})  Load: {psutil.getloadavg()[1]}" ,))
             
             layout["header"].update(Header())
             layout["body"].visible = c.show_logging
@@ -257,14 +259,9 @@ f"CPU: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total
             
             progress_table.add_row(Panel(progress2, border_style="green",subtitle='Rewards: ' + str(c.reward_count) ))
                               
-            progress_table.add_row(job_progress)
+            progress_table.add_row(job_progress)            
             
-            #layout["box2"].update(Panel(job_progress, title="[blue]Farms   [b white]< 25%  [b yellow]>=25% [dark_orange]>=75%  [b green]=100%" , subtitle='Rewards: ' + str(c.reward_count), border_style="green", ), )
-            
-            # Panel(job_progress, title="BitcoinBart Was Here", border_style="green", padding=(1, 2))
-            
-            
-            layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100%"))
+            layout["box1"].update(Panel(progress_table, border_style="green", title ="[blue]Farms" ,subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100% | [blue]Replotting"))
              
             layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green", subtitle='[b white]SPACE: Toggle Logs', subtitle_align='left', height=3),)
             

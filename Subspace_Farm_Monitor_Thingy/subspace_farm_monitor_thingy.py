@@ -239,10 +239,14 @@ def run_command(command, **kwargs):
                                 curr_farm = farm
                                 c.curr_farm = curr_farm    
                             #elif 'Finished collecting already plotted pieces successfully' in line_plain:
-                            elif "plotting" in line_plain and not "Subscribing to archived segments" in line_plain :
+                            elif ("plotting" in line_plain or "Replotting" in line_plain) and not "Subscribing to archived segments" in line_plain :
                                 farm =   line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}")]
+                                if 'Replotting' in line_plain: 
+                                    c.replotting[farm] = True
+                                    c.sector_times[farm] == 0
                                 if farm:
                                     curr_farm = farm
+                                    
                                     if "Replotting complete" in line_plain or "Initial plotting complete" in line_plain:
                                         farm_plot_size[farm] = "100"
                                     else:
@@ -270,6 +274,7 @@ def run_command(command, **kwargs):
                                             farm_plot_size[farm] = line_plain[line_plain.find("(")+1:line_plain.find("%")]
                                             curr_sector_disk[farm] = line_plain[line_plain.find("sector_index=")+ len("sector_index="):line_plain.find("\n")]
                                             event_times[farm] = line_plain.split()[0]
+
                             
                             elif 'Allocated space: ' in line_plain and curr_farm:
                                 allocated_space = line_plain[line_plain.find(":") + 2:line_plain.find("(")-1]
