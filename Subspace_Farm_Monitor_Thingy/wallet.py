@@ -70,7 +70,7 @@ def WalletMon():
 
                     first_time = False
                     last_balance = balance
-
+                    c.balance = balance
                     time.sleep(60)
             except:
                 print('Exception... Retrying in ' + str(60) + ' seconds...') # Yeah, needs real error 
