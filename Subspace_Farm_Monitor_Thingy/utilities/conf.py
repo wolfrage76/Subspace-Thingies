@@ -6,6 +6,7 @@ disk_farms = set()
 reward_count = 0
 farm_rewards = defaultdict(int)
 
+farmer_name = str()
 event_times = defaultdict(str)
 plot_space = {}
 drive_directory = {}
@@ -37,6 +38,8 @@ total_completed = 0
 show_logging = True
 hour_24 = False
 deltas = defaultdict(lambda: '00:00')
+front_end_ip = None
+front_end_port= "8016" 
 
 
 

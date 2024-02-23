@@ -1,23 +1,13 @@
-#BitcoinBart was here
-
 import subprocess
 from pathlib import Path
-from datetime import datetime
-from os import chdir
+from datetime import datetime, timezone
+import dateutil.parser
 import yaml
 import time
-import sys
 import threading
-import utilities.menu_keys as menu
-#from rich import print
 import utilities.conf as c
-import utilities.socket as s
-import dateutil.parser as dp
-import view
-import node_monitor
-
-
-global disk_farms, reward_count, event_times, farm_rewards, farm_plot_size, curr_sector, errors, total_error_count,curr_farm, plot_space, drive_directory
+import utilities.websocket_client as websocket_client
+from rich import print
 
 # Initialize state
 disk_farms = c.disk_farms
@@ -34,49 +24,210 @@ total_error_count = c.total_error_count
 curr_farm = c.curr_farm
 no_more_drives = c.no_more_drives
 
-
 with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
-#################
+c.node_log_file = config.get('NODE_LOG_FILE', '')
+c.show_logging = config.get('SHOW_LOGGING', False)
+c.hour_24 = config.get('HOUR_24', False)
+c.farmer_name = config.get('FARMER_NAME', '')
+c.front_end_ip = config.get('FRONT_END_IP')
+c.front_end_port = config.get('FRONT_END_PORT', "9944")
 
-c.node_log_file = config['NODE_LOG_FILE']
-c.show_logging = config['SHOW_LOGGING']
-c.hour_24 = config['HOUR_24']
-#if config['NODE_EXECUTABLE_FOLDER']:
-   # os.chdir(config['NODE_FOLDER']) # Where your node executable file is located
-    
-reward_phrase = 'reward_signing: Successfully signed reward hash' # This is dumb. Need to handle better.
+reward_phrase = 'reward_signing: Successfully signed reward hash'
 
 c.startTime = time.time()
 
-def wallet_thread():
-    c.wallet = config['WALLET']
-    if config['WALLET']:
-        import wallet
-        wallet.WalletMon()
+def socket_client_thread():
+    while True:
+        websocket_client.main()
+        time.sleep(30)
+    
+socketclientthread = threading.Thread(target=socket_client_thread, name='SocketClient', daemon=True)
 
-def console_thread():
- view.main()
+socketclientthread.start()
 
-def node_thread():
- node_monitor.main()
- 
-def menu_thread():
- menu.main()
- 
-#def socket_thread():
-# s.start()
- 
- 
-consoleguithread = threading.Thread(target=console_thread, name='Console', daemon=True)
-walletthread = threading.Thread(target=wallet_thread, name='Wallet', daemon=True)
-nodethread = threading.Thread(target=node_thread, name='Node', daemon=True)
-menuthread = threading.Thread(target=menu_thread, name='Menu', daemon=True)
-#socketthread = threading.Thread(target=socket_thread, name='Socket', daemon=True)
 
-#menuthread.start()
+#from datetime import datetime, timedelta
 
+# Assuming c.sector_times is a dictionary where each key is a disk identifier and each value is a list of timedelta objects representing operation times for each sector
+# Example: c.sector_times = {'disk1': [timedelta(seconds=30), timedelta(seconds=45)], 'disk2': [timedelta(seconds=25), timedelta(seconds=35)]}
+
+def calculate_average_sector_time(disk):
+    """
+    Calculate the average sector operation time for a given disk.
+    """
+    sector_times = c.sector_times.get(disk, [])
+    if not sector_times:
+        return None  # Or some default value indicating no data
+    
+    total_time = sum(sector_times, timedelta())
+    average_time = total_time / len(sector_times)
+    return average_time
+
+# Example usage:
+# average_time = calculate_average_sector_time('disk1')
+# print(f"Average sector time for disk1: {average_time}")
+
+
+def local_time(string):
+    my_string = ''
+    string2 = string.split(' ')
+    convert = string2[0]
+    
+    if datetime_valid(convert):    
+        datestamp = datetime.fromisoformat(str(convert)).astimezone(tz=None)
+        if c.hour_24:
+            string2[0] = datestamp.strftime("%m-%d %H:%M:%S|")    
+        else:
+            string2[0] = datestamp.strftime("%m-%d %I:%M %p|").replace(' PM',' pm').replace(' AM', ' am')
+
+        for piece in string2:
+            my_string += '{} '.format(piece)
+        my_string = my_string
+    else:
+        my_string=string
+    return(my_string)
+
+def datetime_valid(dt_str):
+    try:
+        datetime.fromisoformat(dt_str)
+    except:
+        return False
+    return True
+
+def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_times, plot_space, drive_directory, farm_plot_size, curr_sector_disk):
+    trigger = False
+    parsed_data = {
+        'line_plain': '',  # Default value
+        'curr_farm': curr_farm,
+        'reward_count': reward_count,
+        'farm_rewards': farm_rewards,
+        'event_times': event_times,
+        'plot_space': plot_space,
+        'drive_directory': drive_directory,
+        'farm_plot_size': farm_plot_size,
+        'curr_sector_disk': curr_sector_disk
+    }
+    
+    line_timestamp_str = line_plain.split()[0]  # Assuming the first part of the line is the timestamp
+    if datetime_valid(line_timestamp_str):
+        line_timestamp = dateutil.parser.parse(line_timestamp_str).astimezone(timezone.utc).timestamp()
+    else:
+        line_timestamp = None
+        
+    if "ERROR" in line_plain:
+        c.errors.pop(0)
+        c.errors.append(local_time(line_plain.replace('\n','').replace(' ERROR','[b red]')))
+        
+    if "WARN" in line_plain:
+        c.warnings.pop(0)
+        c.warnings.append(local_time(line_plain.replace('\n','').replace(' WARN','[b yellow]')))
+        
+    if "INFO" in line_plain:
+        c.warnings.pop(0)
+        c.warnings.append(local_time(line_plain.replace('\n','').replace(' WARN','[b white]')))
+        
+    """ c.last_logs.pop(0)
+    c.last_logs.append(local_time(line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}: ','').replace('sector_index=', 'Current Sector: ').replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]').replace('subspace_farmer::', '').replace ('single_disk_farm::farming:', ' '))
+     """
+    if "(os error " in line_plain:
+        print(line_plain)
+        print('retrying in 30 seconds')
+        time.sleep(30)
+        return parsed_data
+    elif 'hickory' in line_plain and config['MUTE_HICKORY']:
+        pass
+    elif 'WARN quinn_udp: sendmsg error:' in line_plain:
+        pass
+    elif "Single disk farm" in line_plain:
+        check_header = True
+        farm = line_plain[line_plain.find("Single disk farm ") + len("Single disk farm "):line_plain.find(":")]
+        if farm not in disk_farms:
+            disk_farms.add(farm)
+        curr_farm = farm
+        c.curr_farm = curr_farm
+    elif ("plotting" in line_plain or "Replotting" in line_plain) and not "Subscribing to archived segments" in line_plain:
+        farm = line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}")]
+        if 'Replotting' in line_plain:
+            c.replotting[farm] = True
+            c.sector_times[farm] == 0
+        if farm:
+            curr_farm = farm
+            
+            c.curr_farm = farm
+            if "Replotting complete" in line_plain or "Initial plotting complete" in line_plain:
+                farm_plot_size[farm] = "100"
+            else:
+                t = line_plain.split()[0]
+                from dateutil.parser import parse
+                from dateutil.relativedelta import relativedelta
+                if c.sector_times[farm] == 0:
+                    delta = 0
+                else:
+                    datetime_1 = parse(t)
+                    datetime_2 = parse(c.sector_times[farm])
+                    #datetime_2 = datetime_2.replace(tzinfo=tz.tzlocal())
+
+                    # Now both datetime_1 and datetime_2 are in the user's local timezone
+                    delta = relativedelta(datetime_1, datetime_2)
+                    #delta = relativedelta(datetime_1, datetime_2)
+                    c.deltas[farm] = str(delta.minutes) + ':' + str(delta.seconds).rjust(2, '0')
+                c.sector_times[farm] = t
+                plot_size = line_plain[line_plain.find("(")+1:line_plain.find("%")]
+                if plot_size:
+                    farm_plot_size[farm] = line_plain[line_plain.find("(")+1:line_plain.find("%")]
+                    curr_sector_disk[farm] = line_plain[line_plain.find("sector_index=")+ len("sector_index="):]
+                    event_times[farm] = line_plain.split()[0]
+        #websocket_client.main()
+        trigger = True
+    elif 'Allocated space: ' in line_plain and c.curr_farm:
+        allocated_space = line_plain[line_plain.find(":") + 2:line_plain.find("(")-1]
+        plot_space[c.curr_farm] = allocated_space
+    elif 'Directory:' in line_plain and c.curr_farm:
+        directory = line_plain[line_plain.find(":") + 2:]
+        drive_directory[c.curr_farm] = directory
+        c.curr_farm = None
+    elif reward_phrase in line_plain:
+        reward_count += 1
+        farm = line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")]
+        if farm:
+            if farm not in farm_rewards:
+                farm_rewards[farm] = 0
+            farm_rewards[farm] += 1
+        trigger = True
+        if line_timestamp and line_timestamp > c.startTime:
+            send(config['FARMER_NAME'] + '| WINNER! You were rewarded for Vote!')
+    if 'Initial plotting complete' in line_plain:
+        if line_timestamp and line_timestamp > c.startTime:
+            send(config['FARMER_NAME'] + '| Plot complete: ' + line_plain.split()[2] + ' 100%!')
+        trigger = True
+        
+    if trigger:
+        #websocket_client.main()
+        trigger = False
+    
+    parsed_data['line_plain'] = local_time(line_plain)
+    return parsed_data
+
+
+
+def read_log_file():
+    log_file_path = Path(config['FARMER_LOG'])
+    with log_file_path.open('r') as log_file:
+        while True:
+            line = log_file.readline()
+            if not line:
+                time.sleep(0.1)  # Wait for new lines
+                continue
+            line_plain = line.strip()
+            if not line_plain:
+                continue
+            parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_times, plot_space, drive_directory, farm_plot_size, curr_sector_disk)
+            print(parsed_data['line_plain'])  # Print the line to console
+            if config['IS_LIVE']:
+                with open("farmlog.txt", "a+") as file2:
+                    file2.write(parsed_data['line_plain'] + '\n')  # Write the line to farmlog.txt
 
 def send(msg=None):
     #### Discord
@@ -103,247 +254,26 @@ def send(msg=None):
                      }), {"Content-type": "application/x-www-form-urlencoded"})
         conn.getresponse()
 
- 
+read_log_file()
 
-def datetime_valid(dt_str):
-    try:
-        datetime.fromisoformat(dt_str)
-    except:
-        return False
-    return True
-
-def local_time(string):
-    my_string = ''
-    string2 = string.split(' ') 
-    convert = string2[0]
-    
-    if datetime_valid(convert):    
-
-        datestamp = datetime.fromisoformat(str(convert)).astimezone(tz=None)
-        if c.hour_24:
-            string2[0] = datestamp.strftime("%m-%d %H:%M:%S|")    
-        else:
-            string2[0] = datestamp.strftime("%m-%d %I:%M %p|").replace(' PM','pm').replace(' AM', 'am')
-
-        for piece in string2:
-
-            my_string += '{} '.format(piece)
-        my_string = my_string
-    else:
-        my_string=string
-    return(my_string)
-
-def make_csv(str):  #setup .csv to import into other stuff
-    pass
-
-def iso_to_seconds(t):
-
-    parsed_t = dp.parse(t)
-    parsed_dt = datetime(parsed_t.year,parsed_t.month, parsed_t.day, parsed_t.hour, parsed_t.minute).timestamp()
-    return parsed_dt
-    
-    
 def run_command(command, **kwargs):
-    
-    
-    consoleguithread.start() # View
-    
-    if config['WALLET']:
-        walletthread.start()
-    
-    nodethread.start()
-    
-    #socketthread.start()
-    
-    send('Starting farmer monitor...')
-           
-    while True:
-            try:
-                if config['IS_LIVE']:
-            
-                    process = subprocess.Popen(
-                        command,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        **kwargs,
-                    )
-                else:
-                   pass
-               
-                if not config['IS_LIVE']:
-                            if config['TOGGLE_ENCODING']:
-                                
-                                file = open(config['FARMER_LOG'], 'r', encoding='utf-16' )
-                            else:
-                                file = open(config['FARMER_LOG'], 'r', )
-                while True:              
-                    try:
-    #                      
-
-                            if not config['IS_LIVE']:
-                                import re
-                                reg = re.compile(r'\x1b[^m]*m')
-                                line = file.readline()
-                                line_plain = reg.sub('', line)
-                            else:
-                                line = process.stdout.readline() #.decode()
-                                line_plain = line.decode()
-                            
-                            if line_plain == "\r\n" or line_plain == "\n" or line_plain == "":
-                                continue
-                            
-                            if "[red]" in line_plain:
-                                pass
-                            if "ERROR" in line_plain:
-                                c.errors.pop(0)
-                                c.errors.append(local_time(line_plain.replace('\n','').replace(' ERROR','[b red]')))
-                                
-                            if "WARN" in line_plain:
-                                c.warnings.pop(0)
-                                c.warnings.append(local_time(line_plain.replace('\n','').replace(' WARN','[b yellow]')))
-                                
-                            c.last_logs.pop(0)
-                            c.last_logs.append(local_time(line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}: ','').replace('sector_index=', 'Current Sector: ').replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]').replace('subspace_farmer::', ''))
-                            
-                           # if 'single_disk_farm{disk_farm_index=' in line_plain
-                           # line_plain = line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}:',)
-                           
-                            
-                            if not line and process.poll() is not None and config['IS_LIVE']: 
-                                break
-                                                        
-                            elif line == '' or line == '\r\n' or line == '\n':
-                                continue
-                            elif "(os error " in line_plain:
-                                process.kill()
-                                print(line_plain)
-                                print('retrying in 30 seconds')
-                                time.sleep(30)
-                                break
-                            
-                            elif 'hickory' in line_plain and config['MUTE_HICKORY']:
-                                continue
-
-                            elif 'WARN quinn_udp: sendmsg error:' in line_plain :
-                                continue
-                            
-                            elif "Single disk farm" in line_plain:
-                            
-                                check_header = True
-                                
-                                farm = line_plain[line_plain.find("Single disk farm ") +len("Single disk farm "):line_plain.find(":")]
-                                if farm not in disk_farms:
-                                    
-                                    disk_farms.add(farm)
-                                    
-                                curr_farm = farm
-                                c.curr_farm = curr_farm    
-                            #elif 'Finished collecting already plotted pieces successfully' in line_plain:
-                            elif ("plotting" in line_plain or "Replotting" in line_plain) and not "Subscribing to archived segments" in line_plain :
-                                farm =   line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}")]
-                                if 'Replotting' in line_plain: 
-                                    c.replotting[farm] = True
-                                    c.sector_times[farm] == 0
-                                if farm:
-                                    curr_farm = farm
-                                    
-                                    if "Replotting complete" in line_plain or "Initial plotting complete" in line_plain:
-                                        farm_plot_size[farm] = "100"
-                                    else:
-                                        t = line_plain.split()[0] 
-                                        #s_time = iso_to_seconds(t)
-                                        
-                                        from dateutil.parser import parse
-                                        from dateutil.relativedelta import relativedelta
-                                        if c.sector_times[farm] == 0:
-                                             delta = 0
-                                        #     print(time_diff)
-                                        else:
-                                            datetime_1 = parse(t)
-                                            datetime_2 = parse(c.sector_times[farm])
-
-                                            delta = relativedelta(datetime_1, datetime_2)
-                                            c.deltas[farm] = str(delta.minutes) + ':' + str(delta.seconds).rjust(2,'0')
-                                           
-                                        
-                                        c.sector_times[farm] = t
-                                        #c.sector_times[farm] = c.sector_times[farm] + datetime.timedelta(seconds=sec)
-                                        
-                                        plot_size = line_plain[line_plain.find("(")+1:line_plain.find("%")]
-                                        if plot_size:
-                                            farm_plot_size[farm] = line_plain[line_plain.find("(")+1:line_plain.find("%")]
-                                            curr_sector_disk[farm] = line_plain[line_plain.find("sector_index=")+ len("sector_index="):line_plain.find("\n")]
-                                            event_times[farm] = line_plain.split()[0]
-
-                            
-                            elif 'Allocated space: ' in line_plain and curr_farm:
-                                allocated_space = line_plain[line_plain.find(":") + 2:line_plain.find("(")-1]
-                                
-                                plot_space[curr_farm] = allocated_space
-                            
-                                #continue
-                            elif 'Directory:' in line_plain and curr_farm:
-                                directory = line_plain[line_plain.find(":") + 2:]
-                                drive_directory[curr_farm] = directory
-                                curr_farm = None
-                                #    #farms.append({'sdf': sdf, 'allocated_space': allocated_space, 'directory': directory})
-                        
-                            elif reward_phrase in line_plain:
-                                c.reward_count += 1
-                                line_plain = line_plain.replace('{disk_farm_index=', '{disk_farm_index= ')
-                                farm = line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")].replace()
-                                
-                                if farm:
-                                    farm_rewards[ line_plain[line_plain.find("{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")]] += 1
-                                    
-                                    
-                                #print('\n****************** Vote Winner! ******************\n')
-                                # TODO save to csv block, time (pdragon)
-                                
-                                send('WINNER! You were rewarded for Vote!')
-                            elif 'Initial plotting complete' in line_plain:
-                               # print('\n\n************************************* Plot Complete! *************************************\n\n')
-                                
-                                # TODO Save to csv data as above - update Recent Events in footer
-                                send('Plot complete: ' + line_plain.split()[2] + ' 100%!')
-                                #continue
-                                                    
-                           
-                                        
-                            
-                            with open("farmlog.txt", "a+") as file2:
-                                file2.write(local_time(line_plain)+'\n')
-                            
-                    except OSError as e:
-                        print("OSError"  + str(e))
-                        print("OSError > " + e.errno)
-                        print("OSError > " + e.strerror)
-                        print("OSError > " + e.filename)
-                        send("OSError > " + str(e.errno) + ' ' + e.strerror + ' '  +  e.filename)
-                    except:
-
-                        print("Error > " + str(sys.exc_info()[0]))
-                        send("Error > " + str(sys.exc_info()[0]) + ' \nRetrying 5mins...')
-                        print('Exception: Retrying in 5 minutes ') # Set correct after testing
-                        time.sleep(300)
-            except OSError as e:
-                    print("OSError > " + str(e.errno))
-                    print("OSError > " + e.strerror)
-                    print("OSError > " + e.filename)
-                    send("OSError > " + str(e.errno) + ' ' + e.strerror + ' '  +  e.filename)
-            except:
-                print("Error > " + str(sys.exc_info()[0]))
-                send("Error > " + str(sys.exc_info()[0]) + ' \nRetrying 5mins...')
-                print('Exception: Retrying in 5 minutes ') # Set correct after testing
-                time.sleep(300)
-
-        
+    if config['IS_LIVE']:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            **kwargs,
+        )
+        for line in iter(process.stdout.readline, b''):
+            line_plain = line.decode().strip()
+            if not line_plain:
+                continue
+            parse_log_line(line_plain)
+    else:
+        threading.Thread(target=read_log_file, daemon=True, name='Read_log').start()
 
 # RUN COMMAND - run specific file with arguments to capture output.
-
 cmd = config['COMMANDLINE']
 
-run_command(cmd.split(),
-    
-    cwd=Path(__file__).parent.absolute())
-
+while True:
+    run_command(cmd.split(), cwd=Path(__file__).parent.absolute())
