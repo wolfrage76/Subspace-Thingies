@@ -1,8 +1,0 @@
-keyboard==0.13.5
-py_getch==1.0.1
-python_dateutil==2.8.2
-PyYAML==6.0.1
-PyYAML==6.0.1
-Requests==2.31.0
-rich==13.7.0
-websockets==12.0

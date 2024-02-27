@@ -2,6 +2,9 @@ import asyncio
 import websockets
 import conf as c
  
+import datetime
+
+
 class Farmer(object):
     def __init__(self, farmer_name="Unknown", replotting={},warnings=[], errors=[], curr_sector_disk={} , plot_space={}, farm_plot_size={},deltas={} , total_completed=0, startTime ='', farm_rewards = {} ):
         print(farmer_name)
@@ -42,13 +45,16 @@ async def ws_client():
     print("WebSocket: Client Connected.")
     url = "ws://127.0.0.1:8016"
     # Connect to the server
+    
+    
     async with websockets.connect(url) as ws:
-        
+       
         await ws.send(make_farmer().jsondump())
         #await ws.send(f"{age}")
  
         # Stay alive forever, listen to incoming msgs
         while True:
+            
             msg = await ws.recv()
             print(msg)
  
