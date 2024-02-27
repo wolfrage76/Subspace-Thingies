@@ -1,35 +1,56 @@
-################
-# True streams from Farmer directly, not from log.
-# False means to read farmer log instead
+# There are 2 sections: One for the Frontend viewer and one for the backend on the farmers. Fill it out and copy it over to each location
 
-IS_LIVE: False # 
-TOGGLE_ENCODING: True # If reading Farmer log but disk list doesn't appear, set False
+TOGGLE_ENCODING: False # If disk list doesn't appear, or Unicode error, set True. 
 
-###############
-FARMER_NAME: "WolfrageRocks"
+ #######################
+# Farmer Backend Config #
+ #######################
 
-SHOW_LOGGING: True # If False, it will hide the Log scroll and only show farms.
+FARMER_NAME: "Wolfrage Rocks" # How this farmer will be referred to as
+FRONT_END_IP: "192.168.1.205" # Your View frontend IP -- 127.0.0.1, 192.168.1.69, whatever
+FRONT_END_PORT: "8016" # Port the View frontend is using
+FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # Parse this Farmer log file
 
-FARMER_LOG: 'c:\\Users\\wolfrage\\subspace\\farmlog.txt' # If IS_LIVE is FALSE, it reads this log
 
-WALLET: "xxxxxxxxxxxx"
+ ########################
+# Frontend Viewer Config #
+ ########################
 
-NODE_EXECUTABLE_FOLDER: 'c:\\Users\\wolfrage\\subspace' # Optional - Windows needs double slashes
-NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double slashes
-
-NODE_IP: "192.168.1.205" # Your nodes IP -- 127.0.0.1, 192.168.1.69, whatever
+    # UI Node Info Display
+NODE_LOG_FILE: "c:\\Users\\wolfrage\\subspace\\nodelog.txt" # Windows uses double \'s' - needed for Node info display
+HOUR_24: False # Display in 24 hour time format
+    
+    # Wallet Monitor - Queries your node for balance changes and can notify you#
+WALLET: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx" # Blank disables wallet monitoring
+NODE_IP: "192.168.1.205" # Your node IP -- 127.0.0.1, 192.168.1.69, whatever
 NODE_PORT: "9944" # Port the node is using
+WAIT_PERIOD: 120 # wallet check interval seconds
 
+
+ ###############
+# Notifications #
+ ###############
+ 
 SEND_DISCORD: False
 SEND_PUSHOVER: False
-DISCORD_WEBHOOK: "https://discord.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxx"
-PUSHOVER_USER_KEY:
-PUSHOVER_APP_TOKEN:
 
-WAIT_PERIOD: 300 # wallet check interval seconds
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/119992828XXXXXXXXXXXXX" # General notifications go here
+DISCORD_WALLET_NOTIFICATIONS: "https://discord.com/api/webhooks/119919952XXXXXXXXX" # As above, but only for wallet notifications. Defaults to DISCORD_WEBHOOK if blank.
 
-SHOW_PING: False
-MUTE_HICKORY: True
-HOUR_24: False
+PUSHOVER_APP_TOKEN: #"xxxxxxxxxxxxx" # yeah, I need to implement better Pushover stuff
+PUSHOVER_USER_KEY:  #"xxxxxxxxxxxx"
 
-COMMANDLINE: '.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxx --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB --farm-during-initial-plotting false'
+# Being Deprecated Soon #
+SHOW_LOGGING: True # If False, it will hide the Log scroll and only show farms. Spacebar toggles while running
+MUTE_HICKORY: True # Ignore the ignorable Hickory warnings
+
+
+ ################Experimental################
+# True streams from Farmer directly, not from log.
+# False means to read farmer log instead
+#
+# Commandline option below will be launched at start if IS_LIVE is True, otherwise is ignored.
+# Even I'm not using it in Live mode anymore for simplicity's sake. Was cool though!
+
+IS_LIVE: False
+COMMANDLINE: "" #'.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-05 farm --reward-address st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1 --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
