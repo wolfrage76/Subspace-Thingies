@@ -4,6 +4,14 @@
 
 ![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/f28be059-602f-4706-9a77-c9adc65c7284)
 
+### Wallet Monitor Thingy ###
+Standalone wallet monitor - Do *not* use with The Farmer Monitor Thingy as it is already built into it.
+This will query your node for wallet balance changes, and notify you via discord (more notifications soon!)
+
+Rename `config.yaml.example` to `config.yaml` and then edit the configuration
+Run `pip install -r requirements.txt`
+Run `python wallet_monitor_thingy.py`
+
 
 ### Farm Monitor Thingy
 
@@ -45,6 +53,6 @@ The UI will not fully update until a machine cycles and sends its data over.  If
 
 Farmer sample:`.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-01 farm --reward-address xxxxxxxxxxx  path=z:\\dev-farm2,size=2GiB *> farmerlog.txt`
 
-Node sample: ` .\subspace-node-windows-x86_64-skylake-gemini-3h-2024-feb-01 run --chain gemini-3h --blocks-pruning 256 --state-pruning archive-canonical --base-path z:\subspace-node --farmer --name "BitcoinBart" --allow-private-ips  --rpc-methods unsafe --rpc-cors all --rpc-listen-on 127.0.0.1:9944 *> -file nodelog.txt	`
+Node sample: ` .\subspace-node-windows-x86_64-skylake-gemini-3h-2024-feb-01 run --chain gemini-3h --blocks-pruning 256 --state-pruning archive-canonical --base-path z:\subspace-node --farmer --name "BitcoinBart" *> -file nodelog.txt	`
 
 **_ Don't judge my code, you uncouth heathens! Figuring stuff out first, then I'll make it nice and pretty. Well, pretty-ish. Whatever. I'm having fun. _**
