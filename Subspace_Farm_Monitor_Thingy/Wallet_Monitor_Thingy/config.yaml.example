@@ -1,9 +1,0 @@
-    # Wallet Monitor - Queries your node for balance changes and can notify you of changes #
-WALLET: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX" # Blank disables wallet monitoring
-NODE_IP: "192.168.1.205" # Your node IP -- 127.0.0.1, 192.168.1.69, whatever
-NODE_PORT: "9944" # Port the node is using
-WAIT_PERIOD: 120 # wallet check interval seconds
-
-# Notifications #
-SEND_DISCORD: False 
-DISCORD_WALLET_NOTIFICATIONS: "https://discord.com/api/webhooks/xxxxxxxxxxxxxxxxxxxxxxxxx" # Discord Channel Webhook URL
