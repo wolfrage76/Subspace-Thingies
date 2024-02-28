@@ -43,7 +43,7 @@ c.running = True
 
 
 def getVer():  # gonna hijack this for the loop.  Will change later
-    # URL to the GitHub API for the latest release of the subspace repository 
+    # URL to the GitHub API for the latest release of the subspace repository
     url = "https://api.github.com/repos/subspace/subspace/releases/latest"
 
     # Make a GET request to the GitHub API
@@ -78,28 +78,30 @@ if config['NODE_LOG_FILE']:
 
 
 def socket_thread():
-    # print('Triggering socket thread') 
+    # print('Triggering socket thread')
     w.start()
 
 
 def make_image(layout):
-        console2 = Console(record=True)
-    #await asyncio.sleep(900)  # 15mins = 900secs
+    console2 = Console(record=True)
+    # await asyncio.sleep(900)  # 15mins = 900secs
    # while True:
-        console2.print(layout, justify="center")
-        console2.save_svg("layout.svg", title="FARMS")
-        from discord_webhook import DiscordWebhook, DiscordEmbed
+    console2.print(layout, justify="center")
+    console2.save_svg("layout.svg", title="FARMS")
+    from discord_webhook import DiscordWebhook, DiscordEmbed
 
-        webhook = DiscordWebhook(url="https://discord.com/api/webhooks/1199199521981345792/LOlCM6nTtmZTyI6Fnk-O8Hso7KVFG4NXmqXIUfsv8V2dy7au9uFB7SkBCYQfJh5Z_noR")
+    webhook = DiscordWebhook(
+        url="https://discord.com/api/webhooks/1199199521981345792/LOlCM6nTtmZTyI6Fnk-O8Hso7KVFG4NXmqXIUfsv8V2dy7au9uFB7SkBCYQfJh5Z_noR")
 
-        with open("layout.svg", "rb") as f:
-            webhook.add_file(file=f.read(), filename="layout.svg")
+    with open("layout.svg", "rb") as f:
+        webhook.add_file(file=f.read(), filename="layout.svg")
 
-        embed = DiscordEmbed(title="FARMS", description="Current Farm Status", color="03b2f8")
-        embed.set_thumbnail(url="attachment://layout.svg")
+    embed = DiscordEmbed(
+        title="FARMS", description="Current Farm Status", color="03b2f8")
+    embed.set_thumbnail(url="attachment://layout.svg")
 
-        webhook.add_embed(embed)
-        response = webhook.execute()
+    webhook.add_embed(embed)
+    response = webhook.execute()
 
 
 async def cleanup_stale_farms(timeout=600,):  # 900 seconds = 15 minutes
@@ -329,7 +331,7 @@ def flip_flop_color(farmer):
 
 def color_by_status(percent, replot):
     colors = ['[b white]', '[dark_orange]',
-              '[b yellow]', '[b green]', '[blue]']
+              '[b yellow]', '[b green]', '[dodger_blue2]']
     if replot:
         return colors[4]
     elif percent == 100:
@@ -400,7 +402,7 @@ def build_ui():
     layout["body2"].update(make_recent_logs())
     layout["body1"].update(make_recent_node_logs())
     layout["box1"].update(Panel("", border_style="green", title="[yellow]Waiting for Farmers...",
-                                subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100% | [blue]Replotting"))
+                                subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100% | [blue1]Replotting"))
     footer_txt = Table.grid(expand=True)
     footer_txt.add_row(Align.center(
         f"CPU: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total / (1024.0 ** 3))}gb ({psutil.virtual_memory(
@@ -410,8 +412,8 @@ def build_ui():
     layout["footer"].update(Panel(footer_txt, title="BitcoinBart Was Here", border_style="green",
                                   subtitle='[b white]SPACE: Toggle Logs | [b white]Q/ESC: Quit', subtitle_align='left', height=3))
 
-    
     return layout
+
 
 async def main():
     cleanup_task = asyncio.create_task(
@@ -419,12 +421,12 @@ async def main():
 
     layout = build_ui()  # Build and retrieve the UI layout
     layout["main"].update(make_waiting_message())
-    #c.layout = layout
-    update_logs_task = asyncio.create_task(update_node_logs_every_minute(layout))
+    # c.layout = layout
+    update_logs_task = asyncio.create_task(
+        update_node_logs_every_minute(layout))
 
     # image_create = asyncio.create_task(make_image())
 
-    
     # menu_keys.KeyboardThread.run()
     try:
 
@@ -439,7 +441,7 @@ async def main():
 
             while True:
                 layout["body1"].update(make_recent_node_logs())
-                
+
                 if not c.running:
                     print('Toodles!')
                     quit()
@@ -523,8 +525,8 @@ async def main():
                         progress_table.add_row(job_progress, )
 
                         layout["box1"].update(Panel(progress_table, border_style="green", title="[yellow]Farmer: " + farmer_name + " [Up: " + getUptime(farmer_data['startTime']) + "] ",
-                                                    subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100% | [blue]Replotting"))
-                        
+                                                    subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100% | [blue1]Replotting"))
+
                        # make_image(layout)
                         c.layout = layout
                         # Pause for 5 seconds before processing the next farm
