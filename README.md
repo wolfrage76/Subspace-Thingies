@@ -2,7 +2,8 @@
 
 ## My tools and utils for the Subspace Network.
 
-![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/f28be059-602f-4706-9a77-c9adc65c7284)
+![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/c97a59a4-d58d-4306-8863-d7d895896857)
+
 
 ### Wallet Monitor Thingy ###
 Standalone wallet monitor - Do *not* use with The Farmer Monitor Thingy as it is already built into it.
