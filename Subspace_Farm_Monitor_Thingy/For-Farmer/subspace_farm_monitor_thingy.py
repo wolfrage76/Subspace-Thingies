@@ -15,7 +15,7 @@ from dateutil.parser import parse
 disk_farms = c.disk_farms
 reward_count = c.reward_count
 farm_rewards = c.farm_rewards
-
+farm_skips = c.farm_skips
 event_times = c.event_times
 plot_space = c.plot_space
 drive_directory = c.drive_directory
@@ -120,7 +120,7 @@ def local_time(string):
         return string  # If the timestamp is invalid, return the original string
 
 
-def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_times, plot_space, drive_directory, farm_plot_size, curr_sector_disk):
+def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_times, plot_space, drive_directory, farm_plot_size, curr_sector_disk, farm_skips):
     trigger = False
     parsed_data = {
         'line_plain': '',  # Default value
@@ -131,7 +131,8 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_time
         'plot_space': plot_space,
         'drive_directory': drive_directory,
         'farm_plot_size': farm_plot_size,
-        'curr_sector_disk': curr_sector_disk
+        'curr_sector_disk': curr_sector_disk,
+        'farm_skips': farm_skips,
     }
 
     # Assuming the first part of the line is the timestamp
@@ -161,12 +162,12 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_time
     """ c.last_logs.pop(0)
     c.last_logs.append(local_time(line_plain.replace('single_disk_farm{disk_farm_index=', 'Farm: ').replace('}: ','').replace('sector_index=', 'Current Sector: ').replace('\n','').replace(' INFO', '[white]').replace('subspace_farmer::single_disk_farm::plotting:','')).replace(' WARN','[yellow]').replace('subspace_farmer::', '').replace ('single_disk_farm::farming:', ' '))
      """
-    if "(os error " in line_plain:
+    """ if "(os error " in line_plain:
         print(line_plain)
         print('OS Error retrying in 30 seconds')
         time.sleep(30)
-        return parsed_data
-    elif 'hickory' in line_plain and config['MUTE_HICKORY']:
+        return parsed_data """
+    if 'hickory' in line_plain and config['MUTE_HICKORY']:
         pass
     elif 'WARN quinn_udp: sendmsg error:' in line_plain:
         pass
@@ -226,6 +227,16 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_time
         directory = line_plain[line_plain.find(":") + 2:]
         drive_directory[c.curr_farm] = directory
         c.curr_farm = None
+# 2024-02-27T21:08:48.234799Z  WARN {disk_farm_index=0}: subspace_farmer::single_disk_farm::farming: Proving for solution skipped due to farming time limit
+    elif 'Proving for solution skipped due to farming time limit' in line_plain:
+        # farm_skips = c.farm_skips
+        farm = line_plain[line_plain.find(
+            "{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")]
+        if farm:
+            if farm not in farm_skips:
+                farm_skips[farm] = 0
+            farm_skips[farm] += 1
+            c.farm_skips[farm] = farm_skips[farm]
     elif reward_phrase in line_plain:
         reward_count += 1
         c.reward_count = reward_count
@@ -262,7 +273,6 @@ def read_log_file():
         enc = 'utf-8'
     else:
         enc = 'utf-16'
-    # Try opening with utf-16 encoding if you suspect the file to be UTF-16
     with log_file_path.open('r', encoding=enc) as log_file:
         while True:
             try:
@@ -270,17 +280,19 @@ def read_log_file():
                 if not line:
                     time.sleep(0.1)  # Wait for new lines
                     continue
-                line_plain = line.strip()
+                line_plain = line.encode('ascii', 'ignore').decode().strip()
             # Now line_plain is a Unicode string that can be directly processed
                 if line_plain == '\n' or line_plain == '':
                     continue
             # Continue with your parsing and processing logic
                 parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards,
-                                             event_times, plot_space, drive_directory, farm_plot_size, curr_sector_disk)
+                                             event_times, plot_space, drive_directory, farm_plot_size, curr_sector_disk, farm_skips)
                 # Print the processed line to console
                 print(parsed_data['line_plain'])
             except UnicodeDecodeError as e:
                 print(f"Decode error encountered: {e}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
             if config['IS_LIVE']:
                 # Open the output file with utf-8 encoding to ensure Unicode support
                 with open("farmlog.txt", "a+", encoding='utf-8') as file2:

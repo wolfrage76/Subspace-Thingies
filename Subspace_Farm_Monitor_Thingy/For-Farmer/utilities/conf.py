@@ -50,3 +50,4 @@ curr_farm_name = "Default"
 latest_version = "Unknown"
 toggle_encoding = False
 running = False
+farm_skips = defaultdict(int)

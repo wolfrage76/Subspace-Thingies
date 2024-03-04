@@ -2,11 +2,10 @@ import asyncio
 import websockets
 import utilities.conf as c
 import json
-import time
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}, disk_farms={}):
+    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}, disk_farms={}, farm_skips={}):
         # print(farmer_name)
 
         self.farmer_name = farmer_name
@@ -21,9 +20,10 @@ class Farmer(object):
         self.startTime = startTime
         self.farm_rewards = farm_rewards
         self.disk_farms = disk_farms
+        self.farm_skips = farm_skips
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}, disk_farms={}):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}, disk_farms={}, farm_skips={}):
 
     frmr = Farmer()
 
@@ -39,6 +39,7 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], cu
     frmr.total_completed = c.total_completed
     frmr.startTime = c.startTime
     frmr.farm_rewards = c.farm_rewards
+    frmr.farm_skips = c.farm_skips
 
     return frmr
 

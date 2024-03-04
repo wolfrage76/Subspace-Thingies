@@ -171,10 +171,10 @@ def convert_to_tib(space_str):
     if unit in unit_multipliers:
         return str(round(space_value * unit_multipliers[unit], 1)) + ' TiB'
     else:
-        raise ValueError(f"Unknown unit: {unit}")
+        return space_str  # raise ValueError(f"Unknown unit: {unit}")
 
 
-async def update_node_logs_every_minute(layout, ):
+async def update_node_logs_periodically(layout, ):
 
     while True:
         layout["body"].visible = c.show_logging
@@ -183,8 +183,10 @@ async def update_node_logs_every_minute(layout, ):
         layout["body2"].update(make_recent_logs())
 
         footer_txt = Table.grid(expand=True, )
-
-        footer_txt.add_row(Align.center(
+        footer_txt.add_column()
+        footer_txt.add_column()
+        
+        footer_txt.add_row('Latest Ver: ' + c.latest_version + '  ', Align.left(
             f"CPU: {psutil.cpu_percent()}%   " + f"RAM: {round(psutil.virtual_memory().total / (1024.0 ** 3))}gb ({psutil.virtual_memory(
             ).percent}%)   Cores: {psutil.cpu_count(logical=False)} ({str(psutil.cpu_count(logical=True))})  Load: {psutil.getloadavg()[1]}"
         ))  # Add the CPU, RAM, and Cores to the footer
@@ -346,37 +348,53 @@ def color_by_status(percent, replot):
 
 def generate_farms_and_drives_grid():
     # console = Console()
-    table = Table(show_header=True, header_style="bold magenta", )
-
+    table = Table(show_header=False, )
+    table2 = Table()
     # Define the headers for both farmer and drive data
     table.add_column("Farms",  width=20)
-    table.add_column("Rewards", justify="right")
+    table.add_column("Hits/Misses", justify="right")
     table.add_column("Plot Space", justify="right")
     table.add_column("% Completed", justify="right")
+    table.add_column("Avg Sector Time", justify="right")
+    table.add_column("Errors", justify="right")
+    table.add_column("Warnings", justify="right")
+    table.add_column("ETA", justify="right")
+    table2.add_column()
+    
 
     # Iterate over all connected farms
     for farmer_name, farmer_data in c.remote_farms.items():
         # Add farmer data
-        table.add_row('[black]' + farmer_name,
-                      str(farmer_data.get('total_rewards', 'N/A')),
-                      str(farmer_data.get('total_plot_size', 'N/A')),
-                      f"{farmer_data.get('overall_completion', 0)}%", style='on green'
-                      # Include additional farmer data as needed
+        table = Table(show_header=False, )
+        table.add_row(farmer_name,
+                      str(farmer_data.get('total_rewards', 'N/A') ),
+                      str(farmer_data.get('total_plot_size', 'N/A')), 
+                      f"{farmer_data.get('overall_completion', 0)}%", 
+                      str(farmer_data.get('eta', '00:00:00')),
+                      str(farmer_data.get('avg_time', '00:00:00')),
+                      str(farmer_data.get('errors', 'N/A')),
+            str(farmer_data.get('Warnings', 'N/A'))
                       )
+        
+        table2.add_row(Panel(table, title="Farmer: " + farmer_name, border_style="green", subtitle='Rewards: ' +
+              str('1') + '/[b red]' + str('2') + ' Avg Sector: ' + '00:00 ' + ' Sectors/hr: ' + '000',))
+        
 
+        if c.unroll:    
         # Iterate over drives for the current farm
-        for drive in sorted(farmer_data['data']['disk_farms'], key=int):
-            table.add_row(f"{flip_flop_color(drive)}Drive {drive}:",
-                          "",  # Rewards are typically not listed per drive in the provided structure
-                          str(farmer_data['data']['plot_space'][drive]),
-                          f"{farmer_data['data']['farm_plot_size'][drive]}%",
-                          # Include additional drive data as needed
-                          )
-        table.add_row("", "", "", "")
+            for drive in sorted(farmer_data['data']['disk_farms'], key=int):
+                table.add_row(f"{flip_flop_color(drive)}Drive {drive}:",
+                            "",  # Rewards are typically not listed per drive in the provided structure
+                            str(farmer_data['data']['plot_space'][drive]),
+                            f"{farmer_data['data']['farm_plot_size'][drive]}%",
+                            # Include additional drive data as needed
+                            )
+            table.add_row("", "", "", "", "", "", "")
 
     # Print the table
-    print(table)
-    return table
+    #print(table)
+    
+    return table2
 
 
 def convert_to_percent(load_tuple):
@@ -423,7 +441,7 @@ async def main():
     layout["main"].update(make_waiting_message())
     # c.layout = layout
     update_logs_task = asyncio.create_task(
-        update_node_logs_every_minute(layout))
+        update_node_logs_periodically(layout))
 
     # image_create = asyncio.create_task(make_image())
 
@@ -449,6 +467,8 @@ async def main():
                 c.farm_names = c.farm_names or []
                 # Initialize to an empty dictionary if not already set
                 c.remote_farms = c.remote_farms or {}
+                
+                
                 for farmer_index in range(len(c.farm_names)):
                     try:
                         farmer_name = c.farm_names[farmer_index % len(
@@ -502,6 +522,7 @@ async def main():
                             c.total_completed = 0
 
                         progress_table = Table.grid(expand=True)
+                        progress_table2 = Table.grid(expand=True)
 
                         progress2 = Progress(
                             "{task.description}",
@@ -518,13 +539,43 @@ async def main():
                         for key in c.farm_rewards[farmer_name].keys():
                             total = total + c.farm_rewards[farmer_name][key]
 
+                        skips = 0
+                        for key in c.farm_skips[farmer_name].keys():
+                            skips = skips + \
+                                c.farm_skips[farmer_name][key]
+
                         progress_table.add_column()
+                        
+                        progress_table2.add_column(width=10)
+                        progress_table2.add_column()
+                        progress_table2.add_column()
+                        progress_table2.add_column()
+                        progress_table2.add_column()
+                        progress_table2.add_column()
+                        
+                        progress_items = Table.grid(expand=True)
+                        progress_items.add_column(width=10)
+                    
+                        progress_items.add_column()
+                        progress_items.add_column()
+                        progress_items.add_row(progress2, " ", "testing this")
+                        
+                        progress_table2.add_row(Panel(
+                            progress_items, title="Farmer: " + farmer_name, border_style="green", subtitle='Rewards: ' + str(total) + '/[b red]' + str(skips) + ' Avg Sector: ' + '00:00 ' + ' Sectors/hr: ' + '000',))
+                        
                         progress_table.add_row(Panel(
-                            progress2, border_style="green", subtitle='Rewards: ' + str(total)))
+                            progress2, border_style="green", subtitle='Rewards: ' + str(total) + '/[b red]' + str(skips),))
 
                         progress_table.add_row(job_progress, )
+                        
+                        
 
-                        layout["box1"].update(Panel(progress_table, border_style="green", title="[yellow]Farmer: " + farmer_name + " [Up: " + getUptime(farmer_data['startTime']) + "] ",
+                        if c.show_logging:
+                            narf = progress_table
+                        else:
+                            narf = progress_table2 #generate_farms_and_drives_grid()
+                        
+                        layout["box1"].update(Panel(narf, border_style="green", title="[yellow]Farmer: " + farmer_name + " [Up: " + getUptime(farmer_data['startTime']) + "] ",
                                                     subtitle="[b white]< 25% | [b dark_orange]>25% | [yellow]> 75% | [b green]=100% | [blue1]Replotting"))
 
                        # make_image(layout)
