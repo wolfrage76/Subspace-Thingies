@@ -9,7 +9,7 @@ global errored
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}, disk_farms={}):
+    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}, disk_farms={}, farm_skips={},):
         print(farmer_name)
 
         self.farmer_name = farmer_name
@@ -24,9 +24,10 @@ class Farmer(object):
         self.startTime = startTime
         self.farm_rewards = farm_rewards
         self.disk_farms = disk_farms
+        self.farm_skips = farm_skips
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], curr_sector_disk={}, plot_space={}, farm_plot_size={}, deltas={}, total_completed=0, startTime='', farm_rewards={}, farm_skips={}, disk_farms={}):
 
     frmr = Farmer()
 
@@ -41,6 +42,8 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], cu
     frmr.total_completed = total_completed
     frmr.startTime = startTime
     frmr.farm_rewards = farm_rewards
+    frmr.farm_skips = farm_skips
+    frmr.disk_farms = disk_farms
 
     return frmr
 
@@ -73,6 +76,9 @@ async def ws_server(websocket, path):
             c.farm_rewards[farmer_name] = farm_data['farm_rewards']
 
             c.replotting = farm_data['replotting']
+
+            c.farm_skips[farmer_name] = farm_data['farm_skips']
+            
             if errored:
                 print("Websocket is now reconnected.")
                 errored = False

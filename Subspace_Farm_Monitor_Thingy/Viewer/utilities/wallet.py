@@ -67,7 +67,7 @@ def WalletMon():
             except Exception as e:
                 print(f'Wallet Exception... Retrying in {
                       wait_period} seconds...')
-                print(f'Error: {e}')
+                print(f'Wallet Error: {e}')
                 time.sleep(wait_period)
 
 
