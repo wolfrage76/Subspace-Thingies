@@ -167,3 +167,6 @@ Subspace_Farm_Monitor_Thingy/Subspace_Farm_Monitor_Thingy.code-workspace
 Subspace_Farm_Monitor_Thingy/farmlog.txt
 farmlog.txt
 Subspace_Farm_Monitor_Thingy/view.ps1
+.history
+.history/*
+.gitignore

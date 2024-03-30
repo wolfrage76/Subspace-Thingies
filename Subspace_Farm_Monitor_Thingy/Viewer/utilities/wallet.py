@@ -5,6 +5,7 @@ import utilities.conf as c
 import requests
 
 
+
 def get_wallet_balance(substrate):
     result = substrate.query("System", "Account", [c.wallet])
     balance = result.value["data"]["free"] + result.value["data"]["reserved"]
@@ -40,11 +41,11 @@ def WalletMon():
 
     if wallet:
         substrate = substrateinterface.SubstrateInterface(
-            url=f"ws://{nodeip}:{nodeport}")
+            url=f"ws://{nodeip}:{nodeport}")    
         first_time = True
         last_balance = 0.0
 
-        while True:
+        while c.running:
             try:
                 current_balance = get_wallet_balance(substrate)
 
@@ -53,8 +54,7 @@ def WalletMon():
                     if change != 0:
                         direction = "received" if change > 0 else "removed"
                         sign = "+" if change > 0 else "-"
-                        message = f" Your wallet {wallet[-5:]} {direction} coins! \nBalance @ {
-                            format_balance(current_balance, substrate)}  (Change: {sign}{abs(change):.4f})"
+                        message = f" Your wallet {wallet[-5:]} {direction} coins! \nBalance @ {format_balance(current_balance, substrate)}  (Change: {sign}{abs(change):.4f})"
                         send_notification(message, discord_url)
 
                 else:
@@ -65,10 +65,12 @@ def WalletMon():
                 time.sleep(wait_period)
 
             except Exception as e:
-                print(f'Wallet Exception... Retrying in {
-                      wait_period} seconds...')
-                print(f'Wallet Error: {e}')
+                #print(f'Wallet Exception... Retrying in {wait_period} seconds...')
+                #print(f'Wallet Error: {e}')
                 time.sleep(wait_period)
+                substrate = substrateinterface.SubstrateInterface(
+                    url=f"ws://{nodeip}:{nodeport}")
+                
 
 
 # if __name__ == '__main__':

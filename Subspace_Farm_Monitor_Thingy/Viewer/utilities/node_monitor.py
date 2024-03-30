@@ -1,95 +1,72 @@
-import time
+import asyncio
+import websockets
+import json
 import utilities.conf as c
-import sys
-from datetime import datetime
+import time
+import yaml
 
-### Init ###
-last_claimed = 0
+with open("config.yaml") as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
 
-############
+#################
 
-
-def datetime_valid(dt_str):
-    try:
-        datetime.fromisoformat(dt_str)
-    except:
-        return False
-    return True
-
-
-def local_time(string):
-    my_string = ''
-    string2 = string.split()
-    convert = string2[0]
-
-    if datetime_valid(convert):
-
-        datestamp = datetime.fromisoformat(str(convert)).astimezone(tz=None)
-        if c.hour_24:
-            string2[0] = datestamp.strftime("%m-%d %H:%M:%S|")
-        else:
-            string2[0] = datestamp.strftime(
-                "%m-%d %I:%M %p|").replace(' PM', 'pm').replace(' AM', 'am')
-
-        for piece in string2:
-
-            my_string += '{} '.format(piece)
-        my_string = my_string
-    else:
-        my_string = string
-    return (my_string)
-
-
-def main():
-    while True:
-
+nodeip = config['NODE_IP']
+nodeport = config['NODE_PORT']
+async def fetch_node_info():
+    
+    uri = f"ws://{nodeip}:{nodeport}"
+    while c.running:
         try:
-            if c.toggle_encoding:
-                enc = 'utf-16'
-            else:
-                enc = 'utf-8'
+            async with websockets.connect(uri) as websocket:
+                # Peer count
+                await websocket.send(json.dumps({
+                    "jsonrpc": "2.0",
+                    "method": "system_peers",
+                    "params": [],
+                    "id": 1
+                }))
+                peer_count_response = await websocket.recv()
+                peer_count = len(json.loads(peer_count_response).get('result', []))
+                
+                # Sync state
+                await websocket.send(json.dumps({
+                    "jsonrpc": "2.0",
+                    "method": "system_health",
+                    "params": [],
+                    "id": 2
+                }))
+                sync_state_response = await websocket.recv()
+                is_syncing = json.loads(sync_state_response).get('result', {}).get('isSyncing', False)
+                
+                # Best block hash
+                await websocket.send(json.dumps({
+                    "jsonrpc": "2.0",
+                    "method": "chain_getBlockHash",
+                    "params": [],
+                    "id": 3
+                }))
+                best_block_hash_response = await websocket.recv()
+                best_block_hash = json.loads(best_block_hash_response).get('result')
+                
+                # Block details for best block hash
+                await websocket.send(json.dumps({
+                    "jsonrpc": "2.0",
+                    "method": "chain_getBlock",
+                    "params": [best_block_hash],
+                    "id": 4
+                }))
+                best_block_response = await websocket.recv()
+                best_block_number_hex = json.loads(best_block_response).get('result', {}).get('block', {}).get('header', {}).get('number', '0x0')
+                best_block_number = int(best_block_number_hex, 16)
+                
+                # Update global configuration
+                c.peers = peer_count
+                c.best_block = best_block_number
+                c.is_syncing = is_syncing
 
-            # Ensure encoding is set to 'utf-8'
-            with open(c.node_log_file, 'r', encoding=enc) as file:
-                while True:
-
-                    line = file.readline()
-                    # Filter out non-ASCII characters
-                    line_plain = ''.join(
-                        char for char in line if ord(char) < 128)
-
-                    if line == "\r\n" or line == "\n" or line == "":
-                        continue
-                    elif "peers), best: " in line_plain:
-                        c.peers = line_plain.split()[5][+1:]
-                        c.best_block = line_plain.split()[8]
-                        c.finalized = line_plain.split()[11]
-                        c.ul = line_plain.split()[13]
-                        c.dl = line_plain.split()[14]
-
-                    elif "INFO Consensus: substrate:" in line_plain and "Imported" in line_plain:
-                        test = line_plain.split()
-                        c.imported = line_plain.split()[5].replace(
-                            '#\x1b[1;37m', '').replace('\x1b[0m', '')
-                        line_plain = line_plain.replace('#\x1b[1;37m', '').replace(
-                            '\x1b[0m', '').format(line_plain)
-
-                    elif "Claimed block at slot" in line_plain:
-                        last_claimed = line_plain[7]
-                    elif "Pre-sealed block for proposal at" in line_plain:
-                        if line_plain.split()[7] == last_claimed:
-                            c.rewards += c.farm_rewards
-                            farm = line_plain[line_plain.find(
-                                "{disk_farm_index=") + len("{disk_farm_index="):line_plain.find("}:")]
-                            c.farm_rewards[farm] += c.farm_rewards[farm]
-                        else:
-                            last_claimed = 0
-
-                    c.last_node_logs.pop(0)
-                    c.last_node_logs.append(local_time(line_plain.replace('substrate:', '')).replace(
-                        ' INFO', '[white]').replace(' WARN', '[yellow]').replace('ERROR', '[red]'))
-        except:
-            print("Node Error > " + str(sys.exc_info()[0]))
-            # Set correct after testing
-            print('Exception: Retrying in 5 minutes ')
-            time.sleep(5)  # before I tweak exceptions
+        except websockets.ConnectionClosed:
+            print("Connection closed, attempting to reconnect in 20 seconds...")
+            time.sleep(20)
+        except Exception as e:
+            print(f"A node monitor error occurred: {e}")
+            time.sleep(20)
