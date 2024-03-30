@@ -168,3 +168,5 @@ Subspace_Farm_Monitor_Thingy/view.ps1
 .history
 .history/*
 .gitignore
+.history/.gitignore_20240329203744
+.gitignore
