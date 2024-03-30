@@ -33,6 +33,7 @@ WALLET: "stXXXXXXXXXXXXXXXXXXXXXX" # Blank disables wallet monitoring
 WAIT_PERIOD: 480 # wallet check interval seconds
 
 
+
  ###############
 # Notifications #
  ###############
