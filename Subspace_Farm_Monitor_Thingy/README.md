@@ -2,7 +2,7 @@
 
 ## My tools and utils for the Subspace Network.
 
-![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/d3b44548-8c31-4af2-bc09-d4fdf1d9c55f)
+![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/d0b172b6-6041-48ae-949b-22727d5f7dd9)
 
 ### Farm Monitor Thingy
 
@@ -16,18 +16,18 @@ More features coming!
 Ping me on the Subspace Discord (Wolfrage) if you have any questions. No DMs though -- DMs are the Devil's handjob.
 
 Installation:
- You must add `--rpc-listen-on <LocalIP>:<Port>` to your NODE launch command - port 9944 is default
- You must add `--prometheus-listen-on <localIP>:<Port>` to your FARMER launch command - port 8181 is default
- To create a farmer log file, add this to the end of your launch command: ` |tee -a <FILENAME>.txt`
+ - You must add `--rpc-listen-on <LocalIP>:<Port>` to your NODE launch command - port 9944 is default
+ - You must add `--prometheus-listen-on <localIP>:<Port>` to your FARMER launch command - port 8181 is default
+ - To create a farmer log file, add this to the end of your launch command: ` |tee -a <FILENAME>.txt`
 
-* FOR FARMER SIDE:
+FOR FARMER SIDE:
 1. Save monitor folder to the farmer
 2. In the folder Run: `pip install -r requirements.txt`
 3. Inside the folder copy `config.yaml.example` to `config.yaml` and then Edit it
 4. Run: `python Subspace_Farm_Monitor_Thingy.py` to launch
 
 
-* FOR VIEWER:
+FOR VIEWER:
 1. Copy the Viewer folder to a machine you can connect to the console for
 2. In the folder Run: `pip install -r requirements.txt`
 3. Copy the config.yaml file you created from monitor to viewer folder
