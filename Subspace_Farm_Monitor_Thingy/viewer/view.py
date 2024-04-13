@@ -42,7 +42,7 @@ c.startTime = time.time()
 with open("config.yaml", encoding='utf-8') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
-theme = config.get('THEME', None)
+theme = config.get('THEME', 'default')
 if theme == None:    
     theme_file = 'utilities/fallback_theme.yaml'
 else:
