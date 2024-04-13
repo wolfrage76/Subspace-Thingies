@@ -1,0 +1,93 @@
+# 填写此内容并将其复制到监视器和查看器目录，因为这对于两者来说都是相同的
+
+LANGUAGE: 'cn' # 
+# en = English
+# cn = Chinese
+# 
+
+
+ #################
+# 两者都需要 #
+ ################
+
+# 必需的:
+FRONT_END_IP: "192.168.1.209" # 查看器运行的 IP - 127.0.0.1、192.168.1.69 等
+FRONT_END_PORT: "8016" # View 前端正在使用的端口
+
+ #######################
+#农夫后端配置#
+ #######################
+
+# 必需的: （日志解析将成为可选，但目前还不是）
+FARMER_NAME: "Moya" # 这位农民将如何被称为
+FARMER_LOG: '/home/wofl/Subspace/farmlog.txt' # 解析此 Farmer 日志文件 - Windows 使用双 \\'
+
+# 必需的:
+# 您需要将其添加到 Farmer 启动命令中： --prometheus-listen-on <localIP>:<PORT>
+FARMER_IP: '192.168.1.209' # 这是上面的IP
+FARMER_PORT: '8181' # 这是上面的端口
+
+
+ ########################
+# 前端查看器配置 #
+ ########################
+
+# 注意：将 NODE_IP 和/或 NODE_PORT 留空将禁用节点数据显示和钱包监控
+
+# 您需要将其添加到节点启动命令中： --rpc-listen-on <LocalIP>:<Port>
+NODE_IP: "192.168.1.208" # 上面的节点 IP -- 127.0.0.1、192.168.1.69 等等
+NODE_PORT: "9944" # 节点正在使用的端口来自上面。 9944 是默认值。
+    
+#钱包监控 - 查询您的节点的余额变化并可以通知您 #
+WALLET: "st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1" # 空白禁用钱包监控
+WAIT_PERIOD: 480 # 钱包检查间隔秒
+
+#% 在计算大小时考虑缓存大小。农夫默认值为 1。
+# 除非你在启动命令中更改了它，否则不要管它。
+# 如果设置为0，则不会计算缓存大小。不要使用%符号，仅使用数字。
+CACHE_SIZE: 1 
+
+
+ ###############
+# 通知          #
+ ###############
+ 
+SEND_DISCORD: False
+SEND_PUSHOVER: False
+
+# 一般通知请移至此处 #
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1199928287774912602/gLIVElpW-eoii3uZh7Dsd6SG3Ee7BIs50pdH7FXeEWEaR5jDW5jhpx0VsaKc3w6XLkHU" 
+
+# 如上所述，但仅适用于钱包通知。如果为空，则默认为 DISCORD_WEBHOOK。
+DISCORD_WALLET_NOTIFICATIONS: "https://discord.com/api/webhooks/1199199521981345792/LOlCM6nTtmZTyI6Fnk-O8Hso7KVFG4NXmqXIUfsv8V2dy7au9uFB7SkBCYQfJh5Z_noR" 
+
+PUSHOVER_APP_TOKEN: "xxxxxxxxxxxxx" # 是的，我需要实现更好的 Pushover 东西
+PUSHOVER_USER_KEY: "xxxxxxxxxxxx"
+
+ #########################
+###   最终用户配置       ###
+ #########################
+
+
+
+
+####目前未使用####
+SEND_REPORT: False # 通过 Discord 发送农民图像
+REPORT_FREQ: 3600
+
+# 内部的 #
+USE_BANNERS: True # 允许抓取页脚横幅以获取信息
+
+ ################实验性的################
+
+TOGGLE_ENCODING: False # 如果磁盘列表未出现，或显示 Unicode 或 UTF-16 错误，请切换此设置
+
+
+# 已弃用或即将弃用 - 别管！#
+SHOW_LOGGING: True 
+MUTE_HICKORY: True 
+HOUR_24: False 
+TOGGLE_ENCODING_NODE: True 
+
+#IS_LIVE: False
+#COMMANDLINE: "" #'.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-05 farm --reward-address st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1 --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'

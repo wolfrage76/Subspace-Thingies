@@ -170,3 +170,4 @@ Subspace_Farm_Monitor_Thingy/view.ps1
 .history
 .history/*
 .gitignore
+Subspace_Farm_Monitor_Thingy/Viewer/setup.py
