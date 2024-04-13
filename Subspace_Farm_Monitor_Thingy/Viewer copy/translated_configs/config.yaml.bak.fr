@@ -1,0 +1,91 @@
+# Remplissez ceci et copiez-le dans les répertoires du moniteur et du visualiseur, car il sera le même pour les deux
+
+LANGUAGE: 'fr'
+# en = Anglais
+# cn = Chinois
+# uk = Ukrainien
+# es = Espagnol
+# ja = Japonais
+# fr = Français
+# de = Allemand
+# ko = Coréen
+# vi = Vietnamien
+# ru = Russe
+
+ #################
+# Nécessaire pour les deux #
+ ################
+
+# OBLIGATOIRE :
+FRONT_END_IP: "192.168.1.209" # L'IP sur laquelle le Visualiseur fonctionne -- 127.0.0.1, 192.168.1.69, peu importe
+FRONT_END_PORT: "8016" # Le port utilisé par le frontend du Visualiseur
+
+ #######################
+# Configuration du Backend du Fermier #
+ #######################
+
+# OBLIGATOIRE : (L'analyse des journaux deviendra facultative, mais pas encore)
+FARMER_NAME: "Moya" # Comment ce fermier sera désigné
+FARMER_LOG: '/home/wolf/Subspace/farmlog.txt' # Analyser ce fichier journal du Fermier - Utilisez des doubles \\ sous Windows
+
+# OBLIGATOIRE :
+# Vous devez ajouter ceci à votre commande de lancement du Fermier : --prometheus-listen-on <localIP>:<PORT>
+FARMER_IP: '192.168.1.209' # C'est l'IP mentionnée ci-dessus
+FARMER_PORT: '8181' # C'est le port mentionné ci-dessus
+
+ ########################
+# Configuration du Visualiseur Frontend #
+ ########################
+
+# Note : Laisser NODE_IP et/ou NODE_PORT vides désactivera l'affichage des données du nœud ET le suivi du portefeuille
+
+# Vous devez ajouter ceci à votre commande de lancement du Nœud : --rpc-listen-on <LocalIP>:<Port>
+NODE_IP: "192.168.1.208" # Votre IP du nœud mentionnée ci-dessus -- 127.0.0.1, 192.168.1.69, peu importe
+NODE_PORT: "9944" # Le port utilisé par le nœud mentionné ci-dessus. 9944 est la valeur par défaut.
+
+# Suivi du Portefeuille - Interroge votre nœud pour les changements de solde et peut vous notifier #
+WALLET: "st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1" # Vide désactive le suivi du portefeuille
+WAIT_PERIOD: 480 # intervalle de vérification du portefeuille en secondes
+
+# % pour tenir compte de la taille de votre cache lors du calcul des tailles. La valeur par défaut pour le Fermier est 1.
+# À moins que vous ne l'ayez changé dans votre commande de lancement, laissez-le tel quel.
+# La taille du cache ne sera pas comptée si elle est réglée sur 0. N'utilisez pas de symbole %, juste un nombre.
+CACHE_SIZE: 1 
+
+ ###############
+# Notifications #
+ ###############
+ 
+SEND_DISCORD: False
+SEND_PUSHOVER: False
+
+# Les notifications générales vont ici #
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1199928287774912602/gLIVElpW-eoii3uZh7Dsd6SG3Ee7BIs50pdH7FXeEWEaR5jDW5jhpx0VsaKc3w6XLkHU" 
+
+# Comme ci-dessus, mais uniquement pour les notifications de portefeuille. Par défaut, c'est DISCORD_WEBHOOK si vide.
+DISCORD_WALLET_NOTIFICATIONS: "https://discord.com/api/webhooks/1199199521981345792/LOlCM6nTtmZTyI6Fnk-O8Hso7KVFG4NXmqXIUfsv8V2dy7au9uFB7SkBCYQfJh5Z_noR" 
+
+PUSHOVER_APP_TOKEN: "xxxxxxxxxxxxx" # oui, je dois améliorer le support de Pushover
+PUSHOVER_USER_KEY: "xxxxxxxxxxxx"
+
+ #########################
+###   FIN DE LA CONFIGURATION UTILISATEUR   ###
+ #########################
+
+
+####Actuellement inutilisé####
+SEND_REPORT: False # Envoyer l'image du Fermier via Discord
+REPORT_FREQ: 3600
+
+# Interne #
+USE_BANNERS: True # permet d'obtenir la bannière de pied de page pour les informations
+
+ ################Expérimental################
+
+TOGGLE_ENCODING: False # Si la liste des disques n'apparaît pas, ou affiche une erreur Unicode ou UTF-16, basculez ce paramètre
+
+# Est obsolète, ou le sera bientôt - Laissez tel quel ! #
+SHOW_LOGGING: True 
+MUTE_HICKORY: True 
+HOUR_24: False 
+TOGGLE_ENCODING_NODE: True 
