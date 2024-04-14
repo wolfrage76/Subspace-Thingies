@@ -23,7 +23,9 @@ system_stats = c.system_stats
 disk_farms = c.disk_farms
 reward_count = c.reward_count
 farm_rewards = c.farm_rewards
+farm_recent_rewards = c.farm_recent_rewards
 farm_skips = c.farm_skips
+farm_recent_skips = c.farm_recent_skips
 event_times = c.event_times
 drive_directory = c.drive_directory
 errors = c.errors
@@ -162,6 +164,13 @@ def socket_client_thread():
 
 def update_metrics_periodically(interval=10):
     while True:
+        c.rewards_per_hr = 0
+        for disk_index in disk_farms:
+            one_day_ago = datetime.now().timestamp() - 86400
+            c.farm_recent_rewards[disk_index] = len([r for r in c.farm_reward_times[disk_index] if r > one_day_ago])
+            c.farm_recent_skips[disk_index] = len([r for r in c.farm_skip_times[disk_index] if r > one_day_ago]) 
+            c.rewards_per_hr += calculate_rewards_per_hour(c.farm_reward_times[disk_index])
+
         update_farm_metrics(c.farm_id_mapping)
         time.sleep(interval)
 
@@ -230,7 +239,7 @@ def rewards_per_day_per_tib(farm_rewards, farm, total_plotted_tib):
     return total_rewards_last_24_hours / total_plotted_tib  # don't forget /0
 
 
-def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_times,  drive_directory, farm_skips, system_stats, farm_id_mapping, ):
+def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, event_times, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, ):
 
   
     trigger = False
@@ -239,9 +248,11 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_time
         'curr_farm': curr_farm,
         'reward_count': reward_count,
         'farm_rewards': farm_rewards,
+        'farm_recent_rewards': farm_recent_rewards,
         'event_times': event_times,
         'drive_directory': drive_directory,
         'farm_skips': farm_skips,
+        'farm_recent_skips': farm_recent_skips,
         'system_stats': system_stats,
     }
 
@@ -328,8 +339,13 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_time
         drive_directory[c.curr_farm] = line_plain.split('Directory: ')[1] #directory
         c.curr_farm = None
 
-    elif 'roving for solution skipped due to farming time limit' in line_plain:
+    elif ("roving for solution skipped due to farming time limit" in line_plain) or ("ustom error: Solution was ignored" in line_plain):
+        one_day_ago = datetime.now().timestamp() - 86400
+
         farm_skips = c.farm_skips
+        c.farm_skip_times[farm].append( parsed_datetime )
+        # parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
+        # c.farm_skip_times.append(parsed_datetime )
         
         if farm:
             if farm not in farm_skips:
@@ -338,11 +354,12 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_time
             c.farm_skips[farm] = farm_skips[farm]
     
     elif reward_phrase in line_plain:
+        one_day_ago = datetime.now().timestamp() - 86400
         reward_count += 1
         c.reward_count = reward_count
         parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         #parsed_datetime = datetime.strptime(line_plain.split('Z')[0], "%Y-%m-%dT%H:%M:%S.%f")
-        c.farm_reward_times.append(parsed_datetime )
+        c.farm_reward_times[farm].append(parsed_datetime )
         
         farm = line_plain[line_plain.find(
             indexconst) + len(indexconst):line_plain.find("}:")]
@@ -370,7 +387,14 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, event_time
         
     
     #farmer_metrics(farm_id_mapping)
-    c.rewards_per_hr = calculate_rewards_per_hour(c.farm_reward_times)
+#    c.rewards_per_hr = 0
+#    for disk_index in disk_farms:
+#        one_day_ago = datetime.now().timestamp() - 86400
+#        c.farm_recent_rewards[disk_index] = len([r for r in c.farm_reward_times[disk_index] if r > one_day_ago])
+#        c.farm_recent_skips[disk_index] = len([r for r in c.farm_skip_times[disk_index] if r > one_day_ago]) 
+#        c.rewards_per_hr += calculate_rewards_per_hour(c.farm_reward_times[disk_index])
+
+
     if trigger:
         # websocket_client.main()
         trigger = False
@@ -401,9 +425,9 @@ def read_log_file():
                 if line_plain == '\n' or line_plain == '':
                     continue
                 # Continue with your parsing and processing logic
-                parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards,
+                parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
                                              event_times, drive_directory,
-                                              farm_skips,
+                                              farm_skips, farm_recent_skips,
                                              system_stats, farm_id_mapping,)  # Pass the farm_id_mapping
                 vmem = str(psutil.virtual_memory().percent)
                 c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
