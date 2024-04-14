@@ -323,13 +323,19 @@ def getUptime(started=None):
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, disk_farms=None, ):
+    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, ):
         if errors is None:
             errors = []
         if disk_farms is None:
             disk_farms = {}
         if farm_rewards is None:
             farm_rewards = {}
+        if farm_recent_rewards is None:
+            farm_recent_rewards = {}
+        if farm_skips is None:
+            farm_skips = {}
+        if farm_recent_skips is None:
+            farm_recent_skips = {}
         if warnings is None:
             warnings = []
         if replotting is None:
@@ -341,10 +347,13 @@ class Farmer(object):
         self.errors = errors
         self.startTime = startTime
         self.farm_rewards = farm_rewards
+        self.farm_recent_rewards = farm_recent_rewards
+        self.farm_skips = farm_skips
+        self.farm_recent_skips = farm_recent_skips
         self.disk_farms = disk_farms
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, ):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, ):
 
     frmr = Farmer()
     frmr.farmer_name = farmer_name
@@ -353,6 +362,9 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  s
     frmr.errors = errors
     frmr.startTime = startTime
     frmr.farm_rewards = farm_rewards
+    frmr.farm_recent_rewards = farm_recent_rewards
+    frmr.farm_skips = farm_skips
+    frmr.farm_recent_skips = farm_recent_skips
 
     return frmr
 
@@ -512,6 +524,8 @@ def create_summary_layout(layout):
     global_farm_notplotted = 0.0
     global_total_rewards = 0
     global_skips = 0
+    global_recenttotal_rewards = 0
+    global_recentskips = 0
     global_hhr = 0
     global_hhr_formated = str()
     global_tibs = 0
@@ -600,6 +614,9 @@ def create_summary_layout(layout):
 
                 total = sum(farmer_data.get('farm_rewards', {}).values())
                 skips = sum(farmer_data.get('farm_skips').values())  
+                recenttotal = sum(farmer_data.get('farm_recent_rewards', {}).values())
+                recentskips = sum(farmer_data.get('farm_recent_skips').values())  
+
     
                 nocount = (drive_count - (len(is_completed)))
                 if nocount <=0:
@@ -630,7 +647,9 @@ def create_summary_layout(layout):
                 global_farm_plotted += farm_plotted
                 global_farm_notplotted += farm_notplotted
                 global_total_rewards += total
+                global_recenttotal_rewards += recenttotal
                 global_skips += skips
+                global_recentskips += recentskips
                 global_sec_day_total += sec_day #* nocount  # Multiply by nocount to get total bytes/day for this farm
                 global_sec_hr_total += sec_hr 
                 total_nocount += nocount  # Accumulate non-completed drives for weighted average calculation
@@ -665,7 +684,7 @@ def create_summary_layout(layout):
                 progress_items, title_align='left', title=color('SUMMARY_TITLE', offline) + farmer_name + color('SUMMARY_ACCENT', offline) + ' (' + color_by_status(sumipds, False, offline) + str(drive_count)
                 + 'x ' +  lang.get('plots', 'Plots') + ' - ' + str(round(sumipds, 1)) + '%' + color('SUMMARY_ACCENT', offline) + ')' , border_style=color('FARMER_FRAME', offline), subtitle_align='right', subtitle= color('SUMMARY_REWARDS', offline) 
                 + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_MISSES', offline) +lang.get('single_misses', 'M') + color('SUMMARY_ACCENT', offline) +  ': ' 
-                + color('SUMMARY_REWARDS', offline) + str(total) + color('SUMMARY_ACCENT', offline) +'/' + color('SUMMARY_MISSES', offline) + str(skips) + ' ' + color('SUMMARY_ACCENT', offline) + hhr + h_tib),)
+                + color('SUMMARY_REWARDS', offline) + str(recenttotal) + color('SUMMARY_ACCENT', offline) +'/' + color('SUMMARY_MISSES', offline) + str(recentskips) + ' ' + color('SUMMARY_ACCENT', offline) + hhr + h_tib),)
                 
             except Exception as e:
                 console.print(lang.get('an_error_occured', "An error occurred ") + ' ' + str(e) )
@@ -694,7 +713,7 @@ def create_summary_layout(layout):
 
         
         global_table.add_row(Panel(
-            global_progress_items, title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_ACCENT') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_total_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_skips) + str(global_hhr)))
+            global_progress_items, title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_ACCENT') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + str(global_hhr)))
 
         global_table.add_row(end_section=True)
         global_table.add_row(progress_table2)
@@ -732,7 +751,6 @@ def create_main_layout():
     c.remote_farms = c.remote_farms or {}
     sum_plotted = defaultdict(lambda: {})
     sum_size = defaultdict(lambda: {})
-
     
     for farmer_index in range(len(c.farm_names)):
         try:
@@ -766,6 +784,17 @@ def create_main_layout():
             else:
                 total = 0
             skips = sum(farmer_data.get('farm_skips',{}).values())
+
+            if farmer_data.get('farm__recent_rewards', {}).values():
+                recenttotal = sum(farmer_data.get('farm_recent_rewards', []).values()) # total = sum(c.farm_rewards[farmer_name].values())
+            else:
+                recenttotal = 0
+            if farmer_data.get('farm_recent_skips', {}).values():
+                recenttotal = sum(farmer_data.get('farm_recent_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
+            else:
+                recenttotal = 0
+            recentskips = sum(farmer_data.get('farm_recent_skips',{}).values())
+
             
             ipds = 0.0
             psd = 0.0
@@ -783,6 +812,7 @@ def create_main_layout():
                 total_sectors['NotPlotted'] = 0
                 total_sectors['Plotted'] = 0
                 total_sectors['AboutToExpire'] = 0
+
                                     
                 if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_Plotted'):
                     
@@ -814,6 +844,7 @@ def create_main_layout():
                 sector = '#' + str(sector)
 
                 c.farm_rewards[farmer_name][farm] = c.farm_rewards.get(farmer_name, {}).get(farm, 0)
+                c.farm_recent_rewards[farmer_name][farm] = c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)
                 
                 if farmer_data.get('farm_metrics', {}).get(farm):
                     summedPlotting = float(farmer_data['farm_metrics'].get(farm, ).get('subspace_farmer_sector_plotting_time_seconds_sum', {}).get('value','0')) 
@@ -872,7 +903,7 @@ def create_main_layout():
 
                     e = False
                 if ps > 0: 
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB) ').ljust(18) + sectortxt + ' ' + averageTime + ' '+ color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_rewards.get(farmer_name, {}).get(farm, 0)).rjust(3) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES')  + str(c.farm_skips.get(farmer_name, {}).get(farm, 0)).ljust(3), completed=ipds)
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB) ').ljust(18) + sectortxt + ' ' + averageTime + ' '+ color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(3) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES')  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(3), completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -901,6 +932,9 @@ def create_main_layout():
             total = 0
             for key in c.farm_rewards.get(farmer_name, {}).keys():
                 total = total + c.farm_rewards[farmer_name][key]
+            for key in c.farm_recent_rewards.get(farmer_name, {}).keys():
+                recenttotal = recenttotal + c.farm_recent_rewards[farmer_name][key]
+
 
             progress_table.add_column(min_width=25)
 
@@ -910,7 +944,7 @@ def create_main_layout():
             tmp.add_row(progress2,' ' + color('FARMER_ACCENT') + ' ' + lang.get('cpu','CPU') + ': ' + color('FARMER_VALUE') + farmer_data.get('system_stats').get('cpu') + "%  " + color('FARMER_ACCENT') + lang.get('ram','RAM') + ": " + color('FARMER_VALUE') + farmer_data.get('system_stats').get('ram').replace(' ', color('FARMER_ACCENT') + '/' + color('FARMER_VALUE')) + '  '  + color('FARMER_ACCENT') + lang.get('load','Load') + ': ' + color('FARMER_VALUE') +farmer_data.get('system_stats').get('load', 0.0))
 
             progress_table.add_row(Panel(
-                tmp, border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(total) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(skips),))
+                tmp, border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(recenttotal) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(recentskips),))
             
             progress_table.add_row(job_progress, )
 
