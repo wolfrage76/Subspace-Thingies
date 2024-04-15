@@ -535,8 +535,9 @@ def create_summary_layout(layout):
     global_recentskips = 0
     global_hhr = 0
     global_hhr_formated = str()
+    global_h_tibs = 0.0
     global_h_tib = ''
-    global_tibs = 0
+    global_hhr_sum = 0
     total_nocount = 0
     total_calc_avg = 0
     global_sec_day_total = 0.0
@@ -680,10 +681,13 @@ def create_summary_layout(layout):
                     tibs = '0.0'
                 else:
                     tibs = f'{hits_day / (farm_plotted * (1 / (2**10)) ):.2f}'
-                # global_tibs += float(tibs)  # '  [yellow]'  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': [b white]'+ tibs
-                global_tibs += c.rewards_per_hr.get(farmer_name, 0)
+                global_hhr_sum += c.rewards_per_hr.get(farmer_name, 0)
                 h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + tibs
-                global_h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + f'{(global_recenttotal_rewards / (global_farm_plotted * (1 / (2**10))) ):.2f}'
+                if global_farm_plotted == 0:
+                    global_h_tibs = '0.0'
+                else:
+                    global_h_tibs = f'{(global_recenttotal_rewards / (global_farm_plotted * (1 / (2**10))) ):.2f}'
+                global_h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + global_h_tibs
 
                 hhr_formated = f'{c.rewards_per_hr.get(farmer_name, 0):.2f}'
                
@@ -694,7 +698,7 @@ def create_summary_layout(layout):
                
                 hhr =  color('SUMMARY_ACCENT', offline) + ' ' + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT', offline) +'/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE', offline) + hhr_formated
                 
-                global_hhr_formated = f'{float(global_tibs):.2f}'
+                global_hhr_formated = f'{float(global_hhr_sum):.2f}'
                 global_hhr =  ' '+ color('SUMMARY_ACCENT')   + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT')  + '/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE')   + global_hhr_formated
                 
 
