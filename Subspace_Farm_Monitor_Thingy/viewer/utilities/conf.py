@@ -82,7 +82,8 @@ view_xtras = True
 wallet = str()
 warning_farms = []
 warnings = [str(), str(), str(), str(), str(), str(), str(),]
-
+theme_data = None
+theme = None
 
 translation['en'] = {
     'farm': 'Farm',

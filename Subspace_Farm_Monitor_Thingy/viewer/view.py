@@ -42,14 +42,14 @@ c.startTime = time.time()
 with open("config.yaml", encoding='utf-8') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
-theme = config.get('THEME', 'default')
-if theme == None:    
+c.theme = config.get('THEME', 'default')
+if c.theme == None:    
     theme_file = 'utilities/fallback_theme.yaml'
 else:
-    theme_file = 'themes/' + theme + ".yaml"
+    theme_file = 'themes/' + c.theme + ".yaml"
     
 with open(theme_file) as f:
-    t = yaml.load(f, Loader=yaml.FullLoader)
+    c.theme_data = yaml.load(f, Loader=yaml.FullLoader)
 
 #################
 
@@ -397,17 +397,17 @@ def color(data=None, offline=False):
     
     
     if offline and data not in specials:
-        return '[' + t.get('ERROR', 'red') + ']'
+        return '[' + c.theme_data.get('ERROR', 'red') + ']'
     elif offline and data in specials:
-        return t.get('ERROR', 'red')
+        return c.theme_data.get('ERROR', 'red')
     elif data == None:
         return '[b white]'
     elif data == 'HEADERSTYLE':
-        return t.get('HEADER_TEXT') + ' on ' + t.get('HEADER_BACKGROUND')
+        return c.theme_data.get('HEADER_TEXT') + ' on ' + c.theme_data.get('HEADER_BACKGROUND')
     elif data in specials:
-        return t.get(str(data), 'b white')
+        return c.theme_data.get(str(data), 'b white')
     else:
-        return '[' + t.get(str(data), 'b white') + ']'
+        return '[' + c.theme_data.get(str(data), 'b white') + ']'
     
     #return color_build
 
@@ -455,7 +455,7 @@ def build_ui():
     layout["header"].update(Header())
     layout["body"].visible = False# (c.view_state == 1 or c.view_state ==3)
     layout["side"].visible = (c.view_state == 1 or c.view_state == 2)
-    layout["box1"].update(Panel("", border_style=color('FARMER_FRAME'), title=t.get('FARMER_TILE', '[b white]') + "Waiting for Farmers...",
+    layout["box1"].update(Panel("", border_style=color('FARMER_FRAME'), title=color('FARMER_TILE') + "Waiting for Farmers...",
                                 subtitle=color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%" + ' | ' + color('STATUS_REPLOTTING') + 'Replotting'))
     
     layout["bodysum"].visible = (c.view_state == 1 or c.view_state == 3)
@@ -765,7 +765,18 @@ def create_summary_layout(layout):
     os.remove('FarmerReport.png')
  """    
 
+def update_farmer_index():
+    while c.running:
+        
+        if len(c.farm_names) > 0:
+            c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
+        else:
+            pass
+        time.sleep(5)  # Update interval; adjust as needed
+        
+        
 def create_main_layout():
+            
     layout = c.layout
     layout["side"].visible = c.view_state in {1, 2}
     layout["bodysum"].visible = c.view_state in {1, 3}
@@ -775,19 +786,25 @@ def create_main_layout():
     c.remote_farms = c.remote_farms or {}
     sum_plotted = defaultdict(lambda: {})
     sum_size = defaultdict(lambda: {})
-    
-    for farmer_index in range(len(c.farm_names)):
+
+    #farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
+    while True:
+        if c.paused:
+                time.sleep(.2)
+                continue
+                  
         try:
-            while c.paused:
-                time.sleep(.1)
-            farmer_name = c.farm_names[farmer_index % len(c.farm_names)]
+            
+            if len(c.farm_names) >0:
+                farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
+            else: 
+                continue
             farm_info = c.remote_farms.get(farmer_name, {})
             farmer_data = farm_info.get('data', {})
-            
+                
 
-            if not farmer_data:
-                continue
-
+            #if not farmer_data:
+            #    continue
             c.warnings = farmer_data.get('warnings', [])
             c.errors = farmer_data.get('errors', [])
 
@@ -975,7 +992,7 @@ def create_main_layout():
             c.sum_plotted = sum_plotted
             c.sum_size = sum_size
             
-            time.sleep(5)
+            #time.sleep(5)
             
         except Exception as e:
             console.print_exception()
@@ -1022,6 +1039,9 @@ async def main():
     cleanthread.start()
     utilthread.start()
     
+    index_thread = threading.Thread(target=update_farmer_index, name='IndexUpdater', daemon=True)
+    index_thread.start()
+
     kb = KBHit(lambda: layout.update(layout), create_main_layout)
     kb.start()
     
@@ -1055,7 +1075,8 @@ async def main():
         cleanthread.join()
         socketthread.join()
         utilthread.join()
-
+        index_thread.join()
+ 
         os._exit(0) 
 
     kb.stop()
