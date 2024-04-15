@@ -1,6 +1,8 @@
 # Subspace-Thingies
 
 ## My tools and utils for the Subspace Network.
+Currently there is the Farm monitor, and a standalone Wallet monitor (instructions at bottom)
+The wallet monitor is also built into the Farm Monitor
 
 ![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/d0b172b6-6041-48ae-949b-22727d5f7dd9)
 
