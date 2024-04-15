@@ -522,12 +522,15 @@ def create_summary_layout(layout):
     global_drive_count = 0
     global_farm_plotted = 0.0
     global_farm_notplotted = 0.0
+    global_farm_expired = 0.0
+    global_farm_about_expire = 0.0
     global_total_rewards = 0
     global_skips = 0
     global_recenttotal_rewards = 0
     global_recentskips = 0
     global_hhr = 0
     global_hhr_formated = str()
+    global_h_tib = ''
     global_tibs = 0
     total_nocount = 0
     total_calc_avg = 0
@@ -559,7 +562,7 @@ def create_summary_layout(layout):
             try:
                 progress_items = Table.grid(expand=False)
                 progress_items.add_column(width=16)
-                progress_items.add_column(width=12)
+                progress_items.add_column(width=14)
                 progress_items.add_column(width=18)
                 progress_items.add_column(width=14)
                 progress_items.add_column(width=6)
@@ -646,6 +649,8 @@ def create_summary_layout(layout):
                 global_drive_count += drive_count
                 global_farm_plotted += farm_plotted
                 global_farm_notplotted += farm_notplotted
+                global_farm_expired += farm_expired
+                global_farm_about_expire += farm_about_expire
                 global_total_rewards += total
                 global_recenttotal_rewards += recenttotal
                 global_skips += skips
@@ -662,9 +667,11 @@ def create_summary_layout(layout):
                     tibs = '0.0'
                 else:
                     tibs = f'{hits_day / (farm_plotted * (1 / (2**10)) ):.2f}'
-                    global_tibs += float(tibs)  # '  [yellow]'  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': [b white]'+ tibs
+                # global_tibs += float(tibs)  # '  [yellow]'  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': [b white]'+ tibs
+                global_tibs += c.rewards_per_hr.get(farmer_name, 0)
                 h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + tibs
-               
+                global_h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + f'{(global_recenttotal_rewards / (global_farm_plotted * (1 / (2**10))) ):.2f}'
+
                 hhr_formated = f'{c.rewards_per_hr.get(farmer_name, 0):.2f}'
                
                 if farmer_name in c.warning_farms:
@@ -678,7 +685,7 @@ def create_summary_layout(layout):
                 global_hhr =  ' '+ color('SUMMARY_ACCENT')   + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT')  + '/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE')   + global_hhr_formated
                 
 
-                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted ) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', 'Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
+                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
 
                 progress_table2.add_row(Panel(
                 progress_items, title_align='left', title=color('SUMMARY_TITLE', offline) + farmer_name + color('SUMMARY_ACCENT', offline) + ' (' + color_by_status(sumipds, False, offline) + str(drive_count)
@@ -696,24 +703,24 @@ def create_summary_layout(layout):
         else:
             global_avg_sector_time = 0
         # Calculate global percentages and other stats as needed
-        global_sumipds = (global_farm_plotted / (global_farm_notplotted + global_farm_plotted) * 100 if global_farm_notplotted + global_farm_plotted != 0 else 0)
+        global_sumipds = (global_farm_plotted / (global_farm_notplotted + global_farm_plotted + global_farm_expired + global_farm_about_expire) * 100 if global_farm_notplotted + global_farm_plotted != 0 else 0)
         
         
 # Add a row for global stats at the top of progress_table2
         
         global_progress_items = Table.grid(expand=False)
-        global_progress_items.add_column(width=28)
+        global_progress_items.add_column(width=30)
         global_progress_items.add_column(width=18)
         global_progress_items.add_column(width=14)
         
        
 
-        global_progress_items.add_row(color('SUMMARY_VALUE') + convert_to_tib(str(global_farm_plotted) + ' GB') + color('SUMMARY_ACCENT') +'/' + color('SUMMARY_VALUE')  + convert_to_tib(str(global_farm_notplotted + global_farm_plotted) + ' GB')+ color('SUMMARY_ACCENT')  + ' TiB ' +color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + '('+ color('SUMMARY_VALUE') + str(convert_to_tib(str(global_sec_day_total) + ' GB')) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_VALUE') + day +  color('SUMMARY_ACCENT') + ')',  color('SUMMARY_ACCENT') + lang.get('avgsector', 'Avg') + ': ' + color('SUMMARY_VALUE') + seconds_to_mm_ss(global_avg_sector_time), color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + ' ETA: ' +  color('SUMMARY_VALUE')  + hours_to_dh_m(longest_eta), create_progress_bar(global_sumipds, 12))
+        global_progress_items.add_row(color('SUMMARY_VALUE') + convert_to_tib(str(global_farm_plotted) + ' GB') + color('SUMMARY_ACCENT') +'/' + color('SUMMARY_VALUE')  + convert_to_tib(str(global_farm_notplotted + global_farm_plotted + global_farm_expired + global_farm_about_expire) + ' GB')+ color('SUMMARY_ACCENT')  + ' TiB ' +color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + '(+' + color('SUMMARY_VALUE') + str(convert_to_tib(str(global_sec_day_total) + ' GB')) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_VALUE') + day +  color('SUMMARY_ACCENT') + ')',  color('SUMMARY_ACCENT') + lang.get('avgsector', 'Avg') + ': ' + color('SUMMARY_VALUE') + seconds_to_mm_ss(global_avg_sector_time), color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + ' ETA: ' +  color('SUMMARY_VALUE')  + hours_to_dh_m(longest_eta), create_progress_bar(global_sumipds, 12))
         
 
         
         global_table.add_row(Panel(
-            global_progress_items, title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_ACCENT') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + str(global_hhr)))
+            global_progress_items, title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_ACCENT') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + ' ' + str(global_hhr) + str(global_h_tib)))
 
         global_table.add_row(end_section=True)
         global_table.add_row(progress_table2)

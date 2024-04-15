@@ -9,7 +9,7 @@ global errored
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, disk_farms={}, farm_skips={}, farm_metrics={}, drive_directory={} ):
+    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, farm_metrics={}, drive_directory={} ):
         # print(farmer_name)
         
         self.farmer_name = farmer_name
@@ -19,12 +19,14 @@ class Farmer(object):
         self.drive_directory = drive_directory
         self.startTime = startTime
         self.farm_rewards = farm_rewards
+        self.farm_recent_rewards = farm_recent_rewards
         self.disk_farms = disk_farms
         self.farm_skips = farm_skips
+        self.farm_recent_skips = farm_recent_skips
         self.farm_metrics = farm_metrics
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_skips={}, disk_farms={}, farm_metrics={}, drive_directory={}):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, disk_farms={}, farm_metrics={}, drive_directory={}):
 
     frmr = Farmer()
     frmr.drive_directory = drive_directory
@@ -34,7 +36,9 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], st
     frmr.errors = errors
     frmr.startTime = startTime
     frmr.farm_rewards = farm_rewards
+    frmr.farm_recent_rewards = farm_recent_rewards
     frmr.farm_skips = farm_skips
+    frmr.farm_recent_skips = farm_recent_skips
     frmr.disk_farms = disk_farms
     frmr.farm_metrics = farm_metrics
 
@@ -67,10 +71,12 @@ async def ws_server(websocket, path):
             c.drive_directory[farmer_name] = farm_data['drive_directory']
             c.farm_metrics[farmer_name] = farm_data['farm_metrics']
             c.farm_rewards[farmer_name] = farm_data['farm_rewards']
+            c.farm_recent_rewards[farmer_name] = farm_data['farm_recent_rewards']
             c.system_stats[farmer_name] = farm_data['system_stats']
             c.replotting[farmer_name] = farm_data['replotting']
             c.prove_method[farmer_name] = farm_data['prove_method']
             c.farm_skips[farmer_name] = farm_data['farm_skips']
+            c.farm_recent_skips[farmer_name] = farm_data['farm_recent_skips']
             if errored:
                 #print("Websocket is now reconnected.")
                 errored = False

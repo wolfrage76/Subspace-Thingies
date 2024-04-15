@@ -30,8 +30,8 @@ def WalletMon():
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     # Configurations
-    discord_wallet = config.get('DISCORD_WALLET_NOTIFICATIONS', False)
-    discord_url = config.get('DISCORD_WEBHOOK', False)
+    discord_wallet = config.get('DISCORD_WALLET_NOTIFICATIONS', None)
+    discord_url = config.get('DISCORD_WEBHOOK', None)
     if discord_wallet:
         discord_url = discord_wallet
 
