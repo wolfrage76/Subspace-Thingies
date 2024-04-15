@@ -64,6 +64,7 @@ c.hour_24 = config.get('HOUR_24', False)
 c.ui_port = config.get('FRONT_END_PORT', '8016')
 c.toggle_encoding = config.get('TOGGLE_ENCODING', False)
 c.wallet = config.get('WALLET', None)
+c.last_sector_only = config.get('LAST_SECTOR_ONLY',True)
 
 c.running = True
 
@@ -323,7 +324,7 @@ def getUptime(started=None):
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, ):
+    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, last_sector_time=None):
         if errors is None:
             errors = []
         if disk_farms is None:
@@ -336,6 +337,8 @@ class Farmer(object):
             farm_skips = {}
         if farm_recent_skips is None:
             farm_recent_skips = {}
+        if last_sector_time is None:
+            last_sector_time = {}
         if warnings is None:
             warnings = []
         if replotting is None:
@@ -351,9 +354,10 @@ class Farmer(object):
         self.farm_skips = farm_skips
         self.farm_recent_skips = farm_recent_skips
         self.disk_farms = disk_farms
+        self.last_sector_time = last_sector_time
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, ):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, last_sector_time={} ):
 
     frmr = Farmer()
     frmr.farmer_name = farmer_name
@@ -365,6 +369,7 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  s
     frmr.farm_recent_rewards = farm_recent_rewards
     frmr.farm_skips = farm_skips
     frmr.farm_recent_skips = farm_recent_skips
+    frmr.last_sector_time = last_sector_time
 
     return frmr
 
@@ -536,6 +541,7 @@ def create_summary_layout(layout):
     total_calc_avg = 0
     global_sec_day_total = 0.0
     global_sec_hr_total = 0.0
+    global_last_sector_time = 0.0
     longest_eta = 0
     
     
@@ -558,6 +564,7 @@ def create_summary_layout(layout):
             farm_about_expire = 0.0
             farm_plotted = 0.0  # Initialize farm_plotted here
             farm_notplotted = 0.0  # Initialize farm_notplotted here
+            farm_last_sector_time = 0.0
             total_sectors = defaultdict(float)  # Initialize total_sectors here
             try:
                 progress_items = Table.grid(expand=False)
@@ -603,15 +610,18 @@ def create_summary_layout(layout):
                     farm_notplotted += total_sectors.get('NotPlotted',0)
                     farm_about_expire += total_sectors.get('AboutToExpire',0)
 
+
                     if total_sectors.get('Plotted',0) + total_sectors.get('NotPlotted',0) + total_sectors.get('Expired', 0) + total_sectors.get('AboutToExpire', 0) == 0:
                         continue
                  
                     if total_sectors.get('NotPlotted',0) == 0 and total_sectors.get('Expired', 0) == 0 and total_sectors.get('AboutToExpire', 0) == 0:
                         is_completed.append(disk)
+                    else:
+                        farm_last_sector_time += c.last_sector_time.get(farmer_name, {}).get(disk, 0) 
                     
                     if total_sectors.get('Expired', 0) > 0 or total_sectors.get('AboutToExpire', 0) > 0:
                         is_replotting.append(disk)
-
+   
                     drive_count += 1
 
 
@@ -625,7 +635,10 @@ def create_summary_layout(layout):
                 if nocount <=0:
                     calc_avg = 0
                 else:
-                    calced = calculate_average_plotting_time_for_farmer(farmer_data.get('farm_metrics', {}))
+                    if c.last_sector_only == False:
+                        calced = calculate_average_plotting_time_for_farmer(farmer_data.get('farm_metrics', {}))
+                    else:
+                        calced = farm_last_sector_time / nocount
                     calc_avg = calced / nocount
                 
                 if (farm_notplotted + farm_expired + farm_about_expire) != 0 and farmer_data.get('farm_metrics') and calc_avg > 0:
@@ -807,6 +820,7 @@ def create_main_layout():
             psd = 0.0
             remspace = 0.0
             sector = 0
+            lastsectortime = 0
             c.psTotal = 0.0
             c.psdTotal = 0.0
             c.remTotal = 0.0
@@ -831,7 +845,7 @@ def create_main_layout():
                 else:
                     remspace = 0
                 
-                replotspace = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_Expired', {}).get('value', 0)) + float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_AboutToExpire', {}).get('value', 0)) 
+                replotspace = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_Expired', {}).get('value', 0)) + float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectoers_total_sectors_AboutToExpire', {}).get('value', 0)) 
 
                 
                 ps = remspace + psd + replotspace
@@ -885,12 +899,9 @@ def create_main_layout():
                     ipds = 100
                     averageTime = "--:--"
                     sector = '-----'
-                
-              #  elif farm in is_replotting:
-                    #ipds = 100
-                    #averageTime = "--:--"
-                   # replot = True
-                
+                elif c.last_sector_only:
+                    averageTime = seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0))
+
                 prove = ''
    
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'WS':

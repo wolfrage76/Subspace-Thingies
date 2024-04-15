@@ -7,7 +7,7 @@ from rich.traceback import install
 install(show_locals=True)
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={}, ):
+    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},last_sector_time={},):
     
         self.system_stats = system_stats
         self.drive_directory = drive_directory
@@ -24,6 +24,7 @@ class Farmer(object):
         self.farm_metrics = farm_metrics  # Add farm_metrics attribute
         self.prove_method = prove_method
         self.rewards_per_hr = rewards_per_hr
+        self.last_sector_time = last_sector_time
 
 
 def make_farmer():
@@ -42,6 +43,7 @@ def make_farmer():
     frmr.farm_recent_rewards = c.farm_recent_rewards
     frmr.farm_skips = c.farm_skips
     frmr.farm_recent_skips = c.farm_recent_skips
+    frmr.last_sector_time = c.last_sector_time
     frmr.farm_metrics = c.farm_metrics  # Add farm_metrics to the object
     #frmr.rewards_per_hour = c.rewards_per_hour
     

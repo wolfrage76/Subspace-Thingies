@@ -31,6 +31,7 @@ drive_directory = c.drive_directory
 errors = c.errors
 total_error_count = c.total_error_count
 curr_farm = c.curr_farm
+last_sector_time = c.last_sector_time
 
 indexconst = "{farm_index="
 
@@ -239,7 +240,7 @@ def rewards_per_day_per_tib(farm_rewards, farm, total_plotted_tib):
     return total_rewards_last_24_hours / total_plotted_tib  # don't forget /0
 
 
-def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, event_times, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, ):
+def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, event_times, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, last_sector_time, ):
 
   
     trigger = False
@@ -254,6 +255,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         'farm_skips': farm_skips,
         'farm_recent_skips': farm_recent_skips,
         'system_stats': system_stats,
+        'last_sector_time': last_sector_time,
     }
 
     # Assuming the first part of the line is the timestamp
@@ -270,11 +272,11 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         farm_id_mapping = {}
         drive_directory = {}
         curr_farm = None
-        event_times = ''
+        event_times = line_timestamp
         
     farm = line_plain[line_plain.find(
             indexconst) + len(indexconst):line_plain.find("}")]
-        
+
     if "ERROR" in line_plain:
         c.errors.pop(0)
         c.errors.append(local_time(line_plain.replace(
@@ -331,9 +333,12 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.prove_method[farm] = prove_type
        # if c.prove_method[farm]
     
-    elif "lotting sector" in line_plain and ("Subscribing to archived segments" not in line_plain and "failed to send sector index for initial plotting error=send failed because receiver is" not in line_plain):
-        event_times[farm] = line_plain.split()[0]
+    elif "lotting sector" in line_plain or "lotting complete" in line_plain:
+        c.last_sector_time[farm] = line_timestamp - event_times[farm]
+        event_times[farm] = line_timestamp
+        # print('Last sector time:' + str(last_sector_time[farm]))
         trigger = True
+
     elif 'Directory:' in line_plain and c.curr_farm:
        # directory =  line_plain.split('Directory: ')[1] #line_plain[line_plain.find(":") + 2:]
         drive_directory[c.curr_farm] = line_plain.split('Directory: ')[1] #directory
@@ -377,7 +382,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         
         trigger = True
         
-    elif 'nitial plotting complete' in line_plain:
+    if 'nitial plotting complete' in line_plain:
         parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         line_timestamp = parsed_datetime
         if line_timestamp and line_timestamp > monitorstartTime:
@@ -387,13 +392,6 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         
     
     #farmer_metrics(farm_id_mapping)
-#    c.rewards_per_hr = 0
-#    for disk_index in disk_farms:
-#        one_day_ago = datetime.now().timestamp() - 86400
-#        c.farm_recent_rewards[disk_index] = len([r for r in c.farm_reward_times[disk_index] if r > one_day_ago])
-#        c.farm_recent_skips[disk_index] = len([r for r in c.farm_skip_times[disk_index] if r > one_day_ago]) 
-#        c.rewards_per_hr += calculate_rewards_per_hour(c.farm_reward_times[disk_index])
-
 
     if trigger:
         # websocket_client.main()
@@ -428,7 +426,7 @@ def read_log_file():
                 parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
                                              event_times, drive_directory,
                                               farm_skips, farm_recent_skips,
-                                             system_stats, farm_id_mapping,)  # Pass the farm_id_mapping
+                                             system_stats, farm_id_mapping, last_sector_time)  # Pass the farm_id_mapping
                 vmem = str(psutil.virtual_memory().percent)
                 c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
                 
