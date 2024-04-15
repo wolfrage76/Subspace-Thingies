@@ -1,21 +1,8 @@
 # Subspace-Thingies
 
-## My tools and utils for the Subspace Network.
-Currently there is the Farm monitor, and a standalone Wallet monitor (instructions at bottom)
-The wallet monitor is also built into the Farm Monitor
+## Farm Monitor Thingy
 
 ![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/d0b172b6-6041-48ae-949b-22727d5f7dd9)
-
-### Wallet Monitor Thingy ###
-Standalone wallet monitor - Do *not* use with The Farmer Monitor Thingy as it is already built into it.
-This will query your node for wallet balance changes, and notify you via discord (more notifications soon!)
-
-- Rename `config.yaml.example` to `config.yaml` and then edit the configuration
-- Run `pip install -r requirements.txt`
-- Run `python wallet_monitor_thingy.py`
-
-
-### Farm Monitor Thingy
 
 - Supports remote farmers
 - Notifications to Discord or Pushover (more coming!) of events
@@ -49,3 +36,4 @@ THEN FOR VIEWER:
 3. Run: `python view.py` to launch
 
 The UI will not fully update until a machine cycles and sends its data over.  If the drive list is empty after awhile, or if you get Unicode Errors, edit config.yaml and toggle the "TOGGLE_ENCODING" setting.
+

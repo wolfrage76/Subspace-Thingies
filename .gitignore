@@ -161,12 +161,13 @@ cython_debug/
 #.idea/
 
 scratch.py
-.vscode/
+.vscode/*
+.vscode
 launch.json
 farmlog.txt
 Subspace_Farm_Monitor_Thingy/view.ps1
 .history
 .history/*
 .gitignore
-.history/.gitignore_20240329203744
-.gitignore
+Subspace_Farm_Monitor_Thingy/Viewer/setup.py
+config.yaml

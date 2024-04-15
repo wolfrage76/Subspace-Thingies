@@ -5,6 +5,7 @@ import utilities.conf as c
 import requests
 
 
+lang = c.lang
 
 def get_wallet_balance(substrate):
     result = substrate.query("System", "Account", [c.wallet])
@@ -20,8 +21,8 @@ def send_notification(message, discord_url):
     if discord_url:
         data = {"content": message}
         response = requests.post(discord_url, json=data)
-        if response.status_code not in [204]:
-            print(f'Error sending Discord: {response.status_code}')
+        #if response.status_code not in [204]:
+           # print(f'Error sending Discord: {response.status_code}')
 
 
 def WalletMon():
@@ -40,6 +41,7 @@ def WalletMon():
     nodeport = str(config.get('NODE_PORT', 9944))
 
     if wallet:
+      try:  
         substrate = substrateinterface.SubstrateInterface(
             url=f"ws://{nodeip}:{nodeport}")    
         first_time = True
@@ -55,7 +57,9 @@ def WalletMon():
                         direction = "received" if change > 0 else "removed"
                         sign = "+" if change > 0 else "-"
                         message = f" Your wallet {wallet[-5:]} {direction} coins! \nBalance @ {format_balance(current_balance, substrate)}  (Change: {sign}{abs(change):.4f})"
-                        send_notification(message, discord_url)
+                        
+                        if config.get('SEND_DISCORD', False) and config.get('DISCORD_WEBHOOK', False) and message:
+                            send_notification(message, discord_url)
 
                 else:
                     first_time = False
@@ -70,7 +74,10 @@ def WalletMon():
                 time.sleep(wait_period)
                 substrate = substrateinterface.SubstrateInterface(
                     url=f"ws://{nodeip}:{nodeport}")
-                
+            time.sleep(.01)
+      except Exception as e: 
+          #print(lang.get('walet_error','Wallet Error'))   
+          time.sleep(60)       
 
 
 # if __name__ == '__main__':

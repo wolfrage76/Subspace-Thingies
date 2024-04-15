@@ -3,11 +3,15 @@ import sys
 from select import select
 from threading import Thread
 import utilities.conf as c 
-import signal
+import time
+import yaml
 
 class KBHit(Thread):
     def __init__(self, layout_update_callback, force_layout_update_callback=None):
         super().__init__()
+        self.theme_files = [file for file in os.listdir('themes') if file.endswith('.yaml')]
+        self.current_theme_index = 0
+        self.default_theme = c.theme #config.get('THEME', 'default')
         self.running = True
         self.layout_update_callback = layout_update_callback
         self.force_layout_update_callback = force_layout_update_callback
@@ -33,7 +37,18 @@ class KBHit(Thread):
         if os.name != 'nt':
             import termios
             termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old_term)
+    def update_theme(self):
+        theme_name = self.theme_files[self.current_theme_index].replace('.yaml', '')
+        self.apply_theme(theme_name)
 
+    def reset_theme(self):
+        self.apply_theme(self.default_theme)
+
+    def apply_theme(self, theme_name):
+        theme_file = f'themes/{theme_name}.yaml'
+        with open(theme_file) as f:
+            c.theme_data = yaml.load(f, Loader=yaml.FullLoader)
+            
     def run(self):
         while c.running:
             key = self.getch()
@@ -43,17 +58,21 @@ class KBHit(Thread):
 
                 # Process keypresses
                 if ord(key) == 32:  # Space key
-                    pass
-                  #  c.show_logging = not c.show_logging
+                    c.paused = not c.paused
+                elif ord(key) == ord('+'):
+                    self.current_theme_index = (self.current_theme_index - 1) % len(self.theme_files)
+                    self.update_theme()
+            
+                elif ord(key) == ord('-'):
+                    self.current_theme_index = (self.current_theme_index + 1) % len(self.theme_files)
+                    self.update_theme()            
+                elif key == '0':
+                    self.reset_theme()
                 elif ord(key) in {81, 113}:  # Q or q key
                     print('Toodles!')
                     c.running = False
                     self.set_normal_term()
-                    #if os.name == 'nt': 
-                    #os._exit(1)
-                   # else:
-                   #     os.kill(os.getpid(), signal.SIGINT)
-                    #break
+                
                 elif ord(key) == ord('1'):
                     c.view_state = 1
                 elif ord(key) == ord('2'):
@@ -62,11 +81,12 @@ class KBHit(Thread):
                     c.view_state = 3
                 elif ord(key) == 9:  # Tab key
                     c.view_xtras = not c.view_xtras
-                   # if self.force_layout_update_callback:
-                    #    self.force_layout_update_callback()
+                else: 
+                    print(f"Key pressed: {key} (ord: {ord(key)})")  # Debug print
+                    
                         
                 self.layout_update_callback()  # Update the layout immediately
-
+            time.sleep(.01)
 
     def stop(self):
         self.running = False

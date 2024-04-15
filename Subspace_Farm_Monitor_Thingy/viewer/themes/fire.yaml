@@ -1,0 +1,60 @@
+ #########################
+#         Theme           #
+ #########################
+
+# Not everything will work everywhere, so enjoy experiementing! And post your themes!
+#
+# https://rich.readthedocs.io/en/stable/appendix/colors.html
+#
+# Plus:
+# "bold" or "b" for bold text.
+# "blink" for text that flashes (use this one sparingly).
+# "blink2" for text that flashes rapidly (not supported by most terminals).
+# "conceal" for concealed text (not supported by most terminals).
+# "italic" or "i" for italic text (not supported on Windows).
+# "reverse" or "r" for text with foreground and background colors reversed.
+# "strike" or "s" for text with a line through it.
+# "underline" or "u" for underlined text.
+# Rich also supports the following styles, which are not well supported and may not display in your terminal:
+# "underline2" or "uu" for doubly underlined text.
+# "frame" for framed text.
+# "encircle" for encircled text.
+# "overline" or "o" for overlined text.
+
+SUMMARY_TITLE: b red
+SUMMARY_ACCENT: dark_red
+SUMMARY_VALUE: b orange1
+SUMMARY_GLOBAL_FRAME:  dark_orange
+SUMMARY_GLOBAL_TITLE: b red
+SUMMARY_REWARDS: b green
+SUMMARY_MISSES: red
+SUMMARY_FRAME: red
+SUMMARY_FRAME_TITLE: orange1
+SUMMARY_FARMER_FRAME: red 
+HEADER_TEXT: b orange1
+HEADER_BACKGROUND: dark_red
+HEADER_GOOD: green
+HEADER_BAD: red
+HEADER_AVERAGE: yellow
+HEADER_LOW: orange1
+FARMER_TITLE: orange1
+FARMER_STATS_FRAME: dark_orange
+FARMER_FRAME: dark_orange
+FARMER_ACCENT: yellow
+FARMER_VALUE: b white
+FARMER_REWARDS: orange1
+FARMER_MISSES: red 
+STATUS_0: b white
+STATUS_15: b white
+STATUS_25: dark_orange
+STATUS_50: orange1
+STATUS_75: b yellow
+STATUS_90: b yellow
+STATUS_100: b green
+STATUS_REPLOTTING: b blue 
+FOOTER_TEXT: yellow
+FOOTER_ACCENT: dark_orange
+FOOTER_MENU: b yellow
+FOOTER_FRAME: red
+ERROR: red
+WARNING: yellow

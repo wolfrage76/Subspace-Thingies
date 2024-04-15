@@ -1,9 +1,28 @@
-# Fill this out and copy it over to both the monitor and viewer directories as it it will be the same for both
+# Fill this out and copy it over to BOTH the monitor and viewer directories as it it will be the same for both
+
+LANGUAGE: 'en'
+# en = English
+# cn = Chinese
+
+# Those below have only been Google translated so no promises they aren't gibberish.  Most probably is.  
+# Let me know if you can do translations for any of them! 
+#
+# uk = Ukrainian 
+# es = Spanish
+# ja = Japanese
+# fr = French
+# de = German
+# ko = Korean
+# vi = Vietnamese
+# ru = Russian
+#
+###############
 
  #################
 # Needed for both #
  ################
 
+# REQUIRED:
 FRONT_END_IP: "192.168.1.209" # The IP the Viewer is running on -- 127.0.0.1, 192.168.1.69, whatever
 FRONT_END_PORT: "8016" # Port the View frontend is using 
 
@@ -11,10 +30,11 @@ FRONT_END_PORT: "8016" # Port the View frontend is using
 # Farmer Backend Config #
  #######################
 
-FARMER_NAME: "Wolfrage Rocks!" # How this farmer will be referred to as
-
+# REQUIRED: (Log parsing will become optional, but not yet)
+FARMER_NAME: "Moya" # How this farmer will be referred to as
 FARMER_LOG: '/home/wofl/Subspace/farmlog.txt' # Parse this Farmer log file - Windows use double \\'s '
 
+# REQUIRED:
 # You need to add this to your Farmer launch command: --prometheus-listen-on <localIP>:<PORT>
 FARMER_IP: '192.168.1.209' # This is the IP from above
 FARMER_PORT: '8181' # This is the Port from above
@@ -24,47 +44,59 @@ FARMER_PORT: '8181' # This is the Port from above
 # Frontend Viewer Config #
  ########################
 
+# Note: Leaving NODE_IP and/or NODE_PORT empty will disable node data display AND wallet monitor
+
 # You need to add this to your Node launch command: --rpc-listen-on <LocalIP>:<Port> 
 NODE_IP: "192.168.1.208" # Your node IP from above -- 127.0.0.1, 192.168.1.69, whatever
 NODE_PORT: "9944" # Port the node is using from above. 9944 is the default.
     
 # Wallet Monitor - Queries your node for balance changes and can notify you #
-WALLET: "stXXXXXXXXXXXXXXXXXXXXXX" # Blank disables wallet monitoring
+WALLET:  # "stXXXXXXXXXXXXXXXXXXXXXXX" # Blank disables wallet monitoring
 WAIT_PERIOD: 480 # wallet check interval seconds
 
+# % to account for your cache size when calculating sizes. Farmer default is 1. 
+        ## Don't change unless you know what you are doing. ##
+# Cache size will not be counted if set to 0. Do not use a % symbol, just a number.
+CACHE_SIZE: 1 
 
+# By default, the tool now parses the log to pull only the last sector's time for each plot.  This
+# appears to be more accurate overall than the metrics method of taking an average of many hundreds
+# of sector times, where a single interruption, or replots, can distort the numbers until the next restart.
+# Using only last sector time will certainly make the impact of any changes made apparent much more quickly.
+# Set to False if you want to go back to the previous method of very long term averaging provided
+# by the metrics.
+LAST_SECTOR_ONLY: True
 
  ###############
 # Notifications #
  ###############
  
-SEND_DISCORD: True
+SEND_DISCORD: False
 SEND_PUSHOVER: False
 
 # General notifications go here #
-DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1199928287774912602/gLIVElpW-eoii3uZh7Dsd6SG3Ee7BIs50pdH7FXeEWEaR5jDW5jhpx0VsaKc3w6XLkHU" 
+DISCORD_WEBHOOK: # "https://discord.com/api/webhooks/yyyyyyyyyyyyyy" 
 
 # As above, but only for wallet notifications. Defaults to DISCORD_WEBHOOK if blank.
-DISCORD_WALLET_NOTIFICATIONS: "https://discord.com/api/webhooks/1199199521981345792/LOlCM6nTtmZTyI6Fnk-O8Hso7KVFG4NXmqXIUfsv8V2dy7au9uFB7SkBCYQfJh5Z_noR" 
+DISCORD_WALLET_NOTIFICATIONS: # "https://discord.com/api/webhooks/xxxxxx" 
 
 PUSHOVER_APP_TOKEN: "xxxxxxxxxxxxx" # yeah, I need to implement better Pushover stuff
 PUSHOVER_USER_KEY: "xxxxxxxxxxxx"
 
 
- ######
-# Misc #
- ######
- 
-# % to account for your cache size when calculating sizes. Farmer default is 1. 
-# Unless you changed it in your launch command, leave this alone.
-# Cache size will not be counted if set to 0. Do not use a % symbol, just a number.
-CACHE_SIZE: 1 
+
 
 
  #########################
 ###   END USER CONFIG   ###
  #########################
 
+
+
+
+ #########################
+###  Seriously, go away  ###
+ #########################
 
 
 
@@ -85,6 +117,3 @@ SHOW_LOGGING: True
 MUTE_HICKORY: True 
 HOUR_24: False 
 TOGGLE_ENCODING_NODE: True 
-
-IS_LIVE: False
-COMMANDLINE: "" #'.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-05 farm --reward-address st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1 --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
