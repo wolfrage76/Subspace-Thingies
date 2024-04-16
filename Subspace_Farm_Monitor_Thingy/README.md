@@ -4,12 +4,11 @@
 
 ![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/d0b172b6-6041-48ae-949b-22727d5f7dd9)
 
-- Supports remote farmers
-- Notifications to Discord or Pushover (more coming!) of events
+- Multiple languages supported! (en, cn, uk, vi, es, fr, jp  and others!)
+- Remote farmers
+- Stale farmer alerts
 - Monitors your wallet for balance changes
 - Lots more!
-
-More features coming!
 
 Ping me on the Subspace Discord (Wolfrage) if you have any questions. No DMs though -- DMs are the Devil's handjob.
 
