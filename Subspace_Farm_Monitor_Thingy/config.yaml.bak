@@ -44,6 +44,8 @@ FARMER_PORT: '8181' # This is the Port from above
 # Frontend Viewer Config #
  ########################
 
+THEME: 'default' # name of theme (filename without the .yaml) from ./themes that you want to use.
+
 # Note: Leaving NODE_IP and/or NODE_PORT empty will disable node data display AND wallet monitor
 
 # You need to add this to your Node launch command: --rpc-listen-on <LocalIP>:<Port> 
