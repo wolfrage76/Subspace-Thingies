@@ -60,11 +60,14 @@ class KBHit(Thread):
                 if ord(key) == 32:  # Space key
                     c.paused = not c.paused
                 elif ord(key) == ord('+'):
-                    self.current_theme_index = (self.current_theme_index - 1) % len(self.theme_files)
+                    
+                    theme_list =  [themes for themes in self.theme_files if themes != self.theme_files[self.current_theme_index].replace('.yaml', '')]
+                    self.current_theme_index = (self.current_theme_index - 1) % len(theme_list)
                     self.update_theme()
             
                 elif ord(key) == ord('-'):
-                    self.current_theme_index = (self.current_theme_index + 1) % len(self.theme_files)
+                    theme_list =  [themes for themes in self.theme_files if themes != self.theme_files[self.current_theme_index].replace('.yaml', '')]
+                    self.current_theme_index = (self.current_theme_index + 1) % len(theme_list)
                     self.update_theme()            
                 elif key == '0':
                     self.reset_theme()

@@ -287,7 +287,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.warnings.append(local_time(line_plain.replace(
             '\n', '').replace(' WARN', '[b yellow]')))
     
-    elif 'exited' in line_plain:
+    if 'exited' in line_plain:
         pass
     
     
@@ -348,8 +348,9 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         one_day_ago = datetime.now().timestamp() - 86400
 
         farm_skips = c.farm_skips
+        
+        parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         c.farm_skip_times[farm].append( parsed_datetime )
-        # parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         # c.farm_skip_times.append(parsed_datetime )
         
         if farm:
@@ -381,6 +382,8 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         
         
         trigger = True
+        vmem = str(psutil.virtual_memory().percent)
+        c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
         
     if 'nitial plotting complete' in line_plain:
         parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()

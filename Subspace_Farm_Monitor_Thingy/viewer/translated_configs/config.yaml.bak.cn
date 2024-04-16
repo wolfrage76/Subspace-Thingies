@@ -89,5 +89,3 @@ MUTE_HICKORY: True
 HOUR_24: False 
 TOGGLE_ENCODING_NODE: True 
 
-#IS_LIVE: False
-#COMMANDLINE: "" #'.\subspace-farmer-windows-x86_64-skylake-gemini-3h-2024-feb-05 farm --reward-address st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1 --node-rpc-url ws://192.168.1.205:9944 path=z:\\dev-farm,size=3GiB path=z:\\dev-farm2,size=2GiB'
