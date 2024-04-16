@@ -21,17 +21,17 @@
 # "encircle" for encircled text.
 # "overline" or "o" for overlined text.
 
-SUMMARY_TITLE: b red
+SUMMARY_TITLE: red
 SUMMARY_ACCENT: dark_red
-SUMMARY_VALUE: b orange1
+SUMMARY_VALUE: orange1
 SUMMARY_GLOBAL_FRAME:  dark_orange
-SUMMARY_GLOBAL_TITLE: b red
-SUMMARY_REWARDS: b green
+SUMMARY_GLOBAL_TITLE: red
+SUMMARY_REWARDS: green
 SUMMARY_MISSES: red
 SUMMARY_FRAME: red
 SUMMARY_FRAME_TITLE: orange1
 SUMMARY_FARMER_FRAME: red 
-HEADER_TEXT: b orange1
+HEADER_TEXT: orange1
 HEADER_BACKGROUND: dark_red
 HEADER_GOOD: green
 HEADER_BAD: red
@@ -41,20 +41,20 @@ FARMER_TITLE: orange1
 FARMER_STATS_FRAME: dark_orange
 FARMER_FRAME: dark_orange
 FARMER_ACCENT: yellow
-FARMER_VALUE: b white
+FARMER_VALUE: white
 FARMER_REWARDS: orange1
 FARMER_MISSES: red 
-STATUS_0: b white
-STATUS_15: b white
+STATUS_0: white
+STATUS_15: white
 STATUS_25: dark_orange
 STATUS_50: orange1
-STATUS_75: b yellow
-STATUS_90: b yellow
-STATUS_100: b green
-STATUS_REPLOTTING: b blue 
+STATUS_75: yellow
+STATUS_90: yellow
+STATUS_100: green
+STATUS_REPLOTTING: blue 
 FOOTER_TEXT: yellow
 FOOTER_ACCENT: dark_orange
-FOOTER_MENU: b yellow
+FOOTER_MENU: yellow
 FOOTER_FRAME: red
 ERROR: red
 WARNING: yellow

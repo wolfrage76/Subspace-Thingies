@@ -89,7 +89,7 @@ translation['en'] = {
     'farm': 'Farm',
     'farmers': 'Farmers',
     'ram': 'RAM',
-    'uptime': 'Up',
+    'uptime': 'Up', 
     'day': 'day',
     'load': 'Load',
     'rewards': 'Rewards',
@@ -97,6 +97,7 @@ translation['en'] = {
     'single_hits': 'H',
     'single_misses': 'M',
     'avgsector': 'Avg Sector',
+    'lastsector':'Last Sector',
     'eta': 'ETA',
     'hour': 'hr',
     'plots': 'Plots',
@@ -113,20 +114,67 @@ translation['en'] = {
     'pause': 'Pause',
     'toggle_data': 'Toggle Data',
     'change_display': 'Change Display',
-    'quit': 'uit',
+    'quit': 'uit', # Done for English as Q is the displayed menu key. Use your full word for Quit
     'hm': 'H/M',
     'defaultbanner': 'Check out the community tools at:', 
     'an_error_occured':'an error occured' , 
     'pausing':'pausing' , 
     'exiting_requested':'Exiting as requested...' , 
-    'error_sending':'Error sending to ##' , 
+    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
     'an_error_occured':'an error occured' , 
     'wallet_error':'Wallet error',
     'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
     'connection_closed': 'Connection Closed',
-    'retrying_seconds': 'Retrying in ## seconds'
-     
+    'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
+    'cycle_theme': 'Cycle Theme',
+    'lastsector':'Last Sector',
 }
+
+
+translation['cn'] = {
+                'farmer': '农场',
+                'farmers': '农民',
+                'ram': '内存',
+                'uptime':'运行时间',
+                'day': '天',
+                'load': '加载', 
+                'rewards': '奖励',
+                'global_stats': '全球统计',
+                'single_hits': '赢',
+                'single_misses': '丢失', 
+                'avgsector':'平均扇区时间', 
+                'eta':'埃塔',
+                'hour': '小时',
+                'plots': '地块', 
+                'block': '当前区块高度',
+                'peers':'Anode同行数量', 
+                'synced':'已同步', 
+                'unsynced': '不同步',
+                'latest': '最新版本', 
+                'replotting': '重新绘制', 
+                'report': '报告', 
+                'inactivity_removal': '因不活跃而被删除',
+                'spacebar': '空格键',
+                'tab': 'TAB键',
+                'pause':'暂停', 
+                'toggle_data': '切换数据', 
+                'change_display':'改变显示',
+                'quit':'退出', 
+                'hm': '[green]赢[yellow]/[red]错过', 
+                'defaultbanner': '查看社区工具：',
+                'cpu': 'CPU',
+                'an_error_occured':'发生了错误' , 
+                'pausing':'暂停' , 
+                'exiting_requested':'根据请求退出...' , 
+                'error_sending':'发送到 ## 时出错' ,
+                'wallet_error':'钱包错误',
+                'decode_error': '遇到解码错误（在config.yaml文件中切换TOGGLE_ENCODING!）',
+                'connection_closed': '连接关闭',
+                'retrying_seconds': '暂停 ## 秒',
+                'lastsector':'最后一个扇区',
+                'cycle_theme': '循环主题' 
+                }
+
 
 translation['lol'] = {
     'farm': 'Farm',
@@ -191,7 +239,7 @@ translation['ru'] = {
     'peers': 'Пиры',
     'synced': 'Синхронизировано',
     'unsynced': 'Не синхронизировано',
-    'latest': 'Последний',
+    'latest': 'Последняя версия',
     'replotting': 'Перепланировка',
     'report': 'Отчет',
     'inactivity_removal': 'Удалено из-за неактивности',
@@ -202,7 +250,9 @@ translation['ru'] = {
     'change_display': 'Изменить отображение',
     'quit': 'Выход',
     'hm': '[green]H[yellow]/[red]М',
-    'defaultbanner': 'Ознакомьтесь с инструментами сообщества на:'
+    'defaultbanner': 'Ознакомьтесь с инструментами сообщества на:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['uk'] = {
@@ -235,7 +285,9 @@ translation['uk'] = {
     'change_display': 'Змінити відображення',
     'quit': 'Вийти',
     'hm': '[green]H[yellow]/[red]М',
-    'defaultbanner': 'Ознайомтеся з інструментами спільноти на:'
+    'defaultbanner': 'Ознайомтеся з інструментами спільноти на:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['es'] = {
@@ -268,7 +320,9 @@ translation['es'] = {
     'change_display': 'Cambiar pantalla',
     'quit': 'Salir',
     'hm': '[green]H[yellow]/[red]M',
-    'defaultbanner': 'Consulta las herramientas de la comunidad en:'
+    'defaultbanner': 'Consulta las herramientas de la comunidad en:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['ja'] = {
@@ -301,16 +355,18 @@ translation['ja'] = {
     'change_display': '表示変更',
     'quit': '終了',
     'hm': '[green]H[yellow]/[red]M',
-    'defaultbanner': 'コミュニティツールをチェック：'
+    'defaultbanner': 'コミュニティツールをチェック：',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['fr'] = {
     'farm': 'Ferme',
-    'farmers': 'Agriculteurs',
+    'farmers': 'Farmeurs',
     'ram': 'RAM',
     'uptime': 'Temps de fonctionnement',
     'day': 'jour',
-    'load': 'Charge',
+    'load': 'Chargement',
     'rewards': 'Récompenses',
     'global_stats': 'Statistiques globales',
     'single_hits': 'H',
@@ -323,7 +379,7 @@ translation['fr'] = {
     'peers': 'Pairs',
     'synced': 'Synchronisé',
     'unsynced': 'Non synchronisé',
-    'latest': 'Dernier',
+    'latest': 'Dernier version',
     'replotting': 'Replantation',
     'report': 'Rapport',
     'inactivity_removal': 'Retiré pour inactivité',
@@ -334,7 +390,18 @@ translation['fr'] = {
     'change_display': 'Changer l\'affichage',
     'quit': 'Quitter',
     'hm': '[green]H[yellow]/[red]M',
-    'defaultbanner': 'Découvrez les outils de la communauté sur:'
+    'defaultbanner': 'Découvrez les outils de la communauté sur:', 
+    'an_error_occured':'an error occured' , 
+    'pausing':'pausing' , 
+    'exiting_requested':'Exiting as requested...' , 
+    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
+    'an_error_occured':'an error occured' , 
+    'wallet_error':'Wallet error',
+    'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
+    'connection_closed': 'Connection Closed',
+    'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
+    'cycle_theme': 'Cycle Theme',
+    'lastsector':'Last Sector',
 }
 
 translation['de'] = {
@@ -367,7 +434,9 @@ translation['de'] = {
     'change_display': 'Anzeige ändern',
     'quit': 'Beenden',
     'hm': '[green]H[yellow]/[red]M',
-    'defaultbanner': 'Schauen Sie sich die Community-Tools an unter:'
+    'defaultbanner': 'Schauen Sie sich die Community-Tools an unter:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['ko'] = {
@@ -400,7 +469,9 @@ translation['ko'] = {
     'change_display': '디스플레이 변경',
     'quit': '종료',
     'hm': '[green]H[yellow]/[red]M',
-    'defaultbanner': '커뮤니티 도구를 확인하세요:'
+    'defaultbanner': '커뮤니티 도구를 확인하세요:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['vi'] = {
@@ -433,48 +504,7 @@ translation['vi'] = {
     'change_display': 'Thay đổi hiển thị',
     'quit': 'Thoát',
     'hm': 'H/M',
-    'defaultbanner': 'Kiểm tra các công cụ cộng đồng tại:'
+    'defaultbanner': 'Kiểm tra các công cụ cộng đồng tại:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
-
-
-translation['cn'] = {
-                'farmer': '农场',
-                'farmers': '农民',
-                'ram': '内存',
-                'uptime':'运行时间',
-                'day': '天',
-                'load': '加载', 
-                'rewards': '奖励',
-                'global_stats': '全球统计',
-                'single_hits': '赢',
-                'single_misses': '丢失', 
-                'avgsector':'平均扇区时间', 
-                'eta':'埃塔',
-                'hour': '小时',
-                'plots': '地块', 
-                'block': '当前区块高度',
-                'peers':'Anode同行数量', 
-                'synced':'已同步', 
-                'unsynced': '不同步',
-                'latest': '最新版本', 
-                'replotting': '重新绘制', 
-                'report': '报告', 
-                'inactivity_removal': '因不活跃而被删除',
-                'spacebar': '空格键',
-                'tab': 'TAB键',
-                'pause':'暂停', 
-                'toggle_data': '切换数据', 
-                'change_display':'改变显示',
-                'quit':'退出', 
-                'hm': '[green]赢[yellow]/[red]错过', 
-                'defaultbanner': '查看社区工具：',
-                'cpu': 'CPU',
-                'an_error_occured':'发生了错误' , 
-                'pausing':'暂停' , 
-                'exiting_requested':'根据请求退出...' , 
-                'error_sending':'发送到 ## 时出错' ,
-                'wallet_error':'钱包错误',
-                'decode_error': '遇到解码错误（在config.yaml文件中切换TOGGLE_ENCODING！）',
-                'connection_closed': '连接关闭',
-                'retrying_seconds': '暂停 ## 秒',
-                }
