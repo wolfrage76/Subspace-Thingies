@@ -2,20 +2,23 @@
 
 LANGUAGE: 'en'
 # en = English
+# lol = lol
 # cn = Chinese
-
+# ua = Ukrainian 
+# vi = Vietnamese
+# fr = French
+#
 # Those below have only been Google translated so no promises they aren't gibberish.  Most probably is.  
 # Let me know if you can do translations for any of them! 
 #
-# ua = Ukrainian 
 # es = Spanish
 # ja = Japanese
 # fr = French
 # de = German
 # ko = Korean
-# vi = Vietnamese
 # ru = Russian
-#
+
+
 ###############
 
  #################

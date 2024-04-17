@@ -3,7 +3,9 @@
 LANGUAGE: 'es'
 # en = Inglés
 # cn = Chino
-# uk = Ucraniano
+# lol = Lol
+
+# ua = Ucraniano
 # es = Español
 # ja = Japonés
 # fr = Francés
