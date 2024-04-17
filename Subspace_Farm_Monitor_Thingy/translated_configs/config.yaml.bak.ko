@@ -53,14 +53,6 @@ WAIT_PERIOD: 480 # 지갑 확인 간격(초)
 # 캐시 크기가 0으로 설정된 경우 캐시 크기는 계산되지 않습니다. % 기호를 사용하지 말고 숫자만 사용하십시오.
 CACHE_SIZE: 1 
 
-# By default, the tool now parses the log to pull only the last sector's time for each plot.  This
-# appears to be more accurate overall than the metrics method of taking an average of many hundreds
-# of sector times, where a single interruption, or replots, can distort the numbers until the next restart.
-# Using only last sector time will certainly make the impact of any changes made apparent much more quickly.
-# Set to False if you want to go back to the previous method of very long term averaging provided
-# by the metrics.
-LAST_SECTOR_ONLY: True
-
 
  ###############
 # 알림 #
