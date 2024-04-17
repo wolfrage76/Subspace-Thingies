@@ -250,18 +250,9 @@ translation['ru'] = {
     'change_display': 'Изменить отображение',
     'quit': 'Выход',
     'hm': '[green]H[yellow]/[red]М',
-    'defaultbanner': 'Ознакомьтесь с инструментами сообщества на:', 
-    'an_error_occured':'an error occured' , 
-    'pausing':'pausing' , 
-    'exiting_requested':'Exiting as requested...' , 
-    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
-    'an_error_occured':'an error occured' , 
-    'wallet_error':'Wallet error',
-    'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
-    'connection_closed': 'Connection Closed',
-    'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
-    'cycle_theme': 'Cycle Theme',
-    'lastsector':'Last Sector',
+    'defaultbanner': 'Ознакомьтесь с инструментами сообщества на:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['uk'] = {
@@ -478,18 +469,9 @@ translation['ko'] = {
     'change_display': '디스플레이 변경',
     'quit': '종료',
     'hm': '[green]H[yellow]/[red]M',
-    'defaultbanner': '커뮤니티 도구를 확인하세요:', 
-    'an_error_occured':'an error occured' , 
-    'pausing':'pausing' , 
-    'exiting_requested':'Exiting as requested...' , 
-    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
-    'an_error_occured':'an error occured' , 
-    'wallet_error':'Wallet error',
-    'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
-    'connection_closed': 'Connection Closed',
-    'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
-    'cycle_theme': 'Cycle Theme',
-    'lastsector':'Last Sector',
+    'defaultbanner': '커뮤니티 도구를 확인하세요:',
+                'lastsector':'Last Sector',
+                'cycle_theme': 'Cycle Theme' 
 }
 
 translation['vi'] = {
