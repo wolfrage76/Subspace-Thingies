@@ -95,7 +95,7 @@ def wallet_thread():
 def ui_thread():
     while c.running:
         create_main_layout()
-        time.sleep(.01)
+        time.sleep(.2)
 
 
 uithread = threading.Thread(
@@ -464,7 +464,7 @@ def build_ui():
     footer_txt.add_row(Align.left(lang.get('latest', 'Latest') + c.ver + ' '),  Align.center(c.banners))  
 
     layout["footer"].update(create_footer(layout))
-
+    
     return layout
 
 
@@ -744,7 +744,7 @@ def create_summary_layout(layout):
 
         layout["sum1"].update(Panel(global_table, border_style=color('SUMMARY_FRAME'), title= color('SUMMARY_FRAME_TITLE') + str(len(c.remote_farms)) + ' ' + lang.get('farmers', 'Farmers'), subtitle= color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
         
-        time.sleep(.01)
+        time.sleep(.2)
         return layout
 
 
@@ -787,17 +787,17 @@ def create_main_layout():
     sum_size = defaultdict(lambda: {})
 
     #farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
-    while True:
-        if c.paused:
-                time.sleep(.2)
-                continue
+    #while True:
+    if c.paused:
+        time.sleep(.3)
+                
                   
-        try:
+    try:
             
-            if len(c.farm_names) >0:
-                farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
-            else: 
-                continue
+        if len(c.farm_names) > 0:
+            farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
+        #        else: 
+        #           continue
             farm_info = c.remote_farms.get(farmer_name, {})
             farmer_data = farm_info.get('data', {})
                 
@@ -823,7 +823,7 @@ def create_main_layout():
                 skips = sum(farmer_data.get('farm_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
             else:
                 skips = 0
-           # skips = sum(farmer_data.get('farm_skips',{}).values())
+            # skips = sum(farmer_data.get('farm_skips',{}).values())
 
             if farmer_data.get('farm__recent_rewards', {}).values():
                 recenttotal = sum(farmer_data.get('farm_recent_rewards', []).values()) # total = sum(c.farm_rewards[farmer_name].values())
@@ -831,10 +831,10 @@ def create_main_layout():
                 recenttotal = 0
                 
             if farmer_data.get('farm_recent_skips', {}).values():
-              recentskips = sum(farmer_data.get('farm_recent_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
+                recentskips = sum(farmer_data.get('farm_recent_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
             else:
-               recentskips = 0
-          #  recentskips = sum(farmer_data.get('farm_recent_skips',{}).values())
+                recentskips = 0
+            #  recentskips = sum(farmer_data.get('farm_recent_skips',{}).values())
 
             
             ipds = 0.0
@@ -862,7 +862,7 @@ def create_main_layout():
                 else: psd = 0
                 
                 if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_NotPlotted'):
-                     remspace = float(farmer_data['farm_metrics'][farm]['subspace_farmer_sectors_total_sectors_NotPlotted'].get('value', 0))
+                        remspace = float(farmer_data['farm_metrics'][farm]['subspace_farmer_sectors_total_sectors_NotPlotted'].get('value', 0))
                 else:
                     remspace = 0
                 
@@ -893,7 +893,7 @@ def create_main_layout():
                 else:
                     summedPlotting = 0
                 plottingCount = farmer_data.get('farm_metrics', {}).get(farm,{}).get('subspace_farmer_sector_plotting_time_seconds_count',{}).get('value', 0.0)
-               
+                
                 
                 if plottingCount == 0 or (remspace + replotspace == 0) :
                     averageTime = "00:00".ljust(5)
@@ -924,7 +924,7 @@ def create_main_layout():
                     averageTime = seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0))
 
                 prove = ''
-   
+
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'WS':
                     prove = '  [b yellow][[blink][b dark_orange]WS[/blink][b yellow]] '
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'CC':
@@ -962,7 +962,7 @@ def create_main_layout():
             )
             #completed = 0.0
             if total_completed == 100:
-                 progress2.add_task('[white]', completed=100)
+                    progress2.add_task('[white]', completed=100)
             elif total_completed > 0:
                 progress2.add_task('[white]', completed=(c.psdTotal/c.psTotal) * 100)
                 c.psTotal += ps
@@ -994,13 +994,13 @@ def create_main_layout():
             
             #time.sleep(5)
             
-        except Exception as e:
-            console.print_exception()
-            error_msg = lang.get('an_error_occurred', 'An error occured') + ' ' + lang.get('retrying_seconds', 'Pausing ## seconds').replace('##', '10') + '\n' + str(e)
-            
-            console.print(error_msg)
-            time.sleep(10)
-            # Add some additional error handling code here
+    except Exception as e:
+        console.print_exception()
+        error_msg = lang.get('an_error_occurred', 'An error occured') + ' ' + lang.get('retrying_seconds', 'Pausing ## seconds').replace('##', '10') + '\n' + str(e)
+        
+        console.print(error_msg)
+        time.sleep(10)
+        # Add some additional error handling code here
 
 
 cleanthread = threading.Thread(
@@ -1062,7 +1062,7 @@ async def main():
                 live.refresh()
                 
                 c.layout = layout
-                time.sleep(.01)
+                time.sleep(.2)
                 
     except KeyboardInterrupt:
         print(lang.get('exiting_requested', 'Exiting as requested...') +" Toodles!")
