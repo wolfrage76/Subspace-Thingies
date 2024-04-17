@@ -1,4 +1,5 @@
 # Fill this out and copy it over to BOTH the monitor and viewer directories as it it will be the same for both
+# For each farmer, place a copy in each farmer's Monitor folder
 
 LANGUAGE: 'en'
 # en = English
@@ -17,21 +18,22 @@ LANGUAGE: 'en'
 # de = German
 # ko = Korean
 # ru = Russian
-
-
 ###############
 
- #################
-# Needed for both #
- ################
+
+
+ ########################################################################
+# Must be the same in both Monitor and Viewer folders for ALL systems    #
+ ########################################################################
 
 # REQUIRED:
 FRONT_END_IP: "192.168.1.209" # The IP the Viewer is running on -- 127.0.0.1, 192.168.1.69, whatever
 FRONT_END_PORT: "8016" # Port the View frontend is using 
 
- #######################
-# Farmer Backend Config #
- #######################
+
+ ######################################################################################
+# Farmer Backend Config - Change for each Farmer place in that Farmer's Monitor folder #
+ ######################################################################################
 
 # REQUIRED: (Log parsing will become optional, but not yet)
 FARMER_NAME: "Moya" # How this farmer will be referred to as
@@ -43,9 +45,9 @@ FARMER_IP: '192.168.1.209' # This is the IP from above
 FARMER_PORT: '8181' # This is the Port from above
 
 
- ########################
-# Frontend Viewer Config #
- ########################
+ ##########################################################
+# Frontend Viewer Config  - Only needed fpr Viewer folder   #
+ ##########################################################
 
 THEME: 'default' # name of theme (filename without the .yaml) from ./themes that you want to use.
 
@@ -72,9 +74,10 @@ CACHE_SIZE: 1
 # by the metrics.
 LAST_SECTOR_ONLY: True
 
- ###############
-# Notifications #
- ###############
+
+ #######################################################
+# Notifications - Use both in Monitor and Viewer folder #
+ #######################################################
  
 SEND_DISCORD: False
 SEND_PUSHOVER: False
