@@ -1,13 +1,12 @@
 import psutil
 import asyncio
 import datetime
-from rich import box, print
+from rich import print
 from rich.align import Align
 from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
-from rich.progress_bar import ProgressBar
 from rich.table import Table
 import time
 import yaml
