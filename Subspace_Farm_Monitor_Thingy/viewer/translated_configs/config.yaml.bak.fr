@@ -52,6 +52,16 @@ WAIT_PERIOD: 480 # intervalle de vérification du portefeuille en secondes
 # La taille du cache ne sera pas comptée si elle est réglée sur 0. N'utilisez pas de symbole %, juste un nombre.
 CACHE_SIZE: 1 
 
+# By default, the tool now parses the log to pull only the last sector's time for each plot.  This
+# appears to be more accurate overall than the metrics method of taking an average of many hundreds
+# of sector times, where a single interruption, or replots, can distort the numbers until the next restart.
+#
+# Using only last sector time will certainly make the impact of any changes made apparent much more quickly.
+# Set to False if you want to go back to the previous method of very long term averaging provided
+# by the metrics.
+LAST_SECTOR_ONLY: True
+
+
  ###############
 # Notifications #
  ###############

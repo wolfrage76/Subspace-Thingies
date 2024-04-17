@@ -250,9 +250,18 @@ translation['ru'] = {
     'change_display': 'Изменить отображение',
     'quit': 'Выход',
     'hm': '[green]H[yellow]/[red]М',
-    'defaultbanner': 'Ознакомьтесь с инструментами сообщества на:',
-                'lastsector':'Last Sector',
-                'cycle_theme': 'Cycle Theme' 
+    'defaultbanner': 'Ознакомьтесь с инструментами сообщества на:', 
+    'an_error_occured':'an error occured' , 
+    'pausing':'pausing' , 
+    'exiting_requested':'Exiting as requested...' , 
+    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
+    'an_error_occured':'an error occured' , 
+    'wallet_error':'Wallet error',
+    'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
+    'connection_closed': 'Connection Closed',
+    'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
+    'cycle_theme': 'Cycle Theme',
+    'lastsector':'Last Sector',
 }
 
 translation['uk'] = {
@@ -469,9 +478,18 @@ translation['ko'] = {
     'change_display': '디스플레이 변경',
     'quit': '종료',
     'hm': '[green]H[yellow]/[red]M',
-    'defaultbanner': '커뮤니티 도구를 확인하세요:',
-                'lastsector':'Last Sector',
-                'cycle_theme': 'Cycle Theme' 
+    'defaultbanner': '커뮤니티 도구를 확인하세요:', 
+    'an_error_occured':'an error occured' , 
+    'pausing':'pausing' , 
+    'exiting_requested':'Exiting as requested...' , 
+    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
+    'an_error_occured':'an error occured' , 
+    'wallet_error':'Wallet error',
+    'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
+    'connection_closed': 'Connection Closed',
+    'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
+    'cycle_theme': 'Cycle Theme',
+    'lastsector':'Last Sector',
 }
 
 translation['vi'] = {
@@ -479,32 +497,42 @@ translation['vi'] = {
     'farmers': 'Nông dân',
     'ram': 'RAM',
     'uptime': 'Thời gian hoạt động',
-    'day': 'ngày',
+    'day': 'Ngày',
     'load': 'Tải',
     'rewards': 'Phần thưởng',
-    'global_stats': 'Thống kê toàn cầu',
+    'global_stats': 'Thống kê chung',
     'single_hits': 'H',
     'single_misses': 'M',
-    'avgsector': 'Trung bình Khu vực',
+    'avgsector': 'Trung bình sector',
     'eta': 'ETA',
     'hour': 'giờ',
-    'plots': 'Các ô đất',
-    'block': 'Khối',
-    'peers': 'Đối tác',
+    'plots': 'Plots',
+    'block': 'block',
+    'peers': 'peers',
     'synced': 'Đã đồng bộ',
     'unsynced': 'Chưa đồng bộ',
     'latest': 'Mới nhất',
-    'replotting': 'Chuyển đổi',
+    'replotting': 'plot lại',
     'report': 'Báo cáo',
     'inactivity_removal': 'Loại bỏ do không hoạt động',
-    'spacebar': 'KHOẢNG TRỐNG',
+    'spacebar': 'spacebar',
     'tab': 'TAB',
     'pause': 'Tạm dừng',
     'toggle_data': 'Chuyển đổi dữ liệu',
     'change_display': 'Thay đổi hiển thị',
     'quit': 'Thoát',
     'hm': 'H/M',
-    'defaultbanner': 'Kiểm tra các công cụ cộng đồng tại:',
-                'lastsector':'Last Sector',
-                'cycle_theme': 'Cycle Theme' 
+    'defaultbanner': 'Banner mặc định',
+	'lastsector':'Sector cuối',
+	'cycle_theme': 'Cycle Theme', 
+    'an_error_occured':'một lỗi đã xảy ra' , 
+    'pausing':'đang dừng' , 
+    'exiting_requested':'Yêu cầu thoát...' , 
+    'error_sending':'Có lỗi gửi đến ##' , # wherever '##' is in the text will be replaced automatically
+    'an_error_occured':'một lỗi đã xảy ra' , 
+    'wallet_error':'Lỗi ví',
+    'decode_error': 'Lỗi đọc mã xảy ra (Toggle TOGGLE_ENCODING in the config.yaml file!)',
+    'connection_closed': 'Kết nối đã được đóng',
+    'retrying_seconds': 'Thử lại trong ## giây', # wherever '##' is in the text will be replaced automatically
+    'cycle_theme': 'Cycle Theme' 
 }
