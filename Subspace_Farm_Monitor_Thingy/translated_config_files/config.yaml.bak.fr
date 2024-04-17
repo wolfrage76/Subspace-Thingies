@@ -3,7 +3,7 @@
 LANGUAGE: 'fr'
 # en = Anglais
 # cn = Chinois
-# uk = Ukrainien
+# ua = Ukrainien
 # es = Espagnol
 # ja = Japonais
 # fr = Français
@@ -11,6 +11,8 @@ LANGUAGE: 'fr'
 # ko = Coréen
 # vi = Vietnamien
 # ru = Russe
+# lol = Lol
+
 
  #################
 # Nécessaire pour les deux #
