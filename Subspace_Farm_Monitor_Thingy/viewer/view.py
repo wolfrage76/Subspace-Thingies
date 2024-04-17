@@ -866,7 +866,7 @@ def create_main_layout():
                 else:
                     remspace = 0
                 
-                replotspace = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_Expired', {}).get('value', 0)) + float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectoers_total_sectors_AboutToExpire', {}).get('value', 0)) 
+                replotspace = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_Expired', {}).get('value', 0)) + float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_AboutToExpire', {}).get('value', 0)) 
 
                 
                 ps = remspace + psd + replotspace
