@@ -120,14 +120,11 @@ translation['en'] = {
     'an_error_occured':'an error occured' , 
     'pausing':'pausing' , 
     'exiting_requested':'Exiting as requested...' , 
-    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
-    'an_error_occured':'an error occured' , 
-    'wallet_error':'Wallet error',
+    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically    'wallet_error':'Wallet error',
     'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
     'connection_closed': 'Connection Closed',
     'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
     'cycle_theme': 'Cycle Theme',
-    'lastsector':'Last Sector',
 }
 
 
@@ -210,9 +207,7 @@ translation['lol'] = {
     'an_error_occured':'an error occured' , 
     'pausing':'pausing' , 
     'exiting_requested':'Exiting as requested...' , 
-    'error_sending':'Error sending to ' , 
-    'an_error_occured':'an error occured' , 
-    'wallet_error':'Wallet error',
+    'error_sending':'Error sending to ' ,     'wallet_error':'Wallet error',
     'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
     'connection_closed': 'Connection Closed',
     'retrying_seconds': 'Retrying in ## seconds'
@@ -395,7 +390,6 @@ translation['fr'] = {
     'pausing':'pausing' , 
     'exiting_requested':'Exiting as requested...' , 
     'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
-    'an_error_occured':'an error occured' , 
     'wallet_error':'Wallet error',
     'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
     'connection_closed': 'Connection Closed',
@@ -511,10 +505,8 @@ translation['vi'] = {
     'pausing':'đang dừng' , 
     'exiting_requested':'Yêu cầu thoát...' , 
     'error_sending':'Có lỗi gửi đến ##' , # wherever '##' is in the text will be replaced automatically
-    'an_error_occured':'một lỗi đã xảy ra' , 
     'wallet_error':'Lỗi ví',
     'decode_error': 'Lỗi đọc mã xảy ra (Toggle TOGGLE_ENCODING in the config.yaml file!)',
     'connection_closed': 'Kết nối đã được đóng',
     'retrying_seconds': 'Thử lại trong ## giây', # wherever '##' is in the text will be replaced automatically
-    'cycle_theme': 'Cycle Theme' 
 }
