@@ -1062,7 +1062,7 @@ async def main():
                 live.refresh()
                 
                 c.layout = layout
-                time.sleep(.2)
+                time.sleep(.3)
                 
     except KeyboardInterrupt:
         print(lang.get('exiting_requested', 'Exiting as requested...') +" Toodles!")

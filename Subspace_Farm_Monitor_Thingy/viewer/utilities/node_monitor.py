@@ -81,6 +81,6 @@ async def fetch_node_info():
             c.is_syncing = True
             #console.print(f"A node monitor error occurred: {e}", style="bold red")
             await asyncio.sleep(10)  # Wait before attempting to reconnect or proceed
-        asyncio.sleep(.01)
+        asyncio.sleep(.3)
 # To run the fetch_node_info coroutine
 # asyncio.run(fetch_node_info())

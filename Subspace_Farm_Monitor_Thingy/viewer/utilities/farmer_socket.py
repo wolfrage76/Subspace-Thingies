@@ -82,7 +82,7 @@ async def ws_server(websocket, path):
             if errored:
                 #print("Websocket is now reconnected.")
                 errored = False
-            time.sleep(.01)
+            time.sleep(.3)
     except websockets.ConnectionClosedOK:
         errored = False
     except websockets.ConnectionClosedError as e:
