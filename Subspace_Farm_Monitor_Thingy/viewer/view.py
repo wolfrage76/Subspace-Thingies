@@ -76,16 +76,16 @@ def utility_thread():
 async def utility_run(timeout=900,):  # 900 seconds = 15 minutes
 
     while c.running & config.get('USE_BANNERS', True):
-      try:  
-        url = 'http://subspacethingy.ifhya.com/info'
-        response = requests.get(url)
-        data = response.json()
-        c.banners = data.get('info', lang.get('defaultbanner', 'See more community built tools at:') + " http://subspace.ifhya.com")
-        c.ver = data.get('latestver', 'Unknown')
-   
-      except Exception as e:
-          pass
-      await asyncio.sleep(timeout)
+        try:  
+            url = 'http://subspacethingy.ifhya.com/info'
+            response = requests.get(url)
+            data = response.json()
+            c.banners = data.get('info', lang.get('defaultbanner', 'See more community built tools at:') + " http://subspace.ifhya.com")
+            c.ver = data.get('latestver', 'Unknown')
+
+        except Exception as e:
+            pass
+        await asyncio.sleep(timeout)
 
 
 def wallet_thread():
