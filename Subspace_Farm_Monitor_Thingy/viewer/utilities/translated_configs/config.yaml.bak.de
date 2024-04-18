@@ -1,0 +1,96 @@
+# Füllen Sie dies aus und kopieren Sie es in die Verzeichnisse des Monitors und des Viewers, da es für beide gleich sein wird
+
+LANGUAGE: 'de'
+# en = Englisch
+# cn = Chinesisch
+# uk = Ukrainisch
+# es = Spanisch
+# ja = Japanisch
+# fr = Französisch
+# de = Deutsch
+# ko = Koreanisch
+# vi = Vietnamesisch
+# ru = Russisch
+
+ #################
+# Benötigt für beide #
+ ################
+
+# ERFORDERLICH:
+FRONT_END_IP: "192.168.1.209" # Die IP, auf der der Viewer läuft -- 127.0.0.1, 192.168.1.69, was auch immer
+FRONT_END_PORT: "8016" # Port, den die View-Frontend verwendet
+
+ #######################
+# Farmer-Backend-Konfiguration #
+ #######################
+
+# ERFORDERLICH: (Das Parsen von Logs wird optional werden, aber noch nicht)
+FARMER_NAME: "Moya" # Wie dieser Farmer genannt werden soll
+FARMER_LOG: '/home/wolf/Subspace/farmlog.txt' # Dieses Farmer-Logfile parsen - Unter Windows doppelte Backslashes verwenden '
+
+# ERFORDERLICH:
+# Sie müssen dies zu Ihrem Farmer-Startbefehl hinzufügen: --prometheus-listen-on <localIP>:<PORT>
+FARMER_IP: '192.168.1.209' # Das ist die IP von oben
+FARMER_PORT: '8181' # Das ist der Port von oben
+
+
+ ########################
+# Frontend-Viewer-Konfiguration #
+ ########################
+
+# Hinweis: Das Leerlassen von NODE_IP und/oder NODE_PORT deaktiviert die Anzeige von Knotendaten UND die Wallet-Überwachung
+
+# Sie müssen dies zu Ihrem Node-Startbefehl hinzufügen: --rpc-listen-on <LocalIP>:<Port>
+NODE_IP: "192.168.1.208" # Ihre Knoten-IP von oben -- 127.0.0.1, 192.168.1.69, was auch immer
+NODE_PORT: "9944" # Port, den der Knoten von oben verwendet. 9944 ist der Standard.
+    
+# Wallet-Monitor - Fragt Ihren Knoten nach Änderungen des Guthabens ab und kann Sie benachrichtigen #
+WALLET: "st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1" # Leer deaktiviert die Wallet-Überwachung
+WAIT_PERIOD: 480 # Wallet-Überprüfungsintervall in Sekunden
+
+# % für die Berücksichtigung Ihrer Cache-Größe bei der Berechnung der Größen. Der Standardwert für den Farmer ist 1.
+# Wenn Sie dies in Ihrem Startbefehl nicht geändert haben, lassen Sie es so.
+# Die Cache-Größe wird nicht berücksichtigt, wenn sie auf 0 gesetzt ist. Verwenden Sie kein %-Symbol, nur eine Zahl.
+CACHE_SIZE: 1 
+
+
+ ###############
+# Benachrichtigungen #
+ ###############
+ 
+SEND_DISCORD: False
+SEND_PUSHOVER: False
+
+# Allgemeine Benachrichtigungen gehen hierhin #
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1199928287774912602/gLIVElpW-eoii3uZh7Dsd6SG3Ee7BIs50pdH7FXeEWEaR5jDW5jhpx0VsaKc3w6XLkHU" 
+
+# Wie oben, aber nur für Wallet-Benachrichtigungen. Standardmäßig DISCORD_WEBHOOK, wenn leer.
+DISCORD_WALLET_NOTIFICATIONS: "https://discord.com/api/webhooks/1199199521981345792/LOlCM6nTtmZTyI6Fnk-O8Hso7KVFG4NXmqXIUfsv8V2dy7au9uFB7SkBCYQfJh5Z_noR" 
+
+PUSHOVER_APP_TOKEN: "xxxxxxxxxxxxx" # ja, ich muss die Pushover-Unterstützung verbessern
+PUSHOVER_USER_KEY: "xxxxxxxxxxxx"
+
+ #########################
+###   ENDE DER BENUTZERKONFIGURATION   ###
+ #########################
+
+
+
+
+####Derzeit ungenutzt####
+SEND_REPORT: False # Farmer-Bild über Discord senden
+REPORT_FREQ: 3600
+
+# Intern #
+USE_BANNERS: True # erlaubt das Abrufen des Fußzeilenbanners für Informationen
+
+ ################Experimentell################
+
+TOGGLE_ENCODING: False # Wenn die Festplattenliste nicht erscheint oder einen Unicode- oder UTF-16-Fehler anzeigt, schalten Sie diese Einstellung um
+
+
+# Ist veraltet oder wird es bald sein - Lassen Sie es wie es ist! #
+SHOW_LOGGING: True 
+MUTE_HICKORY: True 
+HOUR_24: False 
+TOGGLE_ENCODING_NODE: True 

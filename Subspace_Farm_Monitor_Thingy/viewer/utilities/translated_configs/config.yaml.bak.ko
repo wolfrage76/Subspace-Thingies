@@ -1,0 +1,94 @@
+# 이것을 작성하여 모니터 및 뷰어 디렉토리에 복사하십시오. 둘 다 동일합니다.
+
+LANGUAGE: 'ko'
+# en = 영어
+# cn = 중국어
+# uk = 우크라이나어
+# es = 스페인어
+# ja = 일본어
+# fr = 프랑스어
+# de = 독일어
+# ko = 한국어
+# vi = 베트남어
+# ru = 러시아어
+
+ #################
+# 둘 다 필요 #
+ ################
+
+# 필수:
+FRONT_END_IP: "192.168.1.209" # 뷰어가 실행 중인 IP -- 127.0.0.1, 192.168.1.69, 등
+FRONT_END_PORT: "8016" # 뷰어 프론트엔드가 사용하는 포트
+
+ #######################
+# 농부 백엔드 구성 #
+ #######################
+
+# 필수: (로그 파싱은 선택 사항이 될 것이지만 아직 아님)
+FARMER_NAME: "Moya" # 이 농부를 어떻게 참조할 것인가
+FARMER_LOG: '/home/wolf/Subspace/farmlog.txt' # 이 농부 로그 파일을 파싱합니다 - Windows에서는 이중 백슬래시를 사용하세요 '
+
+# 필수:
+# 농부 시작 명령에 다음을 추가해야 합니다: --prometheus-listen-on <localIP>:<PORT>
+FARMER_IP: '192.168.1.209' # 위의 IP
+FARMER_PORT: '8181' # 위의 포트
+
+
+ ########################
+# 프론트엔드 뷰어 구성 #
+ ########################
+
+# 참고: NODE_IP 및/또는 NODE_PORT를 비워두면 노드 데이터 표시 및 지갑 모니터링이 비활성화됩니다
+
+# 노드 시작 명령에 다음을 추가해야 합니다: --rpc-listen-on <LocalIP>:<Port>
+NODE_IP: "192.168.1.208" # 위의 노드 IP -- 127.0.0.1, 192.168.1.69, 등
+NODE_PORT: "9944" # 위에서 사용하는 노드의 포트. 기본값은 9944입니다.
+    
+# 지갑 모니터링 - 노드에 잔액 변경 사항을 쿼리하고 알림을 받을 수 있습니다 #
+WALLET: "st9CjiVAh3PYt5P5XFrRgPg47nw39G1Y3kB7FwbMTzAxegUX1" # 비어 있으면 지갑 모니터링이 비활성화됩니다
+WAIT_PERIOD: 480 # 지갑 확인 간격(초)
+
+# 크기 계산 시 캐시 크기를 고려하는 비율. 농부의 기본값은 1입니다.
+# 시작 명령에서 변경하지 않은 경우 그대로 두십시오.
+# 캐시 크기가 0으로 설정된 경우 캐시 크기는 계산되지 않습니다. % 기호를 사용하지 말고 숫자만 사용하십시오.
+CACHE_SIZE: 1 
+
+
+ ###############
+# 알림 #
+ ###############
+ 
+SEND_DISCORD: False
+SEND_PUSHOVER: False
+
+# 일반 알림은 여기에 입력됩니다 #
+DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1199928287774912602/gLIVElpW-eoii3uZh7Dsd6SG3Ee7BIs50pdH7FXeEWEaR5jDW5jhpx0VsaKc3w6XLkHU" 
+
+# 위와 같지만 지갑 알림 전용입니다. 비어 있으면 기본값은 DISCORD_WEBHOOK입니다.
+DISCORD_WALLET_NOTIFICATIONS: "https://discord.com/api/webhooks/1199199521981345792/LOlCM6nTtmZTyI6Fnk-O8Hso7KVFG4NXmqXIUfsv8V2dy7au9uFB7SkBCYQfJh5Z_noR" 
+
+PUSHOVER_APP_TOKEN: "xxxxxxxxxxxxx" # 네, Pushover 지원을 개선해야 합니다
+PUSHOVER_USER_KEY: "xxxxxxxxxxxx"
+
+ #########################
+###   사용자 구성의 끝   ###
+ #########################
+
+
+####현재 사용되지 않음####
+SEND_REPORT: False # Discord를 통해 농부 이미지 전송
+REPORT_FREQ: 3600
+
+# 내부 #
+USE_BANNERS: True # 정보를 위해 바닥글 배너를 가져올 수 있습니다
+
+ ################실험적################
+
+TOGGLE_ENCODING: False # 디스크 목록이 나타나지 않거나 유니코드 또는 UTF-16 오류가 표시되면 이 설정을 전환하세요
+
+
+# 사용되지 않음, 또는 곧 사용되지 않음 - 그대로 두세요! #
+SHOW_LOGGING: True 
+MUTE_HICKORY: True 
+HOUR_24: False 
+TOGGLE_ENCODING_NODE: True 
