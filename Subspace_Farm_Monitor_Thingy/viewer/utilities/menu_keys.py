@@ -84,12 +84,12 @@ class KBHit(Thread):
                     c.view_state = 3
                 elif ord(key) == 9:  # Tab key
                     c.view_xtras = not c.view_xtras
-                else: 
-                    print(f"Key pressed: {key} (ord: {ord(key)})")  # Debug print
+               # else: 
+                 #   print(f"Key pressed: {key} (ord: {ord(key)})")  # Debug print
                     
                         
                 self.layout_update_callback()  # Update the layout immediately
-            time.sleep(.01)
+            time.sleep(.2)
 
     def stop(self):
         self.running = False
