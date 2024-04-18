@@ -416,21 +416,21 @@ def color_by_status(percent, replot=False, offline=False):
         return color('ERROR', offline)
     colors = [color('STATUS_REPLOTTING'), color('STATUS_100'),color('STATUS_90'), color('STATUS_75'), color('STATUS_50'),color('STATUS_25'), color('STATUS_15') , color('STATUS_0')]
     if replot: 
-        return colors[0] # b Blue
-    elif percent == 100: # green
+        return colors[0]
+    elif percent == 100:
         return colors[1]
-    elif percent >= 90: # b yellow
+    elif percent >= 90:
         return colors[2]
-    elif percent >= 75: # yellow
+    elif percent >= 75:
         return colors[3]
-    elif percent >= 50: # orange1
+    elif percent >= 50:
         return colors[4]
-    elif percent >= 25: # dark_orange
+    elif percent >= 25:
         return colors[5]
-    elif percent >= 15: # b white
+    elif percent >= 15:
         return colors[6]
     else:
-        return colors[7] # white    
+        return colors[7]    
 
 
 def convert_to_percent(load_tuple):
@@ -788,7 +788,7 @@ def create_main_layout():
 
     #farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
     #while True:
-    if c.paused:
+    while c.paused:
         time.sleep(.3)
                 
                   
