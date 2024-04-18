@@ -1,3 +1,4 @@
+
 from collections import defaultdict
 
 # Initialize state
@@ -250,7 +251,7 @@ translation['ru'] = {
                 'cycle_theme': 'Cycle Theme' 
 }
 
-translation['uk'] = {
+translation['ua'] = {
     'farm': 'Ферма',
     'farmers': 'Фермери',
     'ram': 'ОЗП',
@@ -259,30 +260,38 @@ translation['uk'] = {
     'load': 'Навантаження',
     'rewards': 'Винагороди',
     'global_stats': 'Глобальна статистика',
-    'single_hits': 'H',
-    'single_misses': 'М',
+    'single_hits': 'Х',
+    'single_misses': 'В',
     'avgsector': 'Середнє Сектор',
-    'eta': 'ОР',
-    'hour': 'год',
+    'eta': 'ETA',
+    'hour': 'година',
     'plots': 'Ділянки',
     'block': 'Блок',
     'peers': 'Піри',
     'synced': 'Синхронізовано',
     'unsynced': 'Не синхронізовано',
     'latest': 'Останній',
-    'replotting': 'Перепланування',
+    'replotting': 'Перезасіювання',
     'report': 'Звіт',
     'inactivity_removal': 'Видалено через неактивність',
-    'spacebar': 'ПРОБІЛ',
-    'tab': 'ТАБ',
+    'spacebar': 'Пробіл',
+    'tab': 'Таб',
     'pause': 'Пауза',
     'toggle_data': 'Перемикання даних',
     'change_display': 'Змінити відображення',
     'quit': 'Вийти',
     'hm': '[green]H[yellow]/[red]М',
     'defaultbanner': 'Ознайомтеся з інструментами спільноти на:',
-                'lastsector':'Last Sector',
-                'cycle_theme': 'Cycle Theme' 
+	'lastsector':'останній сектор',
+    'cycle_theme': 'Тема циклу' ,
+    'an_error_occured':'виникла помилка' , 
+    'pausing':'пауза' , 
+    'exiting_requested':'Вихід за запитом...' , 
+    'error_sending':'Помилка надсилання до ##' , # усюди, де '##' в тексті буде замінено автоматично
+    'wallet_error':'помилка гаманця',
+    'decode_error': 'Сталася помилка декодування (перемкніть TOGGLE_ENCODING у файлі config.yaml!)',
+    'connection_closed': 'Підключення закрито',
+    'retrying_seconds': 'Повторна спроба через ## секунд", # усюди, де "##" у тексті, буде замінено автоматично',
 }
 
 translation['es'] = {
@@ -320,7 +329,7 @@ translation['es'] = {
                 'cycle_theme': 'Cycle Theme' 
 }
 
-translation['ja'] = {
+translation['jp'] = {
     'farm': 'ファーム',
     'farmers': '農家',
     'ram': 'RAM',
@@ -473,40 +482,40 @@ translation['vi'] = {
     'farmers': 'Nông dân',
     'ram': 'RAM',
     'uptime': 'Thời gian hoạt động',
-    'day': 'ngày',
+    'day': 'Ngày',
     'load': 'Tải',
     'rewards': 'Phần thưởng',
-    'global_stats': 'Thống kê toàn cầu',
+    'global_stats': 'Thống kê chung',
     'single_hits': 'H',
     'single_misses': 'M',
-    'avgsector': 'Trung bình Khu vực',
+    'avgsector': 'Trung bình sector',
     'eta': 'ETA',
     'hour': 'giờ',
-    'plots': 'Các ô đất',
-    'block': 'Khối',
-    'peers': 'Đối tác',
+    'plots': 'Plots',
+    'block': 'block',
+    'peers': 'peers',
     'synced': 'Đã đồng bộ',
     'unsynced': 'Chưa đồng bộ',
     'latest': 'Mới nhất',
-    'replotting': 'Chuyển đổi',
+    'replotting': 'plot lại',
     'report': 'Báo cáo',
     'inactivity_removal': 'Loại bỏ do không hoạt động',
-    'spacebar': 'KHOẢNG TRỐNG',
+    'spacebar': 'spacebar',
     'tab': 'TAB',
     'pause': 'Tạm dừng',
     'toggle_data': 'Chuyển đổi dữ liệu',
     'change_display': 'Thay đổi hiển thị',
     'quit': 'Thoát',
     'hm': 'H/M',
-    'defaultbanner': 'Kiểm tra các công cụ cộng đồng tại:',
-	'lastsector':'Last Sector',
+    'defaultbanner': 'Banner mặc định',
+	'lastsector':'Sector cuối',
 	'cycle_theme': 'Cycle Theme', 
-    'an_error_occured':'an error occured' , 
-    'pausing':'pausing' , 
-    'exiting_requested':'Exiting as requested...' , 
-    'error_sending':'Error sending to ##' , # wherever '##' is in the text will be replaced automatically
-    'wallet_error':'Wallet error',
-    'decode_error': 'Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!)',
-    'connection_closed': 'Connection Closed',
-    'retrying_seconds': 'Retrying in ## seconds', # wherever '##' is in the text will be replaced automatically
-}
+    'an_error_occured':'một lỗi đã xảy ra' , 
+    'pausing':'đang dừng' , 
+    'exiting_requested':'Yêu cầu thoát...' , 
+    'error_sending':'Có lỗi gửi đến ##' , # wherever '##' is in the text will be replaced automatically
+    'wallet_error':'Lỗi ví',
+    'decode_error': 'Lỗi đọc mã xảy ra (Toggle TOGGLE_ENCODING in the config.yaml file!)',
+    'connection_closed': 'Kết nối đã được đóng',
+    'retrying_seconds': 'Thử lại trong ## giây', # wherever '##' is in the text will be replaced automatically
+    }

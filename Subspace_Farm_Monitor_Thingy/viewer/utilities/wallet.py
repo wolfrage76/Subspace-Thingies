@@ -74,7 +74,7 @@ def WalletMon():
                 time.sleep(wait_period)
                 substrate = substrateinterface.SubstrateInterface(
                     url=f"ws://{nodeip}:{nodeport}")
-            time.sleep(.3)
+            time.sleep(.2)
       except Exception as e: 
           #print(lang.get('walet_error','Wallet Error'))   
           time.sleep(60)       
