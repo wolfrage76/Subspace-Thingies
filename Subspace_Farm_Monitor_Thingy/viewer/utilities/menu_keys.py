@@ -74,19 +74,29 @@ class KBHit(Thread):
                     print('Toodles!')
                     c.running = False
                     self.set_normal_term()
-                elif ord(key) == 68:  # Left arrow key
+                elif key == '\x1b':
+                    pass
+                elif key == '[':
+                    key2 = self.getch()
                     
-                    c.current_farmer_index = (c.current_farmer_index - 1) % len(c.farm_names)
-                    c.force_update = True  # Signal to force update the layout
-                    c.last_manual_update_time = time.time()
-                    c.index_updated_externally = True  # Flag the external update
-
+                    if ord(key2) == 68:  # Left arrow key
+                #elif ord(key) == 68:  # Left arrow key
                     
-                elif ord(key) == 67:  # Right arrow key
+                        c.current_farmer_index = (c.current_farmer_index - 1) % len(c.farm_names)
+                        c.force_update = True  # Signal to force update the layout
+                        c.last_manual_update_time = time.time()
+                    else: 
+                        if ord(key2) == 67:
+                   # c.index_updated_externally = True  # Flag the external update
+                    #self.layout_update_callback()
                     
-                    c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
-                    c.force_update = True  # Signal to force update the layout
-                    c.last_manual_update_time = time.time()
+                #elif ord(key) == 67:  # Right arrow key
+                    
+                            c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
+                            c.force_update = True  # Signal to force update the layout
+                            c.last_manual_update_time = time.time()
+                            #c.index_updated_externally = True
+                            #self.layout_update_callback()
                 elif ord(key) == ord('1'):
                     c.view_state = 1
                 elif ord(key) == ord('2'):

@@ -765,21 +765,22 @@ def create_summary_layout(layout):
  """    
 
 def update_farmer_index():
-    cooldown_period = 5  # Cooldown period in seconds after a manual update
+    cooldown_period = 7  # Cooldown period in seconds after a manual update
     while c.running:
-        if len(c.farm_names) > 0:
+        if len(c.farm_names) > 0 and not c.paused:
             current_time = time.time()
             time_since_last_manual_update = current_time - c.last_manual_update_time
 
             # Rotate index only if cooldown period has elapsed
-            if time_since_last_manual_update > cooldown_period:
+            if time_since_last_manual_update > cooldown_period :
                 c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
                 time.sleep(5)  # Regular update interval
             else:
                 time.sleep(0.1)  # Short sleep to prevent tight looping
+        
                 
                 
-def create_main_layout():
+def create_main_layout():     
             
     layout = c.layout
     layout["side"].visible = c.view_state in {1, 2}
@@ -793,9 +794,17 @@ def create_main_layout():
 
     #farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
     #while True:
-    while c.paused:
-        time.sleep(.3)
-                
+   
+   
+   # while c.paused:
+   #     if not c.force_update:
+   #         time.sleep(.2)   
+   #     else:
+   #         c.force_update = False
+        
+        #time.sleep(.2)
+            
+                         
                   
     try:
             
