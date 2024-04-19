@@ -2,6 +2,9 @@
 #         Theme           #
  #########################
 
+# Changes to default by Qwinn
+#
+
 # Not everything will work everywhere, so enjoy experiementing! And post your themes!
 #
 # https://rich.readthedocs.io/en/stable/appendix/colors.html
@@ -26,7 +29,7 @@ SUMMARY_ACCENT: b yellow
 SUMMARY_VALUE: b white
 SUMMARY_GLOBAL_FRAME: b white
 SUMMARY_GLOBAL_TITLE: b green
-SUMMARY_REWARDS: green
+SUMMARY_REWARDS: b green
 SUMMARY_MISSES: red
 SUMMARY_FRAME: blue
 SUMMARY_FRAME_TITLE: yellow
@@ -44,14 +47,14 @@ FARMER_ACCENT: yellow
 FARMER_VALUE: b white
 FARMER_REWARDS: green
 FARMER_MISSES: red 
-STATUS_0: white
+STATUS_0: b white
 STATUS_15: b white
-STATUS_25: dark_orange
-STATUS_50: orange1
-STATUS_75: yellow
+STATUS_25: b dark_orange
+STATUS_50: b orange1
+STATUS_75: b yellow
 STATUS_90: b yellow
-STATUS_100: green
-STATUS_REPLOTTING: blue 
+STATUS_100: b green
+STATUS_REPLOTTING: b blue 
 FOOTER_TEXT: white
 FOOTER_ACCENT: b white
 FOOTER_MENU: b yellow

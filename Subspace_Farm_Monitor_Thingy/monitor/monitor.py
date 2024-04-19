@@ -15,6 +15,7 @@ from rich.console import Console
 import http.client
 import urllib
 import os
+import sys, select, tty, termios
 
 # Initialize state
 c.system_stats = {}
@@ -61,7 +62,7 @@ monitorstartTime = utc_timestamp
 def process_farmer_metrics(metrics, farm_id_mapping):
     metrics_dict = {}
     wanted = ['process_start_time_seconds','subspace_farmer_sectors_total_sectors', 'subspace_farmer_sector_plot_count', 'subspace_farmer_sector_notplotted_count', 'subspace_farmer_sector_index','subspace_farmer_sector_plotting_time_seconds_count', 'subspace_farmer_sector_plotting_time_seconds_sum', 'subspace_farmer_sectors_total_sectors_Plotted', 'subspace_farmer_sectors_total_sectors_Expired', 
-    'subspace_farmer_sectors_total_sectors_AboutToExpire','subspace_farmer_auditing_time_seconds_sum', 'subspace_farmer_auditing_time_seconds_count', 'subspace_farmer_proving_time_seconds_sum', 'subspace_farmer_proving_time_seconds_count',]
+    'subspace_farmer_sectors_total_sectors_AboutToExpire', 'subspace_farmer_auditing_time_seconds_sum', 'subspace_farmer_auditing_time_seconds_count', 'subspace_farmer_proving_time_seconds_sum', 'subspace_farmer_proving_time_seconds_count',]
 
     for metric in metrics:
         if metric.startswith('subspace_farmer_') and 'farm_id="' in metric:

@@ -68,7 +68,7 @@ c.last_sector_only = config.get('LAST_SECTOR_ONLY',True)
 c.running = True
 
 def clean_thread():
-    asyncio.run(cleanup_stale_farms(100))
+    asyncio.run(cleanup_stale_farms(120))
     
 def utility_thread():
     asyncio.run(utility_run(600))
@@ -76,16 +76,16 @@ def utility_thread():
 async def utility_run(timeout=900,):  # 900 seconds = 15 minutes
 
     while c.running & config.get('USE_BANNERS', True):
-        try:  
-            url = 'http://subspacethingy.ifhya.com/info'
-            response = requests.get(url)
-            data = response.json()
-            c.banners = data.get('info', lang.get('defaultbanner', 'See more community built tools at:') + " http://subspace.ifhya.com")
-            c.ver = data.get('latestver', 'Unknown')
-
-        except Exception as e:
-            pass
-        await asyncio.sleep(timeout)
+      try:  
+        url = 'http://subspacethingy.ifhya.com/info'
+        response = requests.get(url)
+        data = response.json()
+        c.banners = data.get('info', lang.get('defaultbanner', 'See more community built tools at:') + " http://subspace.ifhya.com")
+        c.ver = data.get('latestver', 'Unknown')
+   
+      except Exception as e:
+          pass
+      await asyncio.sleep(timeout)
 
 
 def wallet_thread():
@@ -765,15 +765,20 @@ def create_summary_layout(layout):
  """    
 
 def update_farmer_index():
+    cooldown_period = 5  # Cooldown period in seconds after a manual update
     while c.running:
-        
         if len(c.farm_names) > 0:
-            c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
-        else:
-            pass
-        time.sleep(5)  # Update interval; adjust as needed
-        
-        
+            current_time = time.time()
+            time_since_last_manual_update = current_time - c.last_manual_update_time
+
+            # Rotate index only if cooldown period has elapsed
+            if time_since_last_manual_update > cooldown_period:
+                c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
+                time.sleep(5)  # Regular update interval
+            else:
+                time.sleep(0.1)  # Short sleep to prevent tight looping
+                
+                
 def create_main_layout():
             
     layout = c.layout
@@ -1062,7 +1067,7 @@ async def main():
                 live.refresh()
                 
                 c.layout = layout
-                time.sleep(.3)
+                time.sleep(.2)
                 
     except KeyboardInterrupt:
         print(lang.get('exiting_requested', 'Exiting as requested...') +" Toodles!")

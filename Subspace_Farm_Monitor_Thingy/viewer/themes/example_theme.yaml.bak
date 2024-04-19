@@ -19,7 +19,8 @@
 # "underline2" or "uu" for doubly underlined text.
 # "frame" for framed text.
 # "encircle" for encircled text.
-# "overline" or "o" for overlined text.: 
+# "overline" or "o" for overlined text.
+
 
 SUMMARY_TITLE: b green
 SUMMARY_ACCENT: b yellow
