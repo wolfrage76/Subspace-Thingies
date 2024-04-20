@@ -95,7 +95,7 @@ def wallet_thread():
 def ui_thread():
     while c.running:
         create_main_layout()
-        time.sleep(.2)
+        time.sleep(.4)
 
 
 uithread = threading.Thread(
@@ -248,7 +248,7 @@ def create_footer(layout):
     footer_txt.add_row(Align.left(color('FOOTER_TEXT') + lang.get('latest', 'Latest') + ': ' + ver), Align.center(color('FOOTER_TEXT') + c.banners))
     
     footer = Panel(footer_txt, title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
-                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '🢀 ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '🢂 ' + color('FOOTER_ACCENT')  +  ']: ' + 
+                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '🡰 ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '🡲' + color('FOOTER_ACCENT')  +  ' ]: ' + 
                    color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' + 
                    color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + 
                    lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' + 
@@ -752,7 +752,7 @@ def create_summary_layout(layout):
 
         layout["sum1"].update(Panel(global_table, border_style=color('SUMMARY_FRAME'), title= color('SUMMARY_FRAME_TITLE') + str(len(c.remote_farms)) + ' ' + lang.get('farmers', 'Farmers'), subtitle= color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
         
-        time.sleep(.2)
+        time.sleep(.1)
         return layout
 
 
@@ -1014,7 +1014,7 @@ def create_main_layout():
             c.sum_plotted = sum_plotted
             c.sum_size = sum_size
             
-            #time.sleep(5)
+            time.sleep(.02)
             
     except Exception as e:
         console.print_exception()
@@ -1084,7 +1084,7 @@ async def main():
                 live.refresh()
                 
                 c.layout = layout
-                time.sleep(.2)
+                time.sleep(.1)
                 
     except KeyboardInterrupt:
         print(lang.get('exiting_requested', 'Exiting as requested...') +" Toodles!")
