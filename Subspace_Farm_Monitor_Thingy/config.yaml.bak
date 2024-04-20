@@ -115,7 +115,7 @@ USE_BANNERS: True # allows grabbing footer banner for information
 
  ################Experimental################
 
-TOGGLE_ENCODING: False # If disk list doesn't appear, or shows a Unicode or UTF-16 error, toggle this setting
+TOGGLE_ENCODING: True # If disk list doesn't appear, or shows a Unicode or UTF-16 error, toggle this setting
 
 
 # Is Deprecated, or will be soon - Leave Alone! #
