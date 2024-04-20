@@ -48,11 +48,11 @@ class KBHit(Thread):
         theme_file = f'themes/{theme_name}.yaml'
         with open(theme_file) as f:
             c.theme_data = yaml.load(f, Loader=yaml.FullLoader)
-            
+        
     def run(self):
         while c.running:
             key = self.getch()
-            if key is not None:
+            if key is not None and key != '' and c.farm_names:
                 
                 #print(f"Key pressed: {key} (ord: {ord(key)})")  # Debug print
 
@@ -64,7 +64,6 @@ class KBHit(Thread):
                     theme_list =  [themes for themes in self.theme_files if themes != self.theme_files[self.current_theme_index].replace('.yaml', '')]
                     self.current_theme_index = (self.current_theme_index - 1) % len(theme_list)
                     self.update_theme()
-            
                 elif ord(key) == ord('-'):
                     theme_list =  [themes for themes in self.theme_files if themes != self.theme_files[self.current_theme_index].replace('.yaml', '')]
                     self.current_theme_index = (self.current_theme_index + 1) % len(theme_list)
@@ -75,7 +74,29 @@ class KBHit(Thread):
                     print('Toodles!')
                     c.running = False
                     self.set_normal_term()
-                
+                elif key == '\x1b':
+                    pass
+                elif key == '[':
+                    key2 = self.getch()
+                    
+                    if ord(key2) == 68:  # Left arrow key
+                #elif ord(key) == 68:  # Left arrow key
+                    
+                        c.current_farmer_index = (c.current_farmer_index - 1) % len(c.farm_names)
+                        c.force_update = True  # Signal to force update the layout
+                        c.last_manual_update_time = time.time()
+                    else: 
+                        if ord(key2) == 67:
+                   # c.index_updated_externally = True  # Flag the external update
+                    #self.layout_update_callback()
+                    
+                #elif ord(key) == 67:  # Right arrow key
+                    
+                            c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
+                            c.force_update = True  # Signal to force update the layout
+                            c.last_manual_update_time = time.time()
+                            #c.index_updated_externally = True
+                            #self.layout_update_callback()
                 elif ord(key) == ord('1'):
                     c.view_state = 1
                 elif ord(key) == ord('2'):
@@ -84,12 +105,13 @@ class KBHit(Thread):
                     c.view_state = 3
                 elif ord(key) == 9:  # Tab key
                     c.view_xtras = not c.view_xtras
+                    self.layout_update_callback()
                # else: 
                  #   print(f"Key pressed: {key} (ord: {ord(key)})")  # Debug print
                     
                         
                 self.layout_update_callback()  # Update the layout immediately
-            time.sleep(.2)
+                time.sleep(.2)
 
     def stop(self):
         self.running = False

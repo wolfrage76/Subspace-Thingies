@@ -1,6 +1,11 @@
 from collections import defaultdict
+import time
 
 # Initialize state
+last_manual_update_time = time.time()
+index_updated_externally = False
+farmer_names_filtered = []
+force_update = True
 allSummedPlotting = {}
 allSummedplottingCount = {}
 avgtime = defaultdict(lambda: {})

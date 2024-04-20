@@ -26,7 +26,7 @@ SUMMARY_ACCENT: dark_red
 SUMMARY_VALUE: orange1
 SUMMARY_GLOBAL_FRAME:  dark_orange
 SUMMARY_GLOBAL_TITLE: red
-SUMMARY_REWARDS: green
+SUMMARY_REWARDS: dark_green
 SUMMARY_MISSES: red
 SUMMARY_FRAME: red
 SUMMARY_FRAME_TITLE: orange1
@@ -50,7 +50,7 @@ STATUS_25: dark_orange
 STATUS_50: orange1
 STATUS_75: yellow
 STATUS_90: yellow
-STATUS_100: green
+STATUS_100: dark_green
 STATUS_REPLOTTING: blue 
 FOOTER_TEXT: yellow
 FOOTER_ACCENT: dark_orange

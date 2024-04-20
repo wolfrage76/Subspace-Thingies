@@ -68,7 +68,7 @@ c.last_sector_only = config.get('LAST_SECTOR_ONLY',True)
 c.running = True
 
 def clean_thread():
-    asyncio.run(cleanup_stale_farms(100))
+    asyncio.run(cleanup_stale_farms(120))
     
 def utility_thread():
     asyncio.run(utility_run(600))
@@ -76,16 +76,16 @@ def utility_thread():
 async def utility_run(timeout=900,):  # 900 seconds = 15 minutes
 
     while c.running & config.get('USE_BANNERS', True):
-        try:  
-            url = 'http://subspacethingy.ifhya.com/info'
-            response = requests.get(url)
-            data = response.json()
-            c.banners = data.get('info', lang.get('defaultbanner', 'See more community built tools at:') + " http://subspace.ifhya.com")
-            c.ver = data.get('latestver', 'Unknown')
-
-        except Exception as e:
-            pass
-        await asyncio.sleep(timeout)
+      try:  
+        url = 'http://subspacethingy.ifhya.com/info'
+        response = requests.get(url)
+        data = response.json()
+        c.banners = data.get('info', lang.get('defaultbanner', 'See more community built tools at:') + " http://subspace.ifhya.com")
+        c.ver = data.get('latestver', 'Unknown')
+   
+      except Exception as e:
+          pass
+      await asyncio.sleep(timeout)
 
 
 def wallet_thread():
@@ -95,7 +95,7 @@ def wallet_thread():
 def ui_thread():
     while c.running:
         create_main_layout()
-        time.sleep(.2)
+        time.sleep(.4)
 
 
 uithread = threading.Thread(
@@ -248,7 +248,15 @@ def create_footer(layout):
     footer_txt.add_row(Align.left(color('FOOTER_TEXT') + lang.get('latest', 'Latest') + ': ' + ver), Align.center(color('FOOTER_TEXT') + c.banners))
     
     footer = Panel(footer_txt, title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
-                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' + color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') +  '3' +  color('FOOTER_ACCENT') + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +  color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' + color('FOOTER_MENU') + '-' + color('FOOTER_ACCENT')  + ']: ' + color('FOOTER_MENU') + lang.get('cycle_theme', 'Cycle Theme')  + ' ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + 'Q' + color('FOOTER_ACCENT') +  ']' + color('FOOTER_MENU') + lang.get('quit', 'uit'), subtitle_align='right',height=3)
+                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '🡰 ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '🡲' + color('FOOTER_ACCENT')  +  ' ]: ' + 
+                   color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' + 
+                   color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + 
+                   lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' + 
+                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + 
+                   color('FOOTER_MENU') +  '3' +  color('FOOTER_ACCENT') + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +  
+                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' + 
+                   color('FOOTER_MENU') + '-' + color('FOOTER_ACCENT')  + ']: ' + color('FOOTER_MENU') + lang.get('cycle_theme', 'Cycle Theme')  + ' ' + color('FOOTER_ACCENT') + 
+                   ' [' + color('FOOTER_MENU') + 'Q' + color('FOOTER_ACCENT') +  ']' + color('FOOTER_MENU') + lang.get('quit', 'uit'), subtitle_align='right',height=3)
  
     return footer
 
@@ -744,7 +752,7 @@ def create_summary_layout(layout):
 
         layout["sum1"].update(Panel(global_table, border_style=color('SUMMARY_FRAME'), title= color('SUMMARY_FRAME_TITLE') + str(len(c.remote_farms)) + ' ' + lang.get('farmers', 'Farmers'), subtitle= color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
         
-        time.sleep(.2)
+        time.sleep(.1)
         return layout
 
 
@@ -765,16 +773,22 @@ def create_summary_layout(layout):
  """    
 
 def update_farmer_index():
+    cooldown_period = 7  # Cooldown period in seconds after a manual update
     while c.running:
+        if len(c.farm_names) > 0 and not c.paused:
+            current_time = time.time()
+            time_since_last_manual_update = current_time - c.last_manual_update_time
+
+            # Rotate index only if cooldown period has elapsed
+            if time_since_last_manual_update > cooldown_period :
+                c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
+                time.sleep(5)  # Regular update interval
+            else:
+                time.sleep(0.1)  # Short sleep to prevent tight looping
         
-        if len(c.farm_names) > 0:
-            c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
-        else:
-            pass
-        time.sleep(5)  # Update interval; adjust as needed
-        
-        
-def create_main_layout():
+                
+                
+def create_main_layout():     
             
     layout = c.layout
     layout["side"].visible = c.view_state in {1, 2}
@@ -788,9 +802,17 @@ def create_main_layout():
 
     #farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
     #while True:
-    while c.paused:
-        time.sleep(.3)
-                
+   
+   
+   # while c.paused:
+   #     if not c.force_update:
+   #         time.sleep(.2)   
+   #     else:
+   #         c.force_update = False
+        
+        #time.sleep(.2)
+            
+                         
                   
     try:
             
@@ -992,7 +1014,7 @@ def create_main_layout():
             c.sum_plotted = sum_plotted
             c.sum_size = sum_size
             
-            #time.sleep(5)
+            time.sleep(.02)
             
     except Exception as e:
         console.print_exception()
@@ -1062,7 +1084,7 @@ async def main():
                 live.refresh()
                 
                 c.layout = layout
-                time.sleep(.3)
+                time.sleep(.1)
                 
     except KeyboardInterrupt:
         print(lang.get('exiting_requested', 'Exiting as requested...') +" Toodles!")
