@@ -1,5 +1,4 @@
 # Fill this out and copy it over to BOTH the monitor and viewer directories as it it will be the same for both
-# For each farmer, place a copy in each farmer's Monitor folder
 
 LANGUAGE: 'en'
 # en = English
@@ -13,14 +12,14 @@ LANGUAGE: 'en'
 # Let me know if you can do translations for any of them! 
 #
 # es = Spanish
-# jp = Japanese
+# ja = Japanese
 # fr = French
 # de = German
 # ko = Korean
 # ru = Russian
+
+
 ###############
-
-
 
  ########################################################################
 # Must be the same in both Monitor and Viewer folders for ALL systems    #
@@ -29,7 +28,6 @@ LANGUAGE: 'en'
 # REQUIRED:
 FRONT_END_IP: "192.168.1.209" # The IP the Viewer is running on -- 127.0.0.1, 192.168.1.69, whatever
 FRONT_END_PORT: "8016" # Port the View frontend is using 
-
 
  ######################################################################################
 # Farmer Backend Config - Change for each Farmer place in that Farmer's Monitor folder #
@@ -121,7 +119,4 @@ TOGGLE_ENCODING: False # If disk list doesn't appear, or shows a Unicode or UTF-
 
 
 # Is Deprecated, or will be soon - Leave Alone! #
-SHOW_LOGGING: True 
-MUTE_HICKORY: True 
 HOUR_24: False 
-TOGGLE_ENCODING_NODE: True 
