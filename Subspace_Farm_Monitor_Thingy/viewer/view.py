@@ -58,7 +58,7 @@ c.lang = c.translation[config.get('LANGUAGE', 'en')]
 lang = c.lang
 day = lang.get('day', 'Day')
 
-c.show_logging = not config.get('SHOW_LOGGING')
+#c.show_logging = not config.get('SHOW_LOGGING')
 c.hour_24 = config.get('HOUR_24', False)
 c.ui_port = config.get('FRONT_END_PORT', '8016')
 c.toggle_encoding = config.get('TOGGLE_ENCODING', False)
@@ -95,7 +95,7 @@ def wallet_thread():
 def ui_thread():
     while c.running:
         create_main_layout()
-        time.sleep(.4)
+        time.sleep(.2)
 
 
 uithread = threading.Thread(
@@ -591,7 +591,7 @@ def create_summary_layout(layout):
                 c.warnings = farmer_data.get('warnings', [])
                 c.errors = farmer_data.get('errors', [])
 
-                #total_completed = c.psTotal / c.psdTotal
+                #total_completed = c.psTotal / c.psdTotalsss
                 farm_plotted = 0.0
                 farm_expired = 0
                 farm_about_expire = 0
@@ -739,12 +739,12 @@ def create_summary_layout(layout):
         
        
 
-        global_progress_items.add_row(color('SUMMARY_VALUE') + convert_to_tib(str(global_farm_plotted) + ' GB') + color('SUMMARY_ACCENT') +'/' + color('SUMMARY_VALUE')  + convert_to_tib(str(global_farm_notplotted + global_farm_plotted + global_farm_expired + global_farm_about_expire) + ' GB')+ color('SUMMARY_ACCENT')  + ' TiB ' +color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + '(+' + color('SUMMARY_VALUE') + str(convert_to_tib(str(global_sec_day_total) + ' GB')) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_VALUE') + day +  color('SUMMARY_ACCENT') + ')',  color('SUMMARY_ACCENT') + lang.get('avgsector', 'Avg') + ': ' + color('SUMMARY_VALUE') + seconds_to_mm_ss(global_avg_sector_time), color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + ' ETA: ' +  color('SUMMARY_VALUE')  + hours_to_dh_m(longest_eta), create_progress_bar(global_sumipds, 12))
+        global_progress_items.add_row(color('SUMMARY_VALUE') + convert_to_tib(str(global_farm_plotted) + ' GB') + color('SUMMARY_ACCENT') +'/' + color('SUMMARY_VALUE')  + convert_to_tib(str(global_farm_notplotted + global_farm_plotted + global_farm_expired + global_farm_about_expire) + ' GB')+ color('SUMMARY_ACCENT')  + ' TiB ' +color('SUMMARY_VALUE') +  color('SUMMARY_VALUE') + '(+' + str(convert_to_tib(str(global_sec_day_total) + ' GB')) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_VALUE') + day + color('SUMMARY_ACCENT') + ')',  color('SUMMARY_ACCENT') + lang.get('avgsector', 'Avg') + ': ' + color('SUMMARY_VALUE') + seconds_to_mm_ss(global_avg_sector_time), color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + ' ETA: ' +  color('SUMMARY_VALUE')  + hours_to_dh_m(longest_eta), create_progress_bar(global_sumipds, 12))
         
 
         
         global_table.add_row(Panel(
-            global_progress_items, title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_ACCENT') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + ' ' + str(global_hhr) + str(global_h_tib)))
+            global_progress_items, title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_VALUE') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + ' ' + str(global_hhr) + str(global_h_tib)))
 
         global_table.add_row(end_section=True)
         global_table.add_row(progress_table2)
@@ -783,9 +783,7 @@ def update_farmer_index():
             if time_since_last_manual_update > cooldown_period :
                 c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
                 time.sleep(5)  # Regular update interval
-            else:
-                time.sleep(0.1)  # Short sleep to prevent tight looping
-        
+        time.sleep(.1)
                 
                 
 def create_main_layout():     
@@ -918,7 +916,7 @@ def create_main_layout():
                 
                 
                 if plottingCount == 0 or (remspace + replotspace == 0) :
-                    averageTime = "00:00".ljust(5)
+                    averageTime = "00:00"
                 else:
                     averageTime = seconds_to_mm_ss(summedPlotting / float(plottingCount))   # str(c.avgtime.get(farmer_name, {}).get(farm, '00:00'))
 
@@ -943,9 +941,11 @@ def create_main_layout():
                     averageTime = "--:--"
                     sector = '-----'
                 elif c.last_sector_only:
-                    averageTime = seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0))
+                    averageTime =  seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0)) 
 
                 prove = ''
+                proving_avg =  '{:.2f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
+                auditing_avg = int(float(farmer_data.get('audits', {}).get(farm, 0.0)))
 
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'WS':
                     prove = '  [b yellow][[blink][b dark_orange]WS[/blink][b yellow]] '
@@ -963,8 +963,10 @@ def create_main_layout():
                     averageTime = ''
 
                     e = False
+                    
+                    # removed Sector + sectortxt
                 if ps > 0: # Remove dropped drives from display
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB) ').ljust(18) + sectortxt + ' ' + averageTime + ' '+ color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(3) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES')  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(3), completed=ipds)
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + ' ' + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES')).ljust(5)  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + str(str(auditing_avg) + 'ms').rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(proving_avg) + 's', completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -1044,11 +1046,15 @@ def get_max_directory_length(farmer_name):
     return max_length # + 2  # Add 2 to the maximum length
 
 
+
 async def main():
     layout = build_ui()  # Build and retrieve the UI layout
     layout["main"].update(make_waiting_message())
     c.layout = layout
-
+    
+    kb = KBHit(lambda: layout.update(layout), create_main_layout)   
+    kb.start()
+    
     if config.get('WALLET', False) and config.get('NODE_IP', False) and config.get('NODE_PORT', False):
         walletthread.start()
         
@@ -1064,8 +1070,7 @@ async def main():
     index_thread = threading.Thread(target=update_farmer_index, name='IndexUpdater', daemon=True)
     index_thread.start()
 
-    kb = KBHit(lambda: layout.update(layout), create_main_layout)
-    kb.start()
+   
     
     try:
 
@@ -1111,3 +1116,4 @@ async def main():
 if __name__ == "__main__":
 
     asyncio.run(main())
+

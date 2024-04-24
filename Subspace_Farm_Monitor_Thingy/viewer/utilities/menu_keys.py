@@ -51,14 +51,43 @@ class KBHit(Thread):
         
     def run(self):
         while c.running:
+            #time.sleep(.1)
             key = self.getch()
+            #key = getch.getch()
             if key is not None and key != '' and c.farm_names:
                 
                 #print(f"Key pressed: {key} (ord: {ord(key)})")  # Debug print
-
+           
                 # Process keypresses
-                if ord(key) == 32:  # Space key
+                if key == '\x1b' or key == '[':
+                  continue  
+                elif ord(key) == 32:  # Space key
                     c.paused = not c.paused
+                
+                    
+                elif ord(key) == 68:  # Left arrow key
+
+                    c.current_farmer_index = (c.current_farmer_index - 1) % len(c.farm_names)
+                    c.force_update = True  # Signal to force update the layout
+                    c.last_manual_update_time = time.time()
+                   # c.index_updated_externally = True  # Flag the external update
+                    #self.layout_update_callback()
+                    
+                elif ord(key) == 67:
+                    
+                    c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
+                    c.force_update = True  # Signal to force update the layout
+                    c.last_manual_update_time = time.time()
+                    #c.index_updated_externally = True
+                    #self.layout_update_callback()
+                elif ord(key) == ord('1'):
+                    c.view_state = 1
+                elif ord(key) == ord('2'):
+                    c.view_state = 2
+                elif ord(key) == ord('3'):
+                    c.view_state = 3
+                elif ord(key) == 9:  # Tab key
+                    c.view_xtras = not c.view_xtras
                 elif ord(key) == ord('+'):
                     
                     theme_list =  [themes for themes in self.theme_files if themes != self.theme_files[self.current_theme_index].replace('.yaml', '')]
@@ -74,44 +103,13 @@ class KBHit(Thread):
                     print('Toodles!')
                     c.running = False
                     self.set_normal_term()
-                elif key == '\x1b':
-                    pass
-                elif key == '[':
-                    key2 = self.getch()
-                    
-                    if ord(key2) == 68:  # Left arrow key
-                #elif ord(key) == 68:  # Left arrow key
-                    
-                        c.current_farmer_index = (c.current_farmer_index - 1) % len(c.farm_names)
-                        c.force_update = True  # Signal to force update the layout
-                        c.last_manual_update_time = time.time()
-                    else: 
-                        if ord(key2) == 67:
-                   # c.index_updated_externally = True  # Flag the external update
                     #self.layout_update_callback()
-                    
-                #elif ord(key) == 67:  # Right arrow key
-                    
-                            c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
-                            c.force_update = True  # Signal to force update the layout
-                            c.last_manual_update_time = time.time()
-                            #c.index_updated_externally = True
-                            #self.layout_update_callback()
-                elif ord(key) == ord('1'):
-                    c.view_state = 1
-                elif ord(key) == ord('2'):
-                    c.view_state = 2
-                elif ord(key) == ord('3'):
-                    c.view_state = 3
-                elif ord(key) == 9:  # Tab key
-                    c.view_xtras = not c.view_xtras
-                    self.layout_update_callback()
                # else: 
                  #   print(f"Key pressed: {key} (ord: {ord(key)})")  # Debug print
                     
                         
                 self.layout_update_callback()  # Update the layout immediately
-                time.sleep(.2)
+                time.sleep(.1)
 
     def stop(self):
         self.running = False
@@ -137,7 +135,13 @@ class KBHit(Thread):
                     return msvcrt.getch().decode()
             else:
                 if self.kbhit():
-                    return sys.stdin.read(1)
+                    char = sys.stdin.read(1) 
+                    if 'D' in char:
+                        return 'D'
+                    elif 'C' in char:
+                     return 'C'
+                    else:
+                        return char
             return None
         except:
             return None
