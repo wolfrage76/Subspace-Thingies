@@ -68,6 +68,8 @@ async def ws_server(websocket, path):
                 c.remote_farms[farmer_name]['last_update'] = time.time()
 
            # c.warnings[farmer_name] = farm_data['warnings']
+            c.audits[farmer_name] = farm_data.get('audits', {})
+            c.proves[farmer_name] = farm_data.get('proves', {})
             c.rewards_per_hr[farmer_name] = farm_data.get('rewards_per_hr')
             c.drive_directory[farmer_name] = farm_data['drive_directory']
             c.farm_metrics[farmer_name] = farm_data['farm_metrics']
@@ -82,7 +84,7 @@ async def ws_server(websocket, path):
             if errored:
                 #print("Websocket is now reconnected.")
                 errored = False
-            time.sleep(.01)
+            time.sleep(.2)
     except websockets.ConnectionClosedOK:
         errored = False
     except websockets.ConnectionClosedError as e:

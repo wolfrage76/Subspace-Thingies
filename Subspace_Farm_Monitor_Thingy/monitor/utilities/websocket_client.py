@@ -7,7 +7,7 @@ from rich.traceback import install
 install(show_locals=True)
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},last_sector_time={},):
+    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},last_sector_time={},proves={}, audits={}):
     
         self.system_stats = system_stats
         self.drive_directory = drive_directory
@@ -25,10 +25,14 @@ class Farmer(object):
         self.prove_method = prove_method
         self.rewards_per_hr = rewards_per_hr
         self.last_sector_time = last_sector_time
+        self.proves = proves
+        self.audits = audits
 
 
 def make_farmer():
     frmr = Farmer()
+    frmr.audits = c.audits
+    frmr.proves = c.proves
     frmr.rewards_per_hr= c.rewards_per_hr
     frmr.drive_directory = c.drive_directory
     frmr.prove_method = c.prove_method

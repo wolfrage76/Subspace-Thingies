@@ -1,6 +1,8 @@
 from collections import defaultdict
 
 # Initialize state
+audits = {}
+proves = {}
 allSummedPlotting = 0
 allSummedplottingCount = 0
 avgtime = defaultdict(lambda: {})

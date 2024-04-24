@@ -41,7 +41,6 @@ with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 
-c.show_logging = config.get('SHOW_LOGGING', False)
 c.hour_24 = config.get('HOUR_24', False)
 c.farmer_name = config.get('FARMER_NAME', 'WolfrageRocks')
 c.front_end_ip = config.get('FRONT_END_IP', "127.0.0.1")
@@ -153,12 +152,29 @@ def update_farm_metrics(farm_id_mapping):
     all_metrics = c.farm_metrics
     for disk_index, metrics in processed_metrics.items():
         if disk_index in c.disk_farms:
+            audit_sum =  float(c.farm_metrics.get(disk_index,{}).get('subspace_farmer_auditing_time_seconds_sum',{}).get('value', 0))
+            audit_count = float(c.farm_metrics.get(disk_index,{}).get('subspace_farmer_auditing_time_seconds_count',{}).get('value', 0))
+            
+            prove_sum = float(c.farm_metrics.get(disk_index,{}).get('subspace_farmer_proving_time_seconds_sum',{}).get('value', 0))
+            prove_count = float(c.farm_metrics.get(disk_index,{}).get('subspace_farmer_proving_time_seconds_count',{}).get('value', 0))
+            
+            if prove_count == 0 or prove_sum == 0:
+                c.proves[disk_index] =  0
+            else:
+                c.proves[disk_index] = prove_sum / prove_count
+                
+            if audit_count == 0 or audit_sum == 0:
+                c.audits[disk_index] =  0
+            else:
+                c.audits[disk_index] = 1000 * (audit_sum / audit_count)
             
             all_metrics[disk_index] = metrics
+           
     c.farm_metrics = all_metrics
 
 
 def socket_client_thread():
+    
     while True:
         websocket_client.main()
         time.sleep(15)
@@ -172,7 +188,7 @@ def update_metrics_periodically(interval=10):
             c.farm_recent_rewards[disk_index] = len([r for r in c.farm_reward_times[disk_index] if r > one_day_ago])
             c.farm_recent_skips[disk_index] = len([r for r in c.farm_skip_times[disk_index] if r > one_day_ago]) 
             c.rewards_per_hr += calculate_rewards_per_hour(c.farm_reward_times[disk_index])
-
+            
         update_farm_metrics(c.farm_id_mapping)
         time.sleep(interval)
 
