@@ -20,7 +20,7 @@
 # "frame" for framed text.
 # "encircle" for encircled text.
 # "overline" or "o" for overlined text.
-
+PERCENT: grey78
 SUMMARY_TITLE: grey62
 SUMMARY_ACCENT: grey46
 SUMMARY_VALUE: b grey78

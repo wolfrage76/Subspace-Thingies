@@ -21,6 +21,7 @@
 # "encircle" for encircled text.
 # "overline" or "o" for overlined text.
 
+PERCENT: orange1
 SUMMARY_TITLE: red
 SUMMARY_ACCENT: dark_red
 SUMMARY_VALUE: orange1
