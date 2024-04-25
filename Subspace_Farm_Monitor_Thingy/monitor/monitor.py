@@ -15,7 +15,6 @@ from rich.console import Console
 import http.client
 import urllib
 import os
-import sys, select, tty, termios
 
 # Initialize state
 c.system_stats = {}
