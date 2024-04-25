@@ -159,8 +159,8 @@ def send(msg=None):
 def create_progress_bar1(completed: float, width: int) -> Progress:
     status_color =  color_by_status(completed)
     progress = Progress(
-        TextColumn(status_color +" [progress.percentage]" + status_color +
-                   "{task.percentage:>3.1f}%"),
+        TextColumn(status_color + " [progress.percentage]" + status_color +
+                   "{task.percentage:>3.1f}%", justify='right'),
         SpinnerColumn(),
         BarColumn(),
     )
@@ -771,7 +771,20 @@ def create_summary_layout(layout):
     requests.post(config.get('DISCORD_WEBHOOK', None), files={"file": open('FarmerReport.png', "rb")})
     os.remove('FarmerReport.png')
  """    
+ 
+ 
+def format_s_ms(milliseconds):
+    if float(milliseconds) < 1000:
+        return f"{milliseconds}ms"
+    else:
+        seconds = milliseconds / 1000.0
+        if seconds > 10:
+            return f"{seconds:.1f}s"
+        else:
+            return f"{seconds:.2f}s"
+        
 
+        
 def update_farmer_index():
     cooldown_period = 7  # Cooldown period in seconds after a manual update
     while c.running:
@@ -831,10 +844,10 @@ def create_main_layout():
             job_progress = Progress("{task.description}",
                                     SpinnerColumn(),
                                     TextColumn(
-                                        "[progress.percentage][white]{task.percentage:>3.1f}%"),
-                                    BarColumn(bar_width=8),
+                                        "[progress.percentage]" + color('PERCENT') + "{task.percentage:>3.1f}%"),
+                                    BarColumn(bar_width=8),)
 
-                                    )
+    
             if farmer_data.get('farm_rewards', {}).values():
                 total = sum(farmer_data.get('farm_rewards', []).values()) # total = sum(c.farm_rewards[farmer_name].values())
             else:
@@ -944,8 +957,14 @@ def create_main_layout():
                     averageTime =  seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0)) 
 
                 prove = ''
+                
+                
                 proving_avg =  '{:.2f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
+                if float(proving_avg) > 10:
+                    proving_avg = '{:.1f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
+                
                 auditing_avg = int(float(farmer_data.get('audits', {}).get(farm, 0.0)))
+                
 
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'WS':
                     prove = '  [b yellow][[blink][b dark_orange]WS[/blink][b yellow]] '
@@ -966,7 +985,7 @@ def create_main_layout():
                     
                     # removed Sector + sectortxt
                 if ps > 0: # Remove dropped drives from display
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + ' ' + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES')).ljust(5)  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + str(str(auditing_avg) + 'ms').rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(proving_avg) + 's', completed=ipds)
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + ' ' + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving_avg)+ 's').rjust(5), completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -980,8 +999,7 @@ def create_main_layout():
             progress2 = Progress(
                 "{task.description}",
                 SpinnerColumn(),
-                TextColumn(
-                    "[progress.percentage][white]{task.percentage:>3.1f}%"),
+                TextColumn("[progress.percentage]" + color('PERCENT') + "{task.percentage:>3.1f}%"),
                 BarColumn(),
             )
             #completed = 0.0
