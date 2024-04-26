@@ -160,7 +160,7 @@ def create_progress_bar1(completed: float, width: int) -> Progress:
     status_color =  color_by_status(completed)
     progress = Progress(
         TextColumn(status_color + " [progress.percentage]" + status_color +
-                   "{task.percentage:>3.1f}%", justify='right'),
+                   "{task.percentage:>3.1f}%"),
         SpinnerColumn(),
         BarColumn(),
     )
@@ -775,13 +775,16 @@ def create_summary_layout(layout):
  
 def format_s_ms(milliseconds):
     if float(milliseconds) < 1000:
-        return f"{milliseconds}ms"
+        if float(milliseconds) > 200:
+            return color('WARNING') + f"{milliseconds}ms"
+        else:    
+            return f"{milliseconds}ms"
     else:
         seconds = milliseconds / 1000.0
-        if seconds > 10:
-            return f"{seconds:.1f}s"
+        if seconds >= 1:
+            return color('ERROR') + f"{seconds:.2f}s"
         else:
-            return f"{seconds:.2f}s"
+            return color('WARNING') + f"{seconds:.2f}s"
         
 
         
@@ -960,11 +963,20 @@ def create_main_layout():
                 
                 
                 proving_avg =  '{:.2f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
-                if float(proving_avg) > 10:
-                    proving_avg = '{:.1f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
                 
+                if proving_avg == '.00':
+                    proving = '----'
+                else:
+                    if float(proving_avg) >= 10:
+                        proving = '[blink]' + color('ERROR') + '>' + str(int(float(farmer_data.get('proves', {}).get(farm, 0.0)))) + 's'
+                    elif float(proving_avg) >= 4:
+                        proving = '[blink]' + color('ERROR') + str(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)) + 's'
+                    elif float(proving_avg) > 2:
+                        proving = color('WARNING') + str(float(farmer_data.get('proves', {}).get(farm, 0.0))) + 's'
+                    else:
+                        proving = proving_avg + 's'
+                        
                 auditing_avg = int(float(farmer_data.get('audits', {}).get(farm, 0.0)))
-                
 
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'WS':
                     prove = '  [b yellow][[blink][b dark_orange]WS[/blink][b yellow]] '
@@ -985,7 +997,7 @@ def create_main_layout():
                     
                     # removed Sector + sectortxt
                 if ps > 0: # Remove dropped drives from display
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving_avg)+ 's').rjust(5), completed=ipds)
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving)).rjust(5), completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -999,7 +1011,7 @@ def create_main_layout():
             progress2 = Progress(
                 "{task.description}",
                 SpinnerColumn(),
-                TextColumn("[progress.percentage]" + color('PERCENT') + "{task.percentage:>3.1f}%"),
+                TextColumn("[progress.percentage]" + color('PERCENT') + "{task.percentage:>5.1f}%"),
                 BarColumn(),
             )
             #completed = 0.0
@@ -1028,8 +1040,12 @@ def create_main_layout():
                 tmp, border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(recenttotal) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(recentskips),))
             
             progress_table.add_row(job_progress, )
-
-            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + color('FARMER_VALUE') + lang.get('uptime', 'Up') + ": " + getUptime(farmer_data['startTime']) + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
+            UpTime = getUptime(farmer_data['startTime'])
+            if UpTime == '--:--:--':
+                frame_color = color('FARMER_VALUE', True)
+            else: 
+                frame_color = color('FARMER_VALUE')
+            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
             
             c.sum_plotted = sum_plotted
             c.sum_size = sum_size
