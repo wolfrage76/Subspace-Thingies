@@ -350,6 +350,8 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
        # if c.prove_method[farm]
     
     elif "lotting sector" in line_plain or "lotting complete" in line_plain:
+        if " Plotting sector (0.00%" in line_plain:
+            event_times[farm] = line_timestamp
         if "Replotting sector (0.00%" not in line_plain:
             c.last_sector_time[farm] = line_timestamp - event_times[farm]
         event_times[farm] = line_timestamp
