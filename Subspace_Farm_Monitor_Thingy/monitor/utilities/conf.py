@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 # Initialize state
+timezone_offset = 0
 audits = {}
 proves = {}
 allSummedPlotting = 0

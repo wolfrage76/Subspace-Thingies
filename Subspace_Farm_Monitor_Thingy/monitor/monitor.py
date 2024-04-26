@@ -1,6 +1,6 @@
 import psutil
 from pathlib import Path
-from datetime import timezone, datetime
+from datetime import timedelta, timezone, datetime
 import dateutil.parser
 import yaml
 import time
@@ -15,6 +15,7 @@ from rich.console import Console
 import http.client
 import urllib
 import os
+
 
 # Initialize state
 c.system_stats = {}
@@ -210,10 +211,37 @@ def datetime_valid(dt_str):
     except ValueError:
         return False
 
+def convert_to_utc_with_offset_zulu(date_time_str, utc_offset):
+
+    # Validate input types
+    if not isinstance(date_time_str, str):
+        pass # raise ValueError("date_time_str must be a string")
+    if not isinstance(utc_offset, int):
+        pass # raise ValueError("utc_offset must be an integer")
+    
+    try:
+        # Parse the date-time string
+        local_dt = datetime.strptime(date_time_str, "%y-%m-%d %H:%M:%S.%f")
+    except ValueError as e:
+        #raise ValueError("Error parsing date_time_str: ensure it's in 'dd-mm-yy HH:MM:SS.mmm' format") from e
+        pass
+    # Calculate the offset as a timedelta
+    offset = timedelta(hours=utc_offset)
+    
+    # Apply the offset to get UTC time
+    utc_dt = local_dt - offset
+    
+    # Return the UTC datetime in Zulu time format
+    return utc_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+
 def local_time(string):
     string2 = string.split(' ')
     convert = string2[0]
+    
+    if config.get('U_GPU_PLOTTER', False):
+        convert = convert_to_utc_with_offset_zulu(convert, -5)
 
+    
     if datetime_valid(convert):
         # Handle 'Z' for UTC time explicitly
         if convert.endswith('Z'):
