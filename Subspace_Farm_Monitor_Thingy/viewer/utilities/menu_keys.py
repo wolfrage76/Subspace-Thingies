@@ -114,15 +114,9 @@ class KBHit(Thread):
     def stop(self):
         self.running = False
 
-    def set_normal_term(self):
-        """Resets to normal terminal. On Windows, this is a no-op."""
-        if os.name != 'nt':
-            import termios
-            termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old_term)
-
     def kbhit(self):
         """Returns True if keyboard character was hit, False otherwise."""
-        if os.name == 'nt':
+        if os.name == 'nt': 
             return msvcrt.kbhit()
         else:
             dr, _, _ = select([sys.stdin], [], [], 0)
