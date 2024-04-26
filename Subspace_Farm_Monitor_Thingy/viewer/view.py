@@ -844,7 +844,7 @@ def create_main_layout():
             job_progress = Progress("{task.description}",
                                     SpinnerColumn(),
                                     TextColumn(
-                                        "[progress.percentage]" + color('PERCENT') + "{task.percentage:>3.1f}%"),
+                                        "[progress.percentage]" + color('PERCENT') + "{task.percentage:>5.1f}%"),
                                     BarColumn(bar_width=8),)
 
     
