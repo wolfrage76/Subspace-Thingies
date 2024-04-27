@@ -211,8 +211,8 @@ def datetime_valid(dt_str):
     except ValueError:
         return False
 
-def convert_to_utc_with_offset_zulu(date_time_str, utc_offset):
-    local_dt = datetime()
+def convert_to_utc_with_offset_zulu(date_time_str, utc_offset=0):
+    #local_dt = datetime()
     # Validate input types
     if not isinstance(date_time_str, str):
        return date_time_str # raise ValueError("date_time_str must be a string")
@@ -241,7 +241,9 @@ def local_time(string):
     convert = string2[0]
     
     if config.get('U_GPU_PLOTTER', False):
-        convert = convert_to_utc_with_offset_zulu(convert, config.get('timezone_offset', 0))
+        convert = string2[0] + ' ' + string2[1]
+        convert = convert_to_utc_with_offset_zulu(convert, config.get('timezone_offset', 0)) + '+00:00'
+        
 
     
     if datetime_valid(convert):
@@ -305,7 +307,11 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
     }
 
     # Assuming the first part of the line is the timestamp
-    line_timestamp_str = line_plain.split()[0]
+    if config.get("U_GPU_PLOTTER", False):
+        line_timestamp_str = line_plain.split()[0] + ' ' + line_plain.split()[1]
+        
+    else:
+        line_timestamp_str = line_plain.split()[0]
 
     if datetime_valid(line_timestamp_str):
         line_timestamp = dateutil.parser.parse(
@@ -393,7 +399,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.curr_farm = None
 
 
-    elif ("roving for solution skipped due to farming time limit" in line_plain) or ("Solution was ignored" in line_plain):
+    elif ("solution skipped due to farming time limit" in line_plain) or ("Solution was ignored" in line_plain):
 
         farm_skips = c.farm_skips
         
