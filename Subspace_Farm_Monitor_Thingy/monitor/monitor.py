@@ -211,20 +211,22 @@ def datetime_valid(dt_str):
     except ValueError:
         return False
 
-def convert_to_utc_with_offset_zulu(date_time_str, utc_offset):
-
+def convert_to_utc_with_offset_zulu(date_time_str, utc_offset=0):
+    #local_dt = datetime()
     # Validate input types
     if not isinstance(date_time_str, str):
-        pass # raise ValueError("date_time_str must be a string")
+       return date_time_str # raise ValueError("date_time_str must be a string")
     if not isinstance(utc_offset, int):
-        pass # raise ValueError("utc_offset must be an integer")
-    
+        utc_offset = 0
+        #return date_time_str # raise ValueError("utc_offset must be an integer")
     try:
         # Parse the date-time string
         local_dt = datetime.strptime(date_time_str, "%y-%m-%d %H:%M:%S.%f")
     except ValueError as e:
         #raise ValueError("Error parsing date_time_str: ensure it's in 'dd-mm-yy HH:MM:SS.mmm' format") from e
-        pass
+        #pass
+        return date_time_str
+    
     # Calculate the offset as a timedelta
     offset = timedelta(hours=utc_offset)
     
@@ -239,7 +241,9 @@ def local_time(string):
     convert = string2[0]
     
     if config.get('U_GPU_PLOTTER', False):
-        convert = convert_to_utc_with_offset_zulu(convert, -5)
+        convert = string2[0] + ' ' + string2[1]
+        convert = convert_to_utc_with_offset_zulu(convert, config.get('timezone_offset', 0)) + '+00:00'
+        
 
     
     if datetime_valid(convert):
@@ -303,7 +307,11 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
     }
 
     # Assuming the first part of the line is the timestamp
-    line_timestamp_str = line_plain.split()[0]
+    if config.get("U_GPU_PLOTTER", False):
+        line_timestamp_str = line_plain.split()[0] + ' ' + line_plain.split()[1]
+        
+    else:
+        line_timestamp_str = line_plain.split()[0]
 
     if datetime_valid(line_timestamp_str):
         line_timestamp = dateutil.parser.parse(
@@ -390,8 +398,8 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         drive_directory[c.curr_farm] = line_plain.split('Directory: ')[1] #directory
         c.curr_farm = None
 
-    elif ("roving for solution skipped due to farming time limit" in line_plain) or ("ustom error: Solution was ignored" in line_plain):
-        one_day_ago = datetime.now().timestamp() - 86400
+
+    elif ("solution skipped due to farming time limit" in line_plain) or ("Solution was ignored" in line_plain):
 
         farm_skips = c.farm_skips
         
