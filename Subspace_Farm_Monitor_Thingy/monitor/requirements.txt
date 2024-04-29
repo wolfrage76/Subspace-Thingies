@@ -1,6 +1,0 @@
-psutil>=5.9.0
-python_dateutil>=2.8.1
-PyYAML>=6.0.1
-Requests
-rich
-websockets>=9.1

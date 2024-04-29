@@ -3,5 +3,5 @@ PyYAML>=5.4.1
 Requests>=2.31.0
 rich>=13.7.1
 substrate-interface
-websockets>=9.0
+websockets>=10.0
 python_dateutil>=2.8.1
