@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 # Initialize state
+dropped_drives = []
 timezone_offset = 0
 audits = {}
 proves = {}
@@ -19,7 +20,6 @@ disk_farms = set()
 dl = str()
 drive_directory = {}
 errors = [str(), str(), str(), str(), str(), str(), str(),]
-#event_times = defaultdict(int)
 #farm_deltas = defaultdict(lambda: {})
 farmer_data = {}
 farmer_ip = "127.0.0.1"
@@ -48,7 +48,6 @@ last_farm = int()
 last_logs = [str(), str(), str(), str(), str(), str(), str(),]
 # However many initialized is how many it'll show
 last_node_logs = [str(), str(), str(), str(), str(), str(),]
-#last_sector_time = defaultdict(lambda: int)
 latest_version = "Unknown"
 layout = None
 live_drives = []
@@ -66,7 +65,6 @@ psdTotal = 0
 psTotal = 0
 remote_farms = {}
 remTotal = 0
-# replotting = defaultdict(lambda: False)
 reward_count = 0
 rewards_per_hr = defaultdict(lambda: [])
 running = False
