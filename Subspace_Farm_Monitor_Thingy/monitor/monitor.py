@@ -27,12 +27,12 @@ farm_rewards = c.farm_rewards
 farm_recent_rewards = c.farm_recent_rewards
 farm_skips = c.farm_skips
 farm_recent_skips = c.farm_recent_skips
-event_times = c.event_times
+# event_times = c.event_times
 drive_directory = c.drive_directory
 errors = c.errors
 total_error_count = c.total_error_count
 curr_farm = c.curr_farm
-last_sector_time = c.last_sector_time
+# last_sector_time = c.last_sector_time
 
 indexconst = "{farm_index="
 
@@ -288,9 +288,9 @@ def rewards_per_day_per_tib(farm_rewards, farm, total_plotted_tib):
     return total_rewards_last_24_hours / total_plotted_tib  # don't forget /0
 
 
-def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, event_times, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, last_sector_time, ):
+#def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, event_times, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, last_sector_time,):
+def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, ):
 
-  
     trigger = False
     parsed_data = {
         'line_plain': '',  # Default value
@@ -298,12 +298,12 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         'reward_count': reward_count,
         'farm_rewards': farm_rewards,
         'farm_recent_rewards': farm_recent_rewards,
-        'event_times': event_times,
+#       'event_times': event_times,
         'drive_directory': drive_directory,
         'farm_skips': farm_skips,
         'farm_recent_skips': farm_recent_skips,
         'system_stats': system_stats,
-        'last_sector_time': last_sector_time,
+#       'last_sector_time': last_sector_time,
     }
 
     # Assuming the first part of the line is the timestamp
@@ -318,13 +318,21 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
             line_timestamp_str).astimezone(timezone.utc).timestamp()
     else:
         line_timestamp = None
+
+    if 'groups detected l3_cache_groups=' in line_plain:
+        c.l3_concurrency = int(line_plain.split('groups detected l3_cache_groups=')[1])
+
     if 'Finished collecting already plotted pieces' in line_plain:   # checking for farmer startup
 
         c.startTime = line_timestamp
         farm_id_mapping = {}
         drive_directory = {}
         curr_farm = None
-        event_times = line_timestamp
+        # event_times = line_timestamp
+
+        c.l3_timestamps.clear()
+        for x in range(c.l3_concurrency * 2):
+            c.l3_timestamps = c.l3_timestamps + [ line_timestamp ]
         
     farm = line_plain[line_plain.find(
             indexconst) + len(indexconst):line_plain.find("}")]
@@ -359,7 +367,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         pass
     elif 'Farm errored and stopped' in line_plain:
         pass
-    elif ("Single disk farm" in line_plain or 'subspace_farmer::commands::farm: Farm' in line_plain) and 'cache worker exited' not in line_plain:
+    elif 'subspace_farmer::commands::farm: Farm' in line_plain and 'cache worker exited' not in line_plain:
 
         farm = line_plain[line_plain.find(
             indexconst) + len(indexconst):line_plain.find("}")]
@@ -386,11 +394,24 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
        # if c.prove_method[farm]
     
     elif "lotting sector" in line_plain or "lotting complete" in line_plain:
-        if " Plotting sector (0.00%" in line_plain:
-            event_times[farm] = line_timestamp
-        if "Replotting sector (0.00%" not in line_plain:
-            c.last_sector_time[farm] = line_timestamp - event_times[farm]
-        event_times[farm] = line_timestamp
+
+        del(c.l3_timestamps[0])
+        c.l3_timestamps = c.l3_timestamps + [ line_timestamp ]
+        l3_sum = 0
+
+        for x in range(c.l3_concurrency):
+            l3_sum = l3_sum + c.l3_timestamps[x + c.l3_concurrency] - c.l3_timestamps[x]
+
+        if c.l3_concurrency != 0:
+            c.l3_farm_sector_time = l3_sum / (c.l3_concurrency * c.l3_concurrency)
+        else:
+            c.l3_farm_sector_time = 0
+        
+        # if " Plotting sector (0.00%" in line_plain:
+        #    event_times[farm] = line_timestamp
+        # if "Replotting sector (0.00%" not in line_plain:
+        #    c.last_sector_time[farm] = line_timestamp - event_times[farm]
+        # event_times[farm] = line_timestamp
         trigger = True
 
     elif 'Directory:' in line_plain and c.curr_farm:
@@ -435,9 +456,9 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
                  '| WINNER! You received a Vote reward!')
         
         
-        trigger = True
-        vmem = str(psutil.virtual_memory().percent)
-        c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
+    trigger = True
+    vmem = str(psutil.virtual_memory().percent)
+    c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
         
     if 'nitial plotting complete' in line_plain:
         parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
@@ -480,10 +501,14 @@ def read_log_file():
                 if line_plain == '\n' or line_plain == '':
                     continue
                 # Continue with your parsing and processing logic
+#                parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
+#                                             event_times, drive_directory,
+#                                              farm_skips, farm_recent_skips,
+#                                             system_stats, farm_id_mapping, last_sector_time)  # Pass the farm_id_mapping
                 parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
-                                             event_times, drive_directory,
-                                              farm_skips, farm_recent_skips,
-                                             system_stats, farm_id_mapping, last_sector_time)  # Pass the farm_id_mapping
+                                             drive_directory, farm_skips, farm_recent_skips,
+                                             system_stats, farm_id_mapping)  # Pass the farm_id_mapping
+
                 vmem = str(psutil.virtual_memory().percent)
                 c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
                 
