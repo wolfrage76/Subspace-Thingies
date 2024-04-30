@@ -7,12 +7,13 @@ from rich.traceback import install
 install(show_locals=True)
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},last_sector_time={},proves={}, audits={}, l3_concurrency='', l3_farm_sector_time=''):
+#    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},last_sector_time={},proves={}, audits={}, l3_concurrency='', l3_farm_sector_time=''):
+    def __init__(self, farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={}, proves={}, audits={}, l3_concurrency='', l3_farm_sector_time=''):
     
         self.system_stats = system_stats
         self.drive_directory = drive_directory
         self.farmer_name = farmer_name
-        self.replotting = replotting
+        #self.replotting = replotting
         self.warnings = warnings
         self.errors = errors
         self.startTime = startTime
@@ -24,7 +25,7 @@ class Farmer(object):
         self.farm_metrics = farm_metrics  # Add farm_metrics attribute
         self.prove_method = prove_method
         self.rewards_per_hr = rewards_per_hr
-        self.last_sector_time = last_sector_time
+        # self.last_sector_time = last_sector_time
         self.proves = proves
         self.audits = audits
         self.l3_concurrency = l3_concurrency
@@ -41,7 +42,7 @@ def make_farmer():
     frmr.system_stats = c.system_stats
     frmr.disk_farms = c.disk_farms
     frmr.farmer_name = c.farmer_name
-    frmr.replotting = c.replotting
+    # frmr.replotting = c.replotting
     frmr.warnings = c.warnings
     frmr.errors = c.errors
     frmr.startTime = c.startTime
@@ -49,7 +50,7 @@ def make_farmer():
     frmr.farm_recent_rewards = c.farm_recent_rewards
     frmr.farm_skips = c.farm_skips
     frmr.farm_recent_skips = c.farm_recent_skips
-    frmr.last_sector_time = c.last_sector_time
+    # frmr.last_sector_time = c.last_sector_time
     frmr.farm_metrics = c.farm_metrics  # Add farm_metrics to the object    #frmr.rewards_per_hour = c.rewards_per_hour
     frmr.l3_concurrency = c.l3_concurrency
     frmr.l3_farm_sector_time = c.l3_farm_sector_time
