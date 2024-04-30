@@ -7,7 +7,7 @@ from rich.traceback import install
 install(show_locals=True)
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},last_sector_time={},proves={}, audits={}):
+    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},last_sector_time={},proves={}, audits={}, l3_concurrency='', l3_farm_sector_time=''):
     
         self.system_stats = system_stats
         self.drive_directory = drive_directory
@@ -27,6 +27,8 @@ class Farmer(object):
         self.last_sector_time = last_sector_time
         self.proves = proves
         self.audits = audits
+        self.l3_concurrency = l3_concurrency
+        self.l3_farm_sector_time = l3_farm_sector_time
 
 
 def make_farmer():
@@ -48,8 +50,9 @@ def make_farmer():
     frmr.farm_skips = c.farm_skips
     frmr.farm_recent_skips = c.farm_recent_skips
     frmr.last_sector_time = c.last_sector_time
-    frmr.farm_metrics = c.farm_metrics  # Add farm_metrics to the object
-    #frmr.rewards_per_hour = c.rewards_per_hour
+    frmr.farm_metrics = c.farm_metrics  # Add farm_metrics to the object    #frmr.rewards_per_hour = c.rewards_per_hour
+    frmr.l3_concurrency = c.l3_concurrency
+    frmr.l3_farm_sector_time = c.l3_farm_sector_time
     
     return frmr
 

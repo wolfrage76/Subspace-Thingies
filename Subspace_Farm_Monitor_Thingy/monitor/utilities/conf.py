@@ -41,6 +41,9 @@ front_end_ip = "127.0.0.1"
 front_end_port = 8181
 hour_24 = False
 imported = str()
+l3_concurrency = 1
+l3_farm_sector_time = 0
+l3_timestamps = []
 last_farm = int()
 last_logs = [str(), str(), str(), str(), str(), str(), str(),]
 # However many initialized is how many it'll show

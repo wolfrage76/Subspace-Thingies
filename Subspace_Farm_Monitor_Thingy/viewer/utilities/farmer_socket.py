@@ -9,7 +9,7 @@ global errored
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, farm_metrics={}, drive_directory={}, last_sector_time={} ):
+    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, farm_metrics={}, drive_directory={}, last_sector_time={}, l3_concurrency='', l3_farm_sector_time='',):
         
         self.farmer_name = farmer_name
         self.replotting = replotting
@@ -24,9 +24,11 @@ class Farmer(object):
         self.farm_recent_skips = farm_recent_skips
         self.farm_metrics = farm_metrics
         self.last_sector_time = last_sector_time
+        self.l3_concurrency = l3_concurrency
+        self.l3_farm_sector_time = l3_farm_sector_time
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, disk_farms={}, farm_metrics={}, drive_directory={}, last_sector_time={}):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, disk_farms={}, farm_metrics={}, drive_directory={}, last_sector_time={}, l3_concurrency='', l3_farm_sector_time='',):
 
     frmr = Farmer()
     frmr.drive_directory = drive_directory
@@ -42,6 +44,8 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], st
     frmr.disk_farms = disk_farms
     frmr.farm_metrics = farm_metrics
     frmr.last_sector_time = last_sector_time
+    frmr.l3_concurrency = l3_concurrency
+    frmr.l3_farm_sector_time = l3_farm_sector_time
 
     return frmr
 

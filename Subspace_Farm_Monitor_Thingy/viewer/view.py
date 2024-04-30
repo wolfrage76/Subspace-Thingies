@@ -331,7 +331,7 @@ def getUptime(started=None):
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, last_sector_time=None):
+    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, last_sector_time=None, l3_concurrency='', l3_farm_sector_time='',):
         if errors is None:
             errors = []
         if disk_farms is None:
@@ -362,9 +362,11 @@ class Farmer(object):
         self.farm_recent_skips = farm_recent_skips
         self.disk_farms = disk_farms
         self.last_sector_time = last_sector_time
+        self.l3_concurrency = l3_concurrency
+        self.l3_farm_sector_time = l3_farm_sector_time
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, last_sector_time={} ):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, last_sector_time={}, l3_concurrency='', l3_farm_sector_time='' ):
 
     frmr = Farmer()
     frmr.farmer_name = farmer_name
@@ -377,6 +379,8 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  s
     frmr.farm_skips = farm_skips
     frmr.farm_recent_skips = farm_recent_skips
     frmr.last_sector_time = last_sector_time
+    frmr.l3_concurrency = l3_concurrency
+    frmr.l3_farm_sector_time = l3_farm_sector_time
 
     return frmr
 
@@ -648,6 +652,8 @@ def create_summary_layout(layout):
                     else:
                         calced = farm_last_sector_time / nocount
                     calc_avg = calced / nocount
+
+                calc_avg = farmer_data['l3_farm_sector_time']
                 
                 if (farm_notplotted + farm_expired + farm_about_expire) != 0 and farmer_data.get('farm_metrics') and calc_avg > 0:
                     sec_hr = 3600 / calc_avg
