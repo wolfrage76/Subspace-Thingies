@@ -2,6 +2,9 @@ from collections import defaultdict
 import time
 
 # Initialize state
+parsed_skips = {}
+parsed_rewards = {}
+dropped_drives = {}
 proves = {}
 audits = {}
 last_manual_update_time = time.time()
@@ -25,7 +28,7 @@ disk_farms = set()
 dl = 0
 drive_directory = {}
 errors = [str(), str(), str(), str(), str(), str(), str(),]
-event_times = defaultdict(int)
+#event_times = defaultdict(int)
 farm_deltas = defaultdict(lambda: {})
 farmer_data = {}
 farmer_name = 'WolfrageRocks'  # str()
@@ -41,13 +44,13 @@ frame_delays = -1
 hour_24 = False
 imported = 0
 is_syncing = True
+l3_concurrency = 1
+l3_farm_sector_time = 0
 lang = {}
 last_farm = int()
 last_logs = [str(), str(), str(), str(), str(), str(), str(),]
 # However many initialized is how many it'll show
 last_node_logs = [str(), str(), str(), str(), str(), str(),]
-last_sector_time = defaultdict(int)
-last_sector_only = True
 latest_version = "Unknown"
 layout = None
 name = str()
@@ -58,7 +61,6 @@ no_more_drives = False
 paused = False
 peers = 0
 plot_space = {}
-plot_time_seconds = 0.0
 prove_method = {}
 psdTotal = 0
 psTotal = 0
@@ -68,12 +70,8 @@ replotting = defaultdict(lambda: False)
 reward_count = 0
 rewards_per_hr = defaultdict(lambda: [])
 running = False
-secTime = {}
-sector_times = defaultdict(lambda: 0)
 show_logging = True
 startTime = 0
-sum_plotted = defaultdict(lambda: {})
-sum_size = defaultdict(lambda: {})
 system_stats = {}
 toggle_encoding = False
 toggle_encoding_node = False

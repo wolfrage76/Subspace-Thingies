@@ -18,6 +18,11 @@ import os
 
 
 # Initialize state
+#c.dropped_drives = []
+last_notification_time = {}
+notification_count = {}
+last_notification_time = {}
+notification_count = {}
 c.system_stats = {}
 system_stats = c.system_stats
 
@@ -27,12 +32,11 @@ farm_rewards = c.farm_rewards
 farm_recent_rewards = c.farm_recent_rewards
 farm_skips = c.farm_skips
 farm_recent_skips = c.farm_recent_skips
-event_times = c.event_times
 drive_directory = c.drive_directory
 errors = c.errors
 total_error_count = c.total_error_count
 curr_farm = c.curr_farm
-last_sector_time = c.last_sector_time
+
 
 indexconst = "{farm_index="
 
@@ -200,7 +204,37 @@ socketclientthread = threading.Thread(
 
 socketclientthread.start()
 
+def reset_notification_count(farm):
+    notification_count[farm] = 0
+    
+def stop_error_notification(farm):
+    current_time = time.time()
+    min_cooldown = 300  # Minimum cooldown period in seconds (5 minutes)
 
+    if farm in last_notification_time:
+        elapsed_time = current_time - last_notification_time[farm]
+        # Calculate current cooldown
+        current_cooldown = min_cooldown * (2 ** notification_count[farm])
+
+        if elapsed_time < current_cooldown:
+            return  # Skip sending notification if within the cooldown period
+
+        # Increase the count for consecutive notifications
+        notification_count[farm] += 1
+    else:
+        # First notification
+        notification_count[farm] = 0
+
+    last_notification_time[farm] = current_time
+    # Send the notification
+    send(config['FARMER_NAME'] + '| ERROR - Drive Dropped Off: ' + farm)
+
+    # Reset the notification count if no further errors in 2x the last cooldown
+    reset_cooldown = min_cooldown * (2 ** (notification_count[farm] + 1))
+    threading.Timer(reset_cooldown, reset_notification_count, [farm]).start()
+    
+    
+    
 def datetime_valid(dt_str):
     try:
         # Explicitly handle the 'Z' UTC designation
@@ -288,7 +322,8 @@ def rewards_per_day_per_tib(farm_rewards, farm, total_plotted_tib):
     return total_rewards_last_24_hours / total_plotted_tib  # don't forget /0
 
 
-def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, event_times, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, last_sector_time, ):
+def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping, ):
+
 
   
     trigger = False
@@ -298,24 +333,29 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         'reward_count': reward_count,
         'farm_rewards': farm_rewards,
         'farm_recent_rewards': farm_recent_rewards,
-        'event_times': event_times,
         'drive_directory': drive_directory,
         'farm_skips': farm_skips,
         'farm_recent_skips': farm_recent_skips,
         'system_stats': system_stats,
-        'last_sector_time': last_sector_time,
     }
 
     # Assuming the first part of the line is the timestamp
+    
     if config.get("U_GPU_PLOTTER", False):
         line_timestamp_str = line_plain.split()[0] + ' ' + line_plain.split()[1]
         
     else:
         line_timestamp_str = line_plain.split()[0]
-
+    
+    
+    if 'groups detected l3_cache_groups=' in line_plain:
+        c.l3_concurrency = int(line_plain.split('groups detected l3_cache_groups=')[1])
+    
     if datetime_valid(line_timestamp_str):
         line_timestamp = dateutil.parser.parse(
             line_timestamp_str).astimezone(timezone.utc).timestamp()
+        parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
+        
     else:
         line_timestamp = None
     if 'Finished collecting already plotted pieces' in line_plain:   # checking for farmer startup
@@ -324,10 +364,16 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         farm_id_mapping = {}
         drive_directory = {}
         curr_farm = None
-        event_times = line_timestamp
+       
+        c.l3_timestamps.clear()
+        for x in range(c.l3_concurrency * 2):
+            c.l3_timestamps = c.l3_timestamps + [ line_timestamp ]
+        c.dropped_drives = []
+        
         
     farm = line_plain[line_plain.find(
             indexconst) + len(indexconst):line_plain.find("}")]
+
 
     if "ERROR" in line_plain:
         c.errors.pop(0)
@@ -353,13 +399,25 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
     elif 'DSN instance configured.' in line_plain:
         # c.resetting() # Reset some data when new restart detected in log
         pass
-#    elif 'WARN quinn_udp: sendmsg error:' in line_plain:
-#        pass
+    
     elif "enchmarking faster proving method" in line_plain:
         pass
-    elif 'Farm errored and stopped' in line_plain:
-        pass
-    elif ("Single disk farm" in line_plain or 'subspace_farmer::commands::farm: Farm' in line_plain) and 'cache worker exited' not in line_plain:
+    elif 'Farm exited with error farm_index=' in line_plain and parsed_datetime > monitorstartTime:
+        farm = line_plain.split('Farm exited with error farm_index=')[0]
+        stop_error_notification(farm)
+        
+    elif 'Farm errored and stopped' in line_plain and parsed_datetime > monitorstartTime:
+            farm = line_plain[line_plain.find(
+            indexconst) + len(indexconst):line_plain.find("}")]
+            
+            c.dropped_drives.append(farm)
+            stop_error_notification(farm)   
+            #send(config['FARMER_NAME'] +
+            #     '| Drive Dropped Off: ' + farm)
+            
+            
+            
+    elif 'subspace_farmer::commands::farm: Farm' in line_plain and 'cache worker exited' not in line_plain:
 
         farm = line_plain[line_plain.find(
             indexconst) + len(indexconst):line_plain.find("}")]
@@ -385,18 +443,33 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.prove_method[farm] = prove_type
        # if c.prove_method[farm]
     
+
     elif "lotting sector" in line_plain or "lotting complete" in line_plain:
-        if " Plotting sector (0.00%" in line_plain:
-            event_times[farm] = line_timestamp
-        if "Replotting sector (0.00%" not in line_plain:
-            c.last_sector_time[farm] = line_timestamp - event_times[farm]
-        event_times[farm] = line_timestamp
+
+        del(c.l3_timestamps[0])
+        c.l3_timestamps = c.l3_timestamps + [ line_timestamp ]
+        l3_sum = 0
+
+        for x in range(c.l3_concurrency):
+            l3_sum = l3_sum + c.l3_timestamps[x + c.l3_concurrency] - c.l3_timestamps[x]
+
+        if c.l3_concurrency != 0:
+            c.l3_farm_sector_time = l3_sum / (c.l3_concurrency * c.l3_concurrency)
+        else:
+            c.l3_farm_sector_time = 0
+        
+        # if " Plotting sector (0.00%" in line_plain:
+        #    event_times[farm] = line_timestamp
+        # if "Replotting sector (0.00%" not in line_plain:
+        #    c.last_sector_time[farm] = line_timestamp - event_times[farm]
+        # event_times[farm] = line_timestamp
         trigger = True
 
     elif 'Directory:' in line_plain and c.curr_farm:
        # directory =  line_plain.split('Directory: ')[1] #line_plain[line_plain.find(":") + 2:]
         drive_directory[c.curr_farm] = line_plain.split('Directory: ')[1] #directory
         c.curr_farm = None
+    
 
 
     elif ("solution skipped due to farming time limit" in line_plain) or ("Solution was ignored" in line_plain):
@@ -481,9 +554,8 @@ def read_log_file():
                     continue
                 # Continue with your parsing and processing logic
                 parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
-                                             event_times, drive_directory,
-                                              farm_skips, farm_recent_skips,
-                                             system_stats, farm_id_mapping, last_sector_time)  # Pass the farm_id_mapping
+                                            drive_directory, farm_skips, farm_recent_skips,
+                                             system_stats, farm_id_mapping)  # Pass the farm_id_mapping
                 vmem = str(psutil.virtual_memory().percent)
                 c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
                 
