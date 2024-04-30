@@ -29,13 +29,13 @@ install()
 
 console = Console()
 
-# sum_size = defaultdict(lambda: [])
+sum_size = defaultdict(lambda: [])
 sumpsd = defaultdict(lambda: [])
 sumps = defaultdict(lambda: [])
 sumipds = {}
 farmer_uptime = 0
-#sum_plotted = defaultdict(lambda: 0.0)
-#sum_unplotted = defaultdict(lambda: 0.0)
+sum_plotted = defaultdict(lambda: 0.0)
+sum_unplotted = defaultdict(lambda: 0.0)
 
 c.startTime = time.time()
 with open("config.yaml", encoding='utf-8') as f:
@@ -63,7 +63,7 @@ c.hour_24 = config.get('HOUR_24', False)
 c.ui_port = config.get('FRONT_END_PORT', '8016')
 c.toggle_encoding = config.get('TOGGLE_ENCODING', False)
 c.wallet = config.get('WALLET', None)
-#c.last_sector_only = config.get('LAST_SECTOR_ONLY',True)
+c.last_sector_only = config.get('LAST_SECTOR_ONLY',True)
 
 c.running = True
 
@@ -331,8 +331,7 @@ def getUptime(started=None):
 
 
 class Farmer(object):
-    #def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, last_sector_time=None, l3_concurrency='', l3_farm_sector_time='',):
-    def __init__(self, farmer_name="Unknown", warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, l3_concurrency='', l3_farm_sector_time='',):
+    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, last_sector_time=None):
         if errors is None:
             errors = []
         if disk_farms is None:
@@ -345,15 +344,15 @@ class Farmer(object):
             farm_skips = {}
         if farm_recent_skips is None:
             farm_recent_skips = {}
-        #if last_sector_time is None:
-        #    last_sector_time = {}
+        if last_sector_time is None:
+            last_sector_time = {}
         if warnings is None:
             warnings = []
-        #if replotting is None:
-        #    replotting = {}
+        if replotting is None:
+            replotting = {}
 
         self.farmer_name = farmer_name
-        #self.replotting = replotting
+        self.replotting = replotting
         self.warnings = warnings
         self.errors = errors
         self.startTime = startTime
@@ -362,17 +361,14 @@ class Farmer(object):
         self.farm_skips = farm_skips
         self.farm_recent_skips = farm_recent_skips
         self.disk_farms = disk_farms
-        # self.last_sector_time = last_sector_time
-        self.l3_concurrency = l3_concurrency
-        self.l3_farm_sector_time = l3_farm_sector_time
+        self.last_sector_time = last_sector_time
 
 
-# def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, last_sector_time={}, l3_concurrency='', l3_farm_sector_time='' ):
-def make_farmer(farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, l3_concurrency='', l3_farm_sector_time='' ):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, last_sector_time={} ):
 
     frmr = Farmer()
     frmr.farmer_name = farmer_name
-    #frmr.replotting = replotting
+    frmr.replotting = replotting
     frmr.warnings = warnings
     frmr.errors = errors
     frmr.startTime = startTime
@@ -380,9 +376,7 @@ def make_farmer(farmer_name="Unknown", warnings=[], errors=[], startTime='', far
     frmr.farm_recent_rewards = farm_recent_rewards
     frmr.farm_skips = farm_skips
     frmr.farm_recent_skips = farm_recent_skips
-    # frmr.last_sector_time = last_sector_time
-    frmr.l3_concurrency = l3_concurrency
-    frmr.l3_farm_sector_time = l3_farm_sector_time
+    frmr.last_sector_time = last_sector_time
 
     return frmr
 
@@ -565,8 +559,8 @@ def create_summary_layout(layout):
         progress_table2.add_column(width=12)
         global_table = Table.grid(expand=True)
         global_table.add_column(width=12)
-        #c.sum_size = {}
-        #c.sum_plotted = {}
+        c.sum_size = {}
+        c.sum_plotted = {}
         
         for farmer_index in range(len(c.farm_names)):
             drive_count = 0
@@ -578,7 +572,7 @@ def create_summary_layout(layout):
             farm_about_expire = 0.0
             farm_plotted = 0.0  # Initialize farm_plotted here
             farm_notplotted = 0.0  # Initialize farm_notplotted here
-            # farm_last_sector_time = 0.0
+            farm_last_sector_time = 0.0
             total_sectors = defaultdict(float)  # Initialize total_sectors here
             try:
                 progress_items = Table.grid(expand=False)
@@ -630,8 +624,8 @@ def create_summary_layout(layout):
                  
                     if total_sectors.get('NotPlotted',0) == 0 and total_sectors.get('Expired', 0) == 0 and total_sectors.get('AboutToExpire', 0) == 0:
                         is_completed.append(disk)
-                    #else:
-                    #    farm_last_sector_time += c.last_sector_time.get(farmer_name, {}).get(disk, 0) 
+                    else:
+                        farm_last_sector_time += c.last_sector_time.get(farmer_name, {}).get(disk, 0) 
                     
                     if total_sectors.get('Expired', 0) > 0 or total_sectors.get('AboutToExpire', 0) > 0:
                         is_replotting.append(disk)
@@ -649,12 +643,11 @@ def create_summary_layout(layout):
                 if nocount <=0:
                     calc_avg = 0
                 else:
-                    #if c.last_sector_only == False:
-                    #    calced = calculate_average_plotting_time_for_farmer(farmer_data.get('farm_metrics', {}))
-                    #else:
-                    #    calced = farm_last_sector_time / nocount
-                    #calc_avg = calced / nocount
-                    calc_avg = farmer_data['l3_farm_sector_time']
+                    if c.last_sector_only == False:
+                        calced = calculate_average_plotting_time_for_farmer(farmer_data.get('farm_metrics', {}))
+                    else:
+                        calced = farm_last_sector_time / nocount
+                    calc_avg = calced / nocount
                 
                 if (farm_notplotted + farm_expired + farm_about_expire) != 0 and farmer_data.get('farm_metrics') and calc_avg > 0:
                     sec_hr = 3600 / calc_avg
@@ -818,8 +811,8 @@ def create_main_layout():
     c.layout = layout
     c.farm_names = c.farm_names or []
     c.remote_farms = c.remote_farms or {}
-    #sum_plotted = defaultdict(lambda: {})
-    #sum_size = defaultdict(lambda: {})
+    sum_plotted = defaultdict(lambda: {})
+    sum_size = defaultdict(lambda: {})
 
     #farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
     #while True:
@@ -883,8 +876,8 @@ def create_main_layout():
             ipds = 0.0
             psd = 0.0
             remspace = 0.0
-            #sector = 0
-            #lastsectortime = 0
+            sector = 0
+            lastsectortime = 0
             c.psTotal = 0.0
             c.psdTotal = 0.0
             c.remTotal = 0.0
@@ -931,17 +924,17 @@ def create_main_layout():
                 c.farm_rewards[farmer_name][farm] = c.farm_rewards.get(farmer_name, {}).get(farm, 0)
                 c.farm_recent_rewards[farmer_name][farm] = c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)
                 
-                #if farmer_data.get('farm_metrics', {}).get(farm):
-                #    summedPlotting = float(farmer_data['farm_metrics'].get(farm, ).get('subspace_farmer_sector_plotting_time_seconds_sum', {}).get('value','0')) 
-                #else:
-                #    summedPlotting = 0
-                #plottingCount = farmer_data.get('farm_metrics', {}).get(farm,{}).get('subspace_farmer_sector_plotting_time_seconds_count',{}).get('value', 0.0)
+                if farmer_data.get('farm_metrics', {}).get(farm):
+                    summedPlotting = float(farmer_data['farm_metrics'].get(farm, ).get('subspace_farmer_sector_plotting_time_seconds_sum', {}).get('value','0')) 
+                else:
+                    summedPlotting = 0
+                plottingCount = farmer_data.get('farm_metrics', {}).get(farm,{}).get('subspace_farmer_sector_plotting_time_seconds_count',{}).get('value', 0.0)
                 
                 
-                #if plottingCount == 0 or (remspace + replotspace == 0) :
-                #    averageTime = "00:00"
-                #else:
-                #    averageTime = seconds_to_mm_ss(summedPlotting / float(plottingCount))   # str(c.avgtime.get(farmer_name, {}).get(farm, '00:00'))
+                if plottingCount == 0 or (remspace + replotspace == 0) :
+                    averageTime = "00:00"
+                else:
+                    averageTime = seconds_to_mm_ss(summedPlotting / float(plottingCount))   # str(c.avgtime.get(farmer_name, {}).get(farm, '00:00'))
 
                 disk_metrics = farmer_data.get('farm_metrics', {}).get(farm, {})
                 
@@ -963,8 +956,8 @@ def create_main_layout():
                     ipds = 100
                     averageTime = "--:-- "
                     sector = '-----'
-                #elif c.last_sector_only:
-                #    averageTime =  seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0)) + ' ' 
+                elif c.last_sector_only:
+                    averageTime =  seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0)) + ' ' 
 
                 prove = ''
                 
@@ -995,13 +988,11 @@ def create_main_layout():
                     continue
                 
                 if c.view_xtras:
-                    # sectortxt = str(sector).ljust(5)
-                    sectortxt = ''
-                    averageTime = ''
-                    e = False
+                    sectortxt = str(sector).ljust(5)
                 else:
                     sectortxt = ''
                     averageTime = ''
+
                     e = False
                     
                     # removed Sector + sectortxt
@@ -1056,8 +1047,8 @@ def create_main_layout():
                 frame_color = color('FARMER_VALUE')
             layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
             
-            #c.sum_plotted = sum_plotted
-            #c.sum_size = sum_size
+            c.sum_plotted = sum_plotted
+            c.sum_size = sum_size
             
             time.sleep(.02)
             
