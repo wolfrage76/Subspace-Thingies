@@ -9,10 +9,11 @@ global errored
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, farm_metrics={}, drive_directory={}, last_sector_time={} ):
+    
+    def __init__(self, farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, farm_metrics={}, drive_directory={}, l3_concurrency='', l3_farm_sector_time='', dropped_drives=[]):
         
+        self.dropped_drives = dropped_drives
         self.farmer_name = farmer_name
-        self.replotting = replotting
         self.warnings = warnings
         self.errors = errors
         self.drive_directory = drive_directory
@@ -23,15 +24,18 @@ class Farmer(object):
         self.farm_skips = farm_skips
         self.farm_recent_skips = farm_recent_skips
         self.farm_metrics = farm_metrics
-        self.last_sector_time = last_sector_time
+        #self.last_sector_time = last_sector_time
+        self.dropped_drives = dropped_drives
+        self.l3_concurrency = l3_concurrency
+        self.l3_farm_sector_time = l3_farm_sector_time
 
 
-def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, disk_farms={}, farm_metrics={}, drive_directory={}, last_sector_time={}):
+def make_farmer(farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, disk_farms={}, farm_metrics={}, drive_directory={}, l3_concurrency='', l3_farm_sector_time='',dropped_drives=[]):
 
     frmr = Farmer()
+    frmr.dropped_drives = dropped_drives
     frmr.drive_directory = drive_directory
     frmr.farmer_name = farmer_name
-    frmr.replotting = replotting
     frmr.warnings = warnings
     frmr.errors = errors
     frmr.startTime = startTime
@@ -41,7 +45,8 @@ def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[], st
     frmr.farm_recent_skips = farm_recent_skips
     frmr.disk_farms = disk_farms
     frmr.farm_metrics = farm_metrics
-    frmr.last_sector_time = last_sector_time
+    frmr.l3_concurrency = l3_concurrency
+    frmr.l3_farm_sector_time = l3_farm_sector_time
 
     return frmr
 
@@ -76,11 +81,12 @@ async def ws_server(websocket, path):
             c.farm_rewards[farmer_name] = farm_data['farm_rewards']
             c.farm_recent_rewards[farmer_name] = farm_data['farm_recent_rewards']
             c.system_stats[farmer_name] = farm_data['system_stats']
-            c.replotting[farmer_name] = farm_data['replotting']
             c.prove_method[farmer_name] = farm_data['prove_method']
             c.farm_skips[farmer_name] = farm_data['farm_skips']
             c.farm_recent_skips[farmer_name] = farm_data['farm_recent_skips']
-            c.last_sector_time[farmer_name] = farm_data['last_sector_time']
+            #c.last_sector_time[farmer_name] = farm_data['last_sector_time']
+            c.dropped_drives[farmer_name] = farm_data.get('dropped_drives', [])
+            
             if errored:
                 #print("Websocket is now reconnected.")
                 errored = False
