@@ -8,10 +8,10 @@ install(show_locals=True)
 
 class Farmer(object):
     def __init__(self, farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={},drive_directory='',rewards_per_hr={},proves={}, audits={}, l3_concurrency='', l3_farm_sector_time='', dropped_drives=[]):
-    
-        self.dropped_drives = dropped_drives
+        
         self.l3_concurrency = l3_concurrency
-        self.l3_farm_sector_time = l3_farm_sector_time
+        self.l3_farm_sector_time = l3_farm_sector_time    
+        self.dropped_drives = dropped_drives
         self.system_stats = system_stats
         self.drive_directory = drive_directory
         self.farmer_name = farmer_name

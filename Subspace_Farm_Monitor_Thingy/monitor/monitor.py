@@ -255,7 +255,10 @@ def convert_to_utc_with_offset_zulu(date_time_str, utc_offset=0):
         #return date_time_str # raise ValueError("utc_offset must be an integer")
     try:
         # Parse the date-time string
-        local_dt = datetime.strptime(date_time_str, "%y-%m-%d %H:%M:%S.%f")
+        if config.get("U_GPU_PLOTTER", 'False'):
+            local_dt = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S.%f")
+        else:
+            local_dt = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S.%f")
     except ValueError as e:
         #raise ValueError("Error parsing date_time_str: ensure it's in 'dd-mm-yy HH:MM:SS.mmm' format") from e
         #pass
@@ -354,7 +357,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
     if datetime_valid(line_timestamp_str):
         line_timestamp = dateutil.parser.parse(
             line_timestamp_str).astimezone(timezone.utc).timestamp()
-        parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
+        parsed_datetime = line_timestamp # datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         
     else:
         line_timestamp = None
@@ -444,7 +447,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
        # if c.prove_method[farm]
     
 
-    elif "lotting sector" in line_plain or "lotting complete" in line_plain:
+    elif "lotting sector" in line_plain:  # as of apr-26-2 version, Replotting Complete should be ignored and Replotting 0.00% need to be counted.
 
         del(c.l3_timestamps[0])
         c.l3_timestamps = c.l3_timestamps + [ line_timestamp ]
@@ -476,7 +479,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
 
         farm_skips = c.farm_skips
         
-        parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
+        parsed_datetime = line_timestamp # datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         c.farm_skip_times[farm].append( parsed_datetime )
         # c.farm_skip_times.append(parsed_datetime )
         
@@ -490,7 +493,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         one_day_ago = datetime.now().timestamp() - 86400
         reward_count += 1
         c.reward_count = reward_count
-        parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
+        parsed_datetime = line_timestamp # datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         #parsed_datetime = datetime.strptime(line_plain.split('Z')[0], "%Y-%m-%dT%H:%M:%S.%f")
         c.farm_reward_times[farm].append(parsed_datetime )
         
@@ -513,7 +516,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
         
     if 'nitial plotting complete' in line_plain:
-        parsed_datetime = datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
+        parsed_datetime = line_timestamp # datetime.fromisoformat(line_plain.split('Z')[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc).timestamp()
         line_timestamp = parsed_datetime
         if line_timestamp and line_timestamp > monitorstartTime:
             send(config['FARMER_NAME'] + '| Plot complete: ' +
@@ -573,11 +576,6 @@ def read_log_file():
                 console.print_exception(show_locals=True)
                 time.sleep(10)
 
-            """ if config['IS_LIVE']:
-                # Open the output file with utf-8 encoding to ensure Unicode support
-                with open("farmlog.txt", "a+", encoding='utf-8') as file2:
-                    file2.write(parsed_data['line_plain'] ) # + '\n')
-            """
 
 
 def send(msg=None):
