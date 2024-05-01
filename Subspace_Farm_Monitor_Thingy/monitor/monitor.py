@@ -444,7 +444,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
        # if c.prove_method[farm]
     
 
-    elif "lotting sector" in line_plain or "lotting complete" in line_plain:
+    elif "lotting sector" in line_plain:  # as of apr-26-2 version, Replotting Complete should be ignored and Replotting 0.00% need to be counted.
 
         del(c.l3_timestamps[0])
         c.l3_timestamps = c.l3_timestamps + [ line_timestamp ]
