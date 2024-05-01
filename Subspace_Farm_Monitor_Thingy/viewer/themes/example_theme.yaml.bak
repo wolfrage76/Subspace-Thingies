@@ -22,6 +22,7 @@
 # "overline" or "o" for overlined text.
 
 PERCENT: b white
+BACKGROUND: black
 SUMMARY_TITLE: b green
 SUMMARY_ACCENT: b yellow
 SUMMARY_VALUE: b white
