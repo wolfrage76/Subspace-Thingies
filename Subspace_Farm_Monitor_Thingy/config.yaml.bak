@@ -1,3 +1,7 @@
+# NEW:
+SHOW_DIRECTORY: True # Show farm path or not
+
+
 # Fill this out and copy it over to BOTH the monitor and viewer directories as it it will be the same for both
 
 LANGUAGE: 'en'
