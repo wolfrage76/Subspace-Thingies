@@ -3,9 +3,7 @@
 ## My tools and utils for the Subspace Network.
 Currently there is the Farm monitor, and a standalone Wallet monitor (instructions at bottom)
 The wallet monitor is also built into the Farm Monitor
-
-![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/d0b172b6-6041-48ae-949b-22727d5f7dd9)
-
+![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/642a1497-b430-48f3-9f41-13ef4173cef5)
 ### Wallet Monitor Thingy ###
 Standalone wallet monitor - Do *not* use with The Farmer Monitor Thingy as it is already built into it.
 This will query your node for wallet balance changes, and notify you via discord (more notifications soon!)
