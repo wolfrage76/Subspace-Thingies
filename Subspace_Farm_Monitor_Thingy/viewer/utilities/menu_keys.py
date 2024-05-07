@@ -31,6 +31,8 @@ class KBHit(Thread):
 
             # Support normal-terminal reset at exit
             atexit.register(self.set_normal_term)
+        else:
+            import msvcrt
             
     def set_normal_term(self):
         """Resets to normal terminal. On Windows, this is a no-op."""
@@ -51,8 +53,9 @@ class KBHit(Thread):
         
     def run(self):
         while c.running:
-            #time.sleep(.1)
+            
             key = self.getch()
+            #time.sleep(1)
             #key = getch.getch()
             if key is not None and key != '' and c.farm_names:
                 
@@ -65,15 +68,15 @@ class KBHit(Thread):
                     c.paused = not c.paused
                 
                     
-                elif ord(key) == 68:  # Left arrow key
-
+                # elif ord(key) == 68:  # Left arrow key
+                elif key == 'C':
                     c.current_farmer_index = (c.current_farmer_index - 1) % len(c.farm_names)
                     c.force_update = True  # Signal to force update the layout
                     c.last_manual_update_time = time.time()
                    # c.index_updated_externally = True  # Flag the external update
                     #self.layout_update_callback()
                     
-                elif ord(key) == 67:
+                elif key == 'D':
                     
                     c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
                     c.force_update = True  # Signal to force update the layout

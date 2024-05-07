@@ -408,16 +408,21 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
     elif 'Farm exited with error farm_index=' in line_plain and parsed_datetime > monitorstartTime:
         farm = line_plain.split('Farm exited with error farm_index=')[0]
         stop_error_notification(farm)
+        c.dropped_drives.append(farm)
+        stop_error_notification(farm)  
         
     elif 'Farm errored and stopped' in line_plain and parsed_datetime > monitorstartTime:
-            farm = line_plain[line_plain.find(
-            indexconst) + len(indexconst):line_plain.find("}")]
             
-            c.dropped_drives.append(farm)
-            stop_error_notification(farm)   
-            #send(config['FARMER_NAME'] +
-            #     '| Drive Dropped Off: ' + farm)
-            
+        if '}' in line_plain:    
+            farm = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}")]
+        else:
+            farm = line_plain.split('farm=').split('error=')[0]
+        
+        c.dropped_drives.append(farm)
+        stop_error_notification(farm)   
+        #send(config['FARMER_NAME'] +
+        #     '| Drive Dropped Off: ' + farm)
+        
             
             
     elif 'subspace_farmer::commands::farm: Farm' in line_plain and 'cache worker exited' not in line_plain:
@@ -448,6 +453,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
     
 
     elif "lotting sector" in line_plain:  # as of apr-26-2 version, Replotting Complete should be ignored and Replotting 0.00% need to be counted.
+    #elif "lotting sector" in line_plain or "lotting complete" in line_plain:
 
         del(c.l3_timestamps[0])
         c.l3_timestamps = c.l3_timestamps + [ line_timestamp ]

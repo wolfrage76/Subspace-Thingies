@@ -78,7 +78,7 @@ async def ws_client():
         except websockets.exceptions.ConnectionClosedError as e:
             print(f'Connection closed: {e}. Retrying in {reconnect_delay} seconds...')
         except Exception as e:
-            print(f'Unexpected error: {e}. Retrying in {reconnect_delay} seconds...')
+            print(f'Unexpected socket error: {e}. Retrying in {reconnect_delay} seconds...')
 
     await asyncio.sleep(reconnect_delay)    
 
