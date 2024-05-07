@@ -249,14 +249,12 @@ def create_footer(layout):
     ver = c.ver
     footer_txt.add_row(Align.left(color('FOOTER_TEXT') + lang.get('latest', 'Latest') + ': ' + ver), Align.center(color('FOOTER_TEXT') + c.banners))
     
-    footer = Panel(footer_txt,style="white on " + c.theme_data.get('BACKGROUND', 'black'), title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
-                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '🡰 ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '🡲' + color('FOOTER_ACCENT')  +  ' ]: ' + 
-                   color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' + 
-                   color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + 
-                   lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' + 
-                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + 
+    footer = Panel(footer_txt,style="white on " + c.theme_data.get('BACKGROUND', ''), title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
+                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '<-' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '->' + color('FOOTER_ACCENT')  +  ']: ' + 
+                   color('FOOTER_MENU') + 'Switch Farm  ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' + 
+                   color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + 
                    color('FOOTER_MENU') +  '3' +  color('FOOTER_ACCENT') + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +  
-                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' + 
+                   color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' + 
                    color('FOOTER_MENU') + '-' + color('FOOTER_ACCENT')  + ']: ' + color('FOOTER_MENU') + lang.get('cycle_theme', 'Cycle Theme')  + ' ' + color('FOOTER_ACCENT') + 
                    ' [' + color('FOOTER_MENU') + 'Q' + color('FOOTER_ACCENT') +  ']' + color('FOOTER_MENU') + lang.get('quit', 'uit'), subtitle_align='right',height=3)
  
@@ -470,11 +468,11 @@ def build_ui():
     layout["header"].update(Header())
     layout["body"].visible = False# (c.view_state == 1 or c.view_state ==3)
     layout["side"].visible = (c.view_state == 1 or c.view_state == 2)
-    layout["box1"].update(Panel("", style="white on " + c.theme_data.get('BACKGROUND', 'black'), border_style=color('FARMER_FRAME'), title=color('FARMER_TILE') + "Waiting for Farmers...",
+    layout["box1"].update(Panel("", style="white on " + c.theme_data.get('BACKGROUND', ''), border_style=color('FARMER_FRAME'), title=color('FARMER_TILE') + "Waiting for Farmers...",
                                 subtitle=color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%" + ' | ' + color('STATUS_REPLOTTING') + 'Replotting'))
     
     layout["bodysum"].visible = (c.view_state == 1 or c.view_state == 3)
-    layout["sum1"].update(Panel("", style="white on " + c.theme_data.get('BACKGROUND', 'black'),  border_style=color('SUMMARY_FRAME'), title=color('SUMMARY_TILE') +"Waiting for Farmers...",
+    layout["sum1"].update(Panel("", style="white on " + c.theme_data.get('BACKGROUND', ''),  border_style=color('SUMMARY_FRAME'), title=color('SUMMARY_TILE') +"Waiting for Farmers...",
                                 subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
     footer_txt = Table.grid(expand=True)
     footer_txt.add_row(Align.left(lang.get('latest', 'Latest') + c.ver + ' '),  Align.center(c.banners))  
@@ -721,7 +719,7 @@ def create_summary_layout(layout):
                 progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
 
                 progress_table2.add_row(Panel(
-                progress_items,  style="white on " + c.theme_data.get('BACKGROUND', 'black'), title_align='left', title=color('SUMMARY_TITLE', offline) + farmer_name + color('SUMMARY_ACCENT', offline) + ' (' + color_by_status(sumipds, False, offline) + str(drive_count)
+                progress_items,  style="white on " + c.theme_data.get('BACKGROUND', ''), title_align='left', title=color('SUMMARY_TITLE', offline) + farmer_name + color('SUMMARY_ACCENT', offline) + ' (' + color_by_status(sumipds, False, offline) + str(drive_count)
                 + 'x ' +  lang.get('plots', 'Plots') + ' - ' + str(round(sumipds, 1)) + '%' + color('SUMMARY_ACCENT', offline) + ')' , border_style=color('FARMER_FRAME', offline), subtitle_align='right', subtitle= color('SUMMARY_REWARDS', offline) 
                 + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_MISSES', offline) +lang.get('single_misses', 'M') + color('SUMMARY_ACCENT', offline) +  ': ' 
                 + color('SUMMARY_REWARDS', offline) + str(recenttotal) + color('SUMMARY_ACCENT', offline) +'/' + color('SUMMARY_MISSES', offline) + str(recentskips) + ' ' + color('SUMMARY_ACCENT', offline) + hhr + h_tib),)
@@ -753,13 +751,13 @@ def create_summary_layout(layout):
 
         
         global_table.add_row(Panel(
-            global_progress_items,  style="white on " + c.theme_data.get('BACKGROUND', 'black'), title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_VALUE') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + ' ' + str(global_hhr) + str(global_h_tib)))
+            global_progress_items,  style="white on " + c.theme_data.get('BACKGROUND', ''), title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_VALUE') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + ' ' + str(global_hhr) + str(global_h_tib)))
 
         global_table.add_row(end_section=True)
         global_table.add_row(progress_table2)
 
 
-        layout["sum1"].update(Panel(global_table,  style="white on " + c.theme_data.get('BACKGROUND', 'black'), border_style=color('SUMMARY_FRAME'), title= color('SUMMARY_FRAME_TITLE') + str(len(c.remote_farms)) + ' ' + lang.get('farmers', 'Farmers'), subtitle= color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
+        layout["sum1"].update(Panel(global_table,  style="white on " + c.theme_data.get('BACKGROUND', ''), border_style=color('SUMMARY_FRAME'), title= color('SUMMARY_FRAME_TITLE') + str(len(c.remote_farms)) + ' ' + lang.get('farmers', 'Farmers'), subtitle= color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
         
         time.sleep(.1)
         return layout
@@ -861,22 +859,22 @@ def create_main_layout():
 
     
             if farmer_data.get('farm_rewards', {}).values():
-                total = sum(farmer_data.get('farm_rewards', []).values()) # total = sum(c.farm_rewards[farmer_name].values())
+                total = sum(farmer_data.get('farm_rewards', []).values()) 
             else:
                 total = 0
             if farmer_data.get('farm_skips', {}).values():
-                skips = sum(farmer_data.get('farm_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
+                skips = sum(farmer_data.get('farm_skips', {}).values()) 
             else:
                 skips = 0
             # skips = sum(farmer_data.get('farm_skips',{}).values())
 
             if farmer_data.get('farm__recent_rewards', {}).values():
-                recenttotal = sum(farmer_data.get('farm_recent_rewards', []).values()) # total = sum(c.farm_rewards[farmer_name].values())
+                recenttotal = sum(farmer_data.get('farm_recent_rewards', []).values()) 
             else:
                 recenttotal = 0
                 
             if farmer_data.get('farm_recent_skips', {}).values():
-                recentskips = sum(farmer_data.get('farm_recent_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
+                recentskips = sum(farmer_data.get('farm_recent_skips', {}).values()) 
             else:
                 recentskips = 0
             #  recentskips = sum(farmer_data.get('farm_recent_skips',{}).values())
@@ -963,14 +961,12 @@ def create_main_layout():
                 #replot = False
                 if farm in is_completed and farm not in is_replotting:
                     ipds = 100
-                    averageTime = "--:-- "
+                    #averageTime = "--:-- "
                     sector = '-----'
                 #elif c.last_sector_only:
                 #    averageTime =  seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0)) + ' ' 
 
                 prove = ''
-                
-                
                 proving_avg =  '{:.2f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
                 
                 if proving_avg == '.00':
@@ -995,20 +991,11 @@ def create_main_layout():
                 farmid = c.drive_directory.get(farmer_name, {}).get(farm, '')
                 if farmid == '':
                     continue
-                
-                if c.view_xtras:
-                    # sectortxt = str(sector).ljust(5)
-                    sectortxt = ''
-                    averageTime = ''
-                    e = False
-                else:
-                    sectortxt = ''
-                    averageTime = ''
-                    e = False
-                    
-                    # removed Sector + sectortxt
+
+                offline =  farm in c.dropped_drives.get(farmer_name, {})
+
                 if ps > 0: # Remove dropped drives from display
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving)).rjust(5), completed=ipds)
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting, offline) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + color('FARMER_REWARDS', offline) + lang.get('single_hits','H') + color('FARMER_ACCENT', offline) + '/'+ color('FARMER_MISSES', offline) + lang.get('single_misses','M') + color('FARMER_MISSES', offline) + ': ' + color('FARMER_REWARDS', offline)  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT', offline) + '/' + color('FARMER_MISSES', offline))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT', offline) + ' A: ' + color('FARMER_VALUE', offline) + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT', offline) + ' P: '+ color('FARMER_VALUE', offline) + str(str(proving)).rjust(5), completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -1048,7 +1035,7 @@ def create_main_layout():
             tmp.add_row(progress2,' ' + color('FARMER_ACCENT') + ' ' + lang.get('cpu','CPU') + ': ' + color('FARMER_VALUE') + farmer_data.get('system_stats').get('cpu') + "%  " + color('FARMER_ACCENT') + lang.get('ram','RAM') + ": " + color('FARMER_VALUE') + farmer_data.get('system_stats').get('ram').replace(' ', color('FARMER_ACCENT') + '/' + color('FARMER_VALUE')) + '  '  + color('FARMER_ACCENT') + lang.get('load','Load') + ': ' + color('FARMER_VALUE') +farmer_data.get('system_stats').get('load', 0.0))
 
             progress_table.add_row(Panel(
-                tmp,  style="white on " + c.theme_data.get('BACKGROUND', 'black'), border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(recenttotal) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(recentskips),))
+                tmp,  style="white on " + c.theme_data.get('BACKGROUND', ''), border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(recenttotal) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(recentskips),))
             
             progress_table.add_row(job_progress, )
             UpTime = getUptime(farmer_data['startTime'])
@@ -1056,7 +1043,7 @@ def create_main_layout():
                 frame_color = color('FARMER_VALUE', True)
             else: 
                 frame_color = color('FARMER_VALUE')
-            layout["box1"].update(Panel(progress_table,  style="white on " + c.theme_data.get('BACKGROUND', 'black'), border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
+            layout["box1"].update(Panel(progress_table,  style="white on " + c.theme_data.get('BACKGROUND', ''), border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
             
             #c.sum_plotted = sum_plotted
             #c.sum_size = sum_size
@@ -1134,7 +1121,7 @@ async def main():
                 live.refresh()
                 
                 c.layout = layout
-                time.sleep(.1)
+                time.sleep(.2)
                 
     except KeyboardInterrupt:
         print(lang.get('exiting_requested', 'Exiting as requested...') +" Toodles!")

@@ -104,3 +104,4 @@ async def ws_server(websocket, path):
 async def main():
     async with websockets.serve(ws_server, '', c.ui_port,):
         await asyncio.Future()  # run forever
+    
