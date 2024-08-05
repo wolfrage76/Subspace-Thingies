@@ -24,8 +24,6 @@
 # "encircle" for encircled text.
 # "overline" or "o" for overlined text.: 
 
-BACKGROUND: black
-PERCENT: b white
 SUMMARY_TITLE: b green
 SUMMARY_ACCENT: b yellow
 SUMMARY_VALUE: b white
