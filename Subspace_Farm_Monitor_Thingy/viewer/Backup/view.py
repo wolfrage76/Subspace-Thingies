@@ -24,15 +24,18 @@ import urllib
 from rich.live import Live
 import os
 
+
 install()
 
 console = Console()
 
-# sum_size = defaultdict(lambda: [])
+sum_size = defaultdict(lambda: [])
 sumpsd = defaultdict(lambda: [])
 sumps = defaultdict(lambda: [])
 sumipds = {}
 farmer_uptime = 0
+sum_plotted = defaultdict(lambda: 0.0)
+sum_unplotted = defaultdict(lambda: 0.0)
 
 c.startTime = time.time()
 with open("config.yaml", encoding='utf-8') as f:
@@ -55,10 +58,12 @@ c.lang = c.translation[config.get('LANGUAGE', 'en')]
 lang = c.lang
 day = lang.get('day', 'Day')
 
+#c.show_logging = not config.get('SHOW_LOGGING')
 c.hour_24 = config.get('HOUR_24', False)
 c.ui_port = config.get('FRONT_END_PORT', '8016')
 c.toggle_encoding = config.get('TOGGLE_ENCODING', False)
 c.wallet = config.get('WALLET', None)
+c.last_sector_only = config.get('LAST_SECTOR_ONLY',True)
 
 c.running = True
 
@@ -154,7 +159,7 @@ def send(msg=None):
 def create_progress_bar1(completed: float, width: int) -> Progress:
     status_color =  color_by_status(completed)
     progress = Progress(
-        TextColumn(status_color + " [progress.percentage]" + status_color +
+        TextColumn(status_color +" [progress.percentage]" + status_color +
                    "{task.percentage:>3.1f}%"),
         SpinnerColumn(),
         BarColumn(),
@@ -170,6 +175,9 @@ def create_progress_bar(completed: float, width: int) -> Progress:
     progress = Progress(
         SpinnerColumn(),
         BarColumn(),
+        # TextColumn("[bold green]{task.completed}/{task.total}"),
+        # TextColumn("ETA: {task.fields[eta]}"),
+        # expand=True
     )
 
     task_id = progress.add_task(
@@ -323,7 +331,7 @@ def getUptime(started=None):
 
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, l3_concurrency='', l3_farm_sector_time=''):
+    def __init__(self, farmer_name="Unknown", replotting=None, warnings=None, errors=None, startTime='', farm_rewards=None, farm_recent_rewards=None, farm_skips=None, farm_recent_skips=None, disk_farms=None, last_sector_time=None):
         if errors is None:
             errors = []
         if disk_farms is None:
@@ -336,10 +344,15 @@ class Farmer(object):
             farm_skips = {}
         if farm_recent_skips is None:
             farm_recent_skips = {}
+        if last_sector_time is None:
+            last_sector_time = {}
         if warnings is None:
             warnings = []
+        if replotting is None:
+            replotting = {}
 
         self.farmer_name = farmer_name
+        self.replotting = replotting
         self.warnings = warnings
         self.errors = errors
         self.startTime = startTime
@@ -348,14 +361,14 @@ class Farmer(object):
         self.farm_skips = farm_skips
         self.farm_recent_skips = farm_recent_skips
         self.disk_farms = disk_farms
-        self.l3_concurrency = l3_concurrency
-        self.l3_farm_sector_time = l3_farm_sector_time
+        self.last_sector_time = last_sector_time
 
 
-def make_farmer(farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, l3_concurrency='', l3_farm_sector_time=''):
+def make_farmer(farmer_name="Unknown", replotting={}, warnings=[], errors=[],  startTime='', farm_rewards={}, farm_recent_rewards={}, farm_skips={}, farm_recent_skips={}, last_sector_time={} ):
 
     frmr = Farmer()
     frmr.farmer_name = farmer_name
+    frmr.replotting = replotting
     frmr.warnings = warnings
     frmr.errors = errors
     frmr.startTime = startTime
@@ -363,8 +376,7 @@ def make_farmer(farmer_name="Unknown", warnings=[], errors=[], startTime='', far
     frmr.farm_recent_rewards = farm_recent_rewards
     frmr.farm_skips = farm_skips
     frmr.farm_recent_skips = farm_recent_skips
-    frmr.l3_concurrency = l3_concurrency
-    frmr.l3_farm_sector_time = l3_farm_sector_time
+    frmr.last_sector_time = last_sector_time
 
     return frmr
 
@@ -448,7 +460,7 @@ def build_ui():
     layout = make_layout()
 
     layout["header"].update(Header())
-    layout["body"].visible = False
+    layout["body"].visible = False# (c.view_state == 1 or c.view_state ==3)
     layout["side"].visible = (c.view_state == 1 or c.view_state == 2)
     layout["box1"].update(Panel("", border_style=color('FARMER_FRAME'), title=color('FARMER_TILE') + "Waiting for Farmers...",
                                 subtitle=color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%" + ' | ' + color('STATUS_REPLOTTING') + 'Replotting'))
@@ -547,8 +559,8 @@ def create_summary_layout(layout):
         progress_table2.add_column(width=12)
         global_table = Table.grid(expand=True)
         global_table.add_column(width=12)
-        #c.sum_size = {}
-        #c.sum_plotted = {}
+        c.sum_size = {}
+        c.sum_plotted = {}
         
         for farmer_index in range(len(c.farm_names)):
             drive_count = 0
@@ -560,7 +572,7 @@ def create_summary_layout(layout):
             farm_about_expire = 0.0
             farm_plotted = 0.0  # Initialize farm_plotted here
             farm_notplotted = 0.0  # Initialize farm_notplotted here
-            # farm_last_sector_time = 0.0
+            farm_last_sector_time = 0.0
             total_sectors = defaultdict(float)  # Initialize total_sectors here
             try:
                 progress_items = Table.grid(expand=False)
@@ -598,7 +610,7 @@ def create_summary_layout(layout):
                     disk_metrics = farmer_data.get('farm_metrics', {}).get(disk, {})
                     
                     for state in ["Plotted", "Expired", "AboutToExpire", "NotPlotted"]:
-                        key = f"subspace_farmer_farm_sectors_total_Sectors_{state}"
+                        key = f"subspace_farmer_sectors_total_sectors_{state}"
                         total_sectors[state] += float(disk_metrics.get(key, {}).get('value', 0))
 
                     farm_expired += total_sectors.get('Expired',0)
@@ -612,8 +624,8 @@ def create_summary_layout(layout):
                  
                     if total_sectors.get('NotPlotted',0) == 0 and total_sectors.get('Expired', 0) == 0 and total_sectors.get('AboutToExpire', 0) == 0:
                         is_completed.append(disk)
-                    #else:
-                    #    farm_last_sector_time += c.last_sector_time.get(farmer_name, {}).get(disk, 0) 
+                    else:
+                        farm_last_sector_time += c.last_sector_time.get(farmer_name, {}).get(disk, 0) 
                     
                     if total_sectors.get('Expired', 0) > 0 or total_sectors.get('AboutToExpire', 0) > 0:
                         is_replotting.append(disk)
@@ -631,7 +643,11 @@ def create_summary_layout(layout):
                 if nocount <=0:
                     calc_avg = 0
                 else:
-                    calc_avg = farmer_data['l3_farm_sector_time']
+                    if c.last_sector_only == False:
+                        calced = calculate_average_plotting_time_for_farmer(farmer_data.get('farm_metrics', {}))
+                    else:
+                        calced = farm_last_sector_time / nocount
+                    calc_avg = calced / nocount
                 
                 if (farm_notplotted + farm_expired + farm_about_expire) != 0 and farmer_data.get('farm_metrics') and calc_avg > 0:
                     sec_hr = 3600 / calc_avg
@@ -660,11 +676,13 @@ def create_summary_layout(layout):
                 global_recenttotal_rewards += recenttotal
                 global_skips += skips
                 global_recentskips += recentskips
-                global_sec_day_total += sec_day 
+                global_sec_day_total += sec_day #* nocount  # Multiply by nocount to get total bytes/day for this farm
                 global_sec_hr_total += sec_hr 
                 total_nocount += nocount  # Accumulate non-completed drives for weighted average calculation
                 total_calc_avg += calc_avg * nocount  # Weighted sum for average calculation
 
+                #tibs = convert_to_tib(tibs + ' GiB')
+                
                 hits_day = c.rewards_per_hr.get(farmer_name, 0) * 24
                 if farm_plotted == 0:
                     tibs = '0.0'
@@ -691,7 +709,7 @@ def create_summary_layout(layout):
                 global_hhr =  ' '+ color('SUMMARY_ACCENT')   + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT')  + '/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE')   + global_hhr_formated
                 
 
-                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE')+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
+                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
 
                 progress_table2.add_row(Panel(
                 progress_items, title_align='left', title=color('SUMMARY_TITLE', offline) + farmer_name + color('SUMMARY_ACCENT', offline) + ' (' + color_by_status(sumipds, False, offline) + str(drive_count)
@@ -737,23 +755,23 @@ def create_summary_layout(layout):
         time.sleep(.1)
         return layout
 
- 
- 
-def format_s_ms(milliseconds):
-    if float(milliseconds) < 1000:
-        if float(milliseconds) > 200:
-            return color('WARNING') + f"{milliseconds}ms"
-        else:    
-            return f"{milliseconds}ms"
-    else:
-        seconds = milliseconds / 1000.0
-        if seconds >= 1:
-            return color('ERROR') + f"{seconds:.2f}s"
-        else:
-            return color('WARNING') + f"{seconds:.2f}s"
-        
 
-        
+""" def convert_svg_to_pdf():
+    export_console = Console(record=True)
+    content = c.layout['sum1']
+    export_console.print(content)
+
+    # Export console output to SVG
+    svg_data = export_console.export_svg(title=lang.get('farmer', 'Farmer'))
+    with open('output.svg', 'w') as svg_file:
+        svg_file.write(svg_data)
+
+    cairosvg.svg2png(url='output.svg', write_to='FarmerReport.png')
+    os.remove('output.svg')
+    requests.post(config.get('DISCORD_WEBHOOK', None), files={"file": open('FarmerReport.png', "rb")})
+    os.remove('FarmerReport.png')
+ """    
+
 def update_farmer_index():
     cooldown_period = 7  # Cooldown period in seconds after a manual update
     while c.running:
@@ -773,18 +791,39 @@ def create_main_layout():
     layout = c.layout
     layout["side"].visible = c.view_state in {1, 2}
     layout["bodysum"].visible = c.view_state in {1, 3}
+    #layout["box1"].visible = c.view_xtras
     c.layout = layout
     c.farm_names = c.farm_names or []
     c.remote_farms = c.remote_farms or {}
+    sum_plotted = defaultdict(lambda: {})
+    sum_size = defaultdict(lambda: {})
 
+    #farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
+    #while True:
+   
+   
+   # while c.paused:
+   #     if not c.force_update:
+   #         time.sleep(.2)   
+   #     else:
+   #         c.force_update = False
+        
+        #time.sleep(.2)
+            
+                         
+                  
     try:
             
         if len(c.farm_names) > 0:
             farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
+        #        else: 
+        #           continue
             farm_info = c.remote_farms.get(farmer_name, {})
             farmer_data = farm_info.get('data', {})
                 
 
+            #if not farmer_data:
+            #    continue
             c.warnings = farmer_data.get('warnings', [])
             c.errors = farmer_data.get('errors', [])
 
@@ -792,33 +831,37 @@ def create_main_layout():
             job_progress = Progress("{task.description}",
                                     SpinnerColumn(),
                                     TextColumn(
-                                        "[progress.percentage]" + color('PERCENT') + "{task.percentage:>5.1f}%"),
-                                    BarColumn(bar_width=8),)
+                                        "[progress.percentage][white]{task.percentage:>3.1f}%"),
+                                    BarColumn(bar_width=8),
 
-    
+                                    )
             if farmer_data.get('farm_rewards', {}).values():
-                total = sum(farmer_data.get('farm_rewards', []).values())
+                total = sum(farmer_data.get('farm_rewards', []).values()) # total = sum(c.farm_rewards[farmer_name].values())
             else:
                 total = 0
             if farmer_data.get('farm_skips', {}).values():
-                skips = sum(farmer_data.get('farm_skips', {}).values())
+                skips = sum(farmer_data.get('farm_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
             else:
                 skips = 0
+            # skips = sum(farmer_data.get('farm_skips',{}).values())
 
             if farmer_data.get('farm__recent_rewards', {}).values():
-                recenttotal = sum(farmer_data.get('farm_recent_rewards', []).values())
+                recenttotal = sum(farmer_data.get('farm_recent_rewards', []).values()) # total = sum(c.farm_rewards[farmer_name].values())
             else:
                 recenttotal = 0
                 
             if farmer_data.get('farm_recent_skips', {}).values():
-                recentskips = sum(farmer_data.get('farm_recent_skips', {}).values())
+                recentskips = sum(farmer_data.get('farm_recent_skips', {}).values()) # total = sum(c.farm_rewards[farmer_name].values())
             else:
                 recentskips = 0
+            #  recentskips = sum(farmer_data.get('farm_recent_skips',{}).values())
 
             
             ipds = 0.0
             psd = 0.0
             remspace = 0.0
+            sector = 0
+            lastsectortime = 0
             c.psTotal = 0.0
             c.psdTotal = 0.0
             c.remTotal = 0.0
@@ -833,17 +876,17 @@ def create_main_layout():
                 total_sectors['AboutToExpire'] = 0
 
                                     
-                if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted'):
+                if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sector_total_sectors'):
                     
-                    psd = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted').get('value', 0))
+                    psd = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sector_total_sectors').get('value', 0))
                 else: psd = 0
                 
-                if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_NotPlotted'):
-                        remspace = float(farmer_data['farm_metrics'][farm]['subspace_farmer_farm_sectors_total_Sectors_NotPlotted'].get('value', 0))
+                if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sector_notplotted_count'):
+                        remspace = float(farmer_data['farm_metrics'][farm]['subspace_farmer_sector_notplotted_count'].get('value', 0))
                 else:
                     remspace = 0
                 
-                replotspace = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Expired', {}).get('value', 0)) + float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_AboutToExpire', {}).get('value', 0)) 
+                replotspace = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sector_expired_count', {}).get('value', 0)) + float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sectors_total_sectors_AboutToExpire', {}).get('value', 0)) 
 
                 
                 ps = remspace + psd + replotspace
@@ -864,6 +907,18 @@ def create_main_layout():
 
                 c.farm_rewards[farmer_name][farm] = c.farm_rewards.get(farmer_name, {}).get(farm, 0)
                 c.farm_recent_rewards[farmer_name][farm] = c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)
+                
+                if farmer_data.get('farm_metrics', {}).get(farm):
+                    summedPlotting = float(farmer_data['farm_metrics'].get(farm, ).get('subspace_farmer_farm_sector_plotting_time_seconds_sum', {}).get('value','0')) 
+                else:
+                    summedPlotting = 0
+                plottingCount = farmer_data.get('farm_metrics', {}).get(farm,{}).get('subspace_farmer_farm_sector_plotting_time_seconds_count',{}).get('value', 0.0)
+                
+                
+                if plottingCount == 0 or (remspace + replotspace == 0) :
+                    averageTime = "00:00"
+                else:
+                    averageTime = seconds_to_mm_ss(summedPlotting / float(plottingCount))   # str(c.avgtime.get(farmer_name, {}).get(farm, '00:00'))
 
                 disk_metrics = farmer_data.get('farm_metrics', {}).get(farm, {})
                 
@@ -872,34 +927,24 @@ def create_main_layout():
                     total_sectors[state] += float(disk_metrics.get(key, {}).get('value', 0))
                 
                 if total_sectors.get('NotPlotted', 0) == 0 and total_sectors.get('AboutToExpire', 0) == 0 and total_sectors.get('Expired', 0) == 0 and total_sectors.get('Plotted', 0) > 0 :
+                    #replotting_count += 1
                     is_completed.append(farm)
                     
                 if total_sectors.get('AboutToExpire', 0) > 0 or total_sectors.get('Expired', 0) > 0:
+                    #replotting_count += 1
                     is_replotting.append(farm)
 
                 
+                #replot = False
                 if farm in is_completed and farm not in is_replotting:
                     ipds = 100
-                    averageTime = "--:-- "
+                    averageTime = "--:--"
                     sector = '-----'
+                elif c.last_sector_only:
+                    averageTime =  seconds_to_mm_ss(c.last_sector_time.get(farmer_name, {}).get(farm, 0)) 
 
                 prove = ''
-                
-                
                 proving_avg =  '{:.2f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
-                
-                if proving_avg == '.00':
-                    proving = '----'
-                else:
-                    if float(proving_avg) >= 10:
-                        proving = '[blink]' + color('ERROR') + '>' + str(int(float(farmer_data.get('proves', {}).get(farm, 0.0)))) + 's'
-                    elif float(proving_avg) >= 4:
-                        proving = '[blink]' + color('ERROR') + str(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)) + 's'
-                    elif float(proving_avg) > 2:
-                        proving = color('WARNING') + str(float(farmer_data.get('proves', {}).get(farm, 0.0))) + 's'
-                    else:
-                        proving = proving_avg + 's'
-                        
                 auditing_avg = int(float(farmer_data.get('audits', {}).get(farm, 0.0)))
 
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'WS':
@@ -912,16 +957,16 @@ def create_main_layout():
                     continue
                 
                 if c.view_xtras:
-                    sectortxt = ''
-                    averageTime = ''
-                    e = False
+                    sectortxt = str(sector).ljust(5)
                 else:
                     sectortxt = ''
                     averageTime = ''
+
                     e = False
                     
+                    # removed Sector + sectortxt
                 if ps > 0: # Remove dropped drives from display
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving)).rjust(5), completed=ipds)
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + ' ' + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES')).ljust(5)  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + str(str(auditing_avg) + 'ms').rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(proving_avg) + 's', completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -935,9 +980,11 @@ def create_main_layout():
             progress2 = Progress(
                 "{task.description}",
                 SpinnerColumn(),
-                TextColumn("[progress.percentage]" + color('PERCENT') + "{task.percentage:>5.1f}%"),
+                TextColumn(
+                    "[progress.percentage][white]{task.percentage:>3.1f}%"),
                 BarColumn(),
             )
+            #completed = 0.0
             if total_completed == 100:
                     progress2.add_task('[white]', completed=100)
             elif total_completed > 0:
@@ -963,12 +1010,11 @@ def create_main_layout():
                 tmp, border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(recenttotal) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(recentskips),))
             
             progress_table.add_row(job_progress, )
-            UpTime = getUptime(farmer_data['startTime'])
-            if UpTime == '--:--:--':
-                frame_color = color('FARMER_VALUE', True)
-            else: 
-                frame_color = color('FARMER_VALUE')
-            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
+
+            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + color('FARMER_VALUE') + lang.get('uptime', 'Up') + ": " + getUptime(farmer_data['startTime']) + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
+            
+            c.sum_plotted = sum_plotted
+            c.sum_size = sum_size
             
             time.sleep(.02)
             
@@ -978,6 +1024,8 @@ def create_main_layout():
         
         console.print(error_msg)
         time.sleep(10)
+        # Add some additional error handling code here
+
 
 cleanthread = threading.Thread(
     target=clean_thread, name='Cleaning', daemon=True)
@@ -995,7 +1043,9 @@ def get_max_directory_length(farmer_name):
         if len(directory) > max_length:
             max_length = len(directory)
 
-    return max_length
+    return max_length # + 2  # Add 2 to the maximum length
+
+
 
 async def main():
     layout = build_ui()  # Build and retrieve the UI layout
@@ -1025,7 +1075,7 @@ async def main():
     try:
 
         with Live(layout, refresh_per_second=4, screen=True) as live:
-            while c.running:
+            while c.running: #while True:
                 if not c.running:
                     print('Toodles!')
                     break
@@ -1058,6 +1108,7 @@ async def main():
 
     kb.stop()
     
+    #import sys
     os._exit(0) 
 
   
@@ -1065,3 +1116,4 @@ async def main():
 if __name__ == "__main__":
 
     asyncio.run(main())
+
