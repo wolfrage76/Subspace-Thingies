@@ -1,5 +1,7 @@
 # Subspace-Thingies
 
+SEE BETA BRANCH FOR GPU/CLUSTER VERSION
+
 ## My tools and utils for the Subspace Network.
 Currently there is the Farm monitor, and a standalone Wallet monitor (instructions at bottom)
 The wallet monitor is also built into the Farm Monitor
