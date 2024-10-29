@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 # Initialize state
+global_time = 0
 dropped_drives = []
 timezone_offset = 0
 audits = {}

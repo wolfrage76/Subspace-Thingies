@@ -84,7 +84,7 @@ async def ws_server(websocket, path):
             c.prove_method[farmer_name] = farm_data['prove_method']
             c.farm_skips[farmer_name] = farm_data['farm_skips']
             c.farm_recent_skips[farmer_name] = farm_data['farm_recent_skips']
-            #c.last_sector_time[farmer_name] = farm_data['last_sector_time']
+            # c.last_sector_time[farmer_name] = farm_data['last_sector_time']
             c.dropped_drives[farmer_name] = farm_data.get('dropped_drives', [])
             
             if errored:
