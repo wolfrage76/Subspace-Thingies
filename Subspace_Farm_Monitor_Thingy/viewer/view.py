@@ -240,7 +240,7 @@ def create_footer(layout):
     footer_txt.add_row(Align.left(color('FOOTER_TEXT') + lang.get('latest', 'Latest') + ': ' + ver), Align.center(color('FOOTER_TEXT') + c.banners))
     
     footer = Panel(footer_txt, title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
-                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '🡰 ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '🡲' + color('FOOTER_ACCENT')  +  ' ]: ' + 
+                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '<- ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '->' + color('FOOTER_ACCENT')  +  ' ]: ' + 
                    color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' + 
                    color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + 
                    lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' + 
@@ -570,6 +570,12 @@ def create_summary_layout(layout):
                 progress_items.add_column(width=14)
                 progress_items.add_column(width=6)
                 farmer_name = c.farm_names[farmer_index % len(c.farm_names)]
+                
+                if farmer_name in c.warning_farms:
+                    offline = True
+                else:
+                    offline = False
+                
                 farm_info = c.remote_farms.get(farmer_name, {})
 
                 farmer_data = farm_info.get('data', {})
@@ -632,6 +638,7 @@ def create_summary_layout(layout):
                     calc_avg = 0
                 else:
                     calc_avg = farmer_data['l3_farm_sector_time']
+                   # calc_avg = c.last_sector_time[farmer_name] # ?
                 
                 if (farm_notplotted + farm_expired + farm_about_expire) != 0 and farmer_data.get('farm_metrics') and calc_avg > 0:
                     sec_hr = 3600 / calc_avg
@@ -671,7 +678,7 @@ def create_summary_layout(layout):
                 else:
                     tibs = f'{hits_day / (farm_plotted * (1 / (2**10)) ):.2f}'
                 global_hhr_sum += c.rewards_per_hr.get(farmer_name, 0)
-                h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + tibs
+                h_tib = '  ' + color('SUMMARY_ACCENT', offline)  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE', offline) + tibs
                 if global_farm_plotted == 0:
                     global_h_tibs = '0.0'
                 else:
@@ -680,18 +687,13 @@ def create_summary_layout(layout):
 
                 hhr_formated = f'{c.rewards_per_hr.get(farmer_name, 0):.2f}'
                
-                if farmer_name in c.warning_farms:
-                    offline = True
-                else:
-                    offline = False
-               
                 hhr =  color('SUMMARY_ACCENT', offline) + ' ' + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT', offline) +'/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE', offline) + hhr_formated
                 
                 global_hhr_formated = f'{float(global_hhr_sum):.2f}'
                 global_hhr =  ' '+ color('SUMMARY_ACCENT')   + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT')  + '/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE')   + global_hhr_formated
                 
 
-                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE')+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
+                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE',offline)+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
 
                 progress_table2.add_row(Panel(
                 progress_items, title_align='left', title=color('SUMMARY_TITLE', offline) + farmer_name + color('SUMMARY_ACCENT', offline) + ' (' + color_by_status(sumipds, False, offline) + str(drive_count)
@@ -814,6 +816,11 @@ def create_main_layout():
                 recentskips = sum(farmer_data.get('farm_recent_skips', {}).values())
             else:
                 recentskips = 0
+            
+            if farmer_name in c.warning_farms:
+                offline = True
+            else:
+                offline = False
 
             
             ipds = 0.0
@@ -896,7 +903,7 @@ def create_main_layout():
                     elif float(proving_avg) >= 4:
                         proving = '[blink]' + color('ERROR') + str(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)) + 's'
                     elif float(proving_avg) > 2:
-                        proving = color('WARNING') + str(float(farmer_data.get('proves', {}).get(farm, 0.0))) + 's'
+                        proving = color('WARNING') + str(round(float(farmer_data.get('proves', {}).get(farm, 0.0)))) + 's'
                     else:
                         proving = proving_avg + 's'
                         
@@ -957,7 +964,7 @@ def create_main_layout():
             tmp = Table.grid()
             tmp.add_column(width=13)
             tmp.add_column()
-            tmp.add_row(progress2,' ' + color('FARMER_ACCENT') + ' ' + lang.get('cpu','CPU') + ': ' + color('FARMER_VALUE') + farmer_data.get('system_stats').get('cpu') + "%  " + color('FARMER_ACCENT') + lang.get('ram','RAM') + ": " + color('FARMER_VALUE') + farmer_data.get('system_stats').get('ram').replace(' ', color('FARMER_ACCENT') + '/' + color('FARMER_VALUE')) + '  '  + color('FARMER_ACCENT') + lang.get('load','Load') + ': ' + color('FARMER_VALUE') +farmer_data.get('system_stats').get('load', 0.0))
+            tmp.add_row(progress2,' ' + color('FARMER_ACCENT') + ' ' + lang.get('cpu','CPU') + ': ' + color('FARMER_VALUE') + farmer_data.get('system_stats', {}).get('cpu','0') + "%  " + color('FARMER_ACCENT') + lang.get('ram','RAM') + ": " + color('FARMER_VALUE') + farmer_data.get('system_stats').get('ram', '0').replace(' ', color('FARMER_ACCENT') + '/' + color('FARMER_VALUE')) + '  '  + color('FARMER_ACCENT') + lang.get('load','Load') + ': ' + color('FARMER_VALUE') +farmer_data.get('system_stats').get('load', '0.0'))
 
             progress_table.add_row(Panel(
                 tmp, border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(recenttotal) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(recentskips),))
@@ -968,7 +975,7 @@ def create_main_layout():
                 frame_color = color('FARMER_VALUE', True)
             else: 
                 frame_color = color('FARMER_VALUE')
-            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
+            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME',offline), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE', offline) + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
             
             time.sleep(.02)
             
@@ -1024,7 +1031,7 @@ async def main():
     
     try:
 
-        with Live(layout, refresh_per_second=4, screen=True) as live:
+        with Live(layout, refresh_per_second=10, screen=True) as live:
             while c.running:
                 if not c.running:
                     print('Toodles!')
@@ -1036,7 +1043,7 @@ async def main():
                 layout["footer"].update(create_footer(
                     create_summary_layout(layout)))
                 
-                live.refresh()
+                # live.refresh()
                 
                 c.layout = layout
                 time.sleep(.1)

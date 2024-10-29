@@ -2,6 +2,7 @@ import psutil
 from pathlib import Path
 from datetime import timedelta, timezone, datetime
 import dateutil.parser
+from dateutil.parser import parse  # Importing parse function
 import yaml
 import time
 import threading
@@ -9,12 +10,12 @@ import utilities.conf as c
 import utilities.websocket_client as websocket_client
 from rich import print
 import re
-from dateutil.parser import parse
 import requests
 from rich.console import Console
 import http.client
 import urllib
 import os
+import json
 
 # Initialize state
 last_notification_time = {}
@@ -44,8 +45,10 @@ c.front_end_ip = config.get('FRONT_END_IP', "127.0.0.1")
 c.front_end_port = config.get('FRONT_END_PORT', "8016")
 farmer_ip = config.get('FARMER_IP', "127.0.0.1")
 farmer_port = config.get('FARMER_PORT', "8181")
+cluster_enabled = config.get('CLUSTER_ENABLED' ,False)
 
 reward_phrase = 'reward_signing: Successfully signed reward hash'
+recommendTxt = '\n\t\t[blink][b yellow]Recommendation: [white]'
 
 dt = datetime.now(timezone.utc)
 utc_time = dt.replace(tzinfo=timezone.utc)
@@ -53,10 +56,16 @@ utc_timestamp = utc_time.timestamp()
 c.startTime = utc_timestamp
 monitorstartTime = utc_timestamp
 
+
 def process_farmer_metrics(metrics, farm_id_mapping):
+    """
+    Process farmer metrics and return a dictionary of metrics per disk index.
+    """
     metrics_dict = {}
     wanted = [
         'subspace_farmer_farm_sectors_total_Sectors',
+        'subspace_farmer_plotter_sector_plotting_time_seconds',
+        'subspace_farmer_plotter_sector_plotted_counter_Sectors',
         'process_start_time_seconds',
         'subspace_farmer_sectors_total_sectors',
         'subspace_farmer_sector_plot_count',
@@ -69,14 +78,26 @@ def process_farmer_metrics(metrics, farm_id_mapping):
         'subspace_farmer_sectors_total_sectors_AboutToExpire',
         'subspace_farmer_farm_auditing_time_seconds_sum',
         'subspace_farmer_farm_auditing_time_seconds_count',
-        'subspace_farmer_farm_sector_plotting_time_seconds_count',
         'subspace_farmer_farm_proving_time_seconds_count',
         'subspace_farmer_farm_proving_time_seconds_sum',
         'subspace_farmer_sectors_total_sectors_Plotting',
         'subspace_farmer_sector_expired_count'
     ]
+    
+    total_plotting_time_sum = 0
+    total_plotting_time_count = 0
+    test1 = []
+    test2 = []
+    
     for metric in metrics:
-        if metric.startswith('subspace_farmer_') and 'farm_id="' in metric:
+        if 'subspace_farmer_farm_sector_plotting_time_seconds_sum' in metric:
+            test1.append(float(metric.split()[-1]))
+            total_plotting_time_sum += float(metric.split()[-1])
+        elif 'subspace_farmer_farm_sector_plotting_time_seconds_count' in metric:
+            test2.append(float(metric.split()[-1]))
+            total_plotting_time_count += float(metric.split()[-1])
+            
+        elif metric.startswith('subspace_farmer_') and 'farm_id="' in metric:
             parts = metric.split()
             metric_name = parts[0].split('{')[0]
             if '_bucket' in metric_name or metric_name not in wanted:
@@ -104,10 +125,19 @@ def process_farmer_metrics(metrics, farm_id_mapping):
                 else:
                     metric_key = metric_name
                 metrics_dict[disk_index][metric_key] = {'value': value, 'labels': labels_dict}
-                
+    # Calculate global average sector plotting time
+    if total_plotting_time_count > 0:
+        c.global_time = total_plotting_time_sum / total_plotting_time_count
+    else:
+        c.global_time = 0  # If no plotting has occurred
+    test1
+    test2
     return metrics_dict
 
 def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
+    """
+    Retrieve farmer metrics from the farmer service.
+    """
     url = f"http://{farmer_ip}:{farmer_port}/metrics"
     max_logs = 3
     metricslog = []
@@ -138,38 +168,38 @@ def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
         return [] 
     
 def update_farm_metrics(farm_id_mapping):
+    """
+    Update farm metrics and store them in the global configuration.
+    """
     metrics = get_farmer_metrics(farmer_ip, farmer_port)
     processed_metrics = process_farmer_metrics(metrics, farm_id_mapping)
     all_metrics = c.farm_metrics
     for disk_index, metrics in processed_metrics.items():
         if disk_index in c.disk_farms:
-            
             audit_sum = float(metrics.get('subspace_farmer_farm_auditing_time_seconds_sum', {}).get('value', 0))
             audit_count = float(metrics.get('subspace_farmer_farm_auditing_time_seconds_count', {}).get('value', 0))
             prove_sum = float(metrics.get('subspace_farmer_farm_proving_time_seconds_sum', {}).get('value', 0))
             prove_count = float(metrics.get('subspace_farmer_farm_proving_time_seconds_count', {}).get('value', 0))
             
-            
-            if prove_count == 0 or prove_sum == 0:
-                c.proves[disk_index] =  0
-            else:
-                c.proves[disk_index] = prove_sum / prove_count
-                
-            if audit_count == 0 or audit_sum == 0:
-                c.audits[disk_index] =  0
-            else:
-                c.audits[disk_index] = 1000 * (audit_sum / audit_count)
+            c.proves[disk_index] = prove_sum / prove_count if prove_count > 0 else 0
+            c.audits[disk_index] = 1000 * (audit_sum / audit_count) if audit_count > 0 else 0
             
             all_metrics[disk_index] = metrics
            
     c.farm_metrics = all_metrics
 
 def socket_client_thread():
+    """
+    Periodically attempt to reconnect the WebSocket client.
+    """
     while True:
         websocket_client.main()
         time.sleep(15)
 
 def update_metrics_periodically(interval=10):
+    """
+    Periodically update farm metrics and reward information.
+    """
     while True:
         c.rewards_per_hr = 0
         for disk_index in disk_farms:
@@ -179,6 +209,7 @@ def update_metrics_periodically(interval=10):
             c.rewards_per_hr += calculate_rewards_per_hour(c.farm_reward_times[disk_index])
             
         update_farm_metrics(c.farm_id_mapping)
+        # save_data_to_file()
         time.sleep(interval)
 
 metrics_thread = threading.Thread(target=update_metrics_periodically, daemon=True)
@@ -211,9 +242,12 @@ def stop_error_notification(farm):
     send(config['FARMER_NAME'] + '| ERROR - Drive Dropped Off: ' + farm)
     reset_cooldown = min_cooldown * (2 ** (notification_count[farm] + 1))
     threading.Timer(reset_cooldown, reset_notification_count, [farm]).start()
-    
+
 def datetime_valid(dt_str):
-    dt_str = dt_str.replace('INFO','').strip()
+    """
+    Validate the datetime string format.
+    """
+    dt_str = dt_str.replace('INFO', '').strip()
     try:
         if dt_str.endswith('Z'):
             dt_str = dt_str[:-1] + '+00:00'
@@ -223,13 +257,16 @@ def datetime_valid(dt_str):
         return False
 
 def convert_to_utc_with_offset_zulu(date_time_str, utc_offset=0):
+    """
+    Convert a local datetime string to UTC with a Zulu suffix.
+    """
     if not isinstance(date_time_str, str):
        return date_time_str
     if not isinstance(utc_offset, int):
         utc_offset = 0
     try:
         local_dt = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S.%f")
-    except ValueError as e:
+    except ValueError:
         return date_time_str
     
     offset = timedelta(hours=utc_offset - 12)
@@ -237,8 +274,17 @@ def convert_to_utc_with_offset_zulu(date_time_str, utc_offset=0):
     return utc_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
 
 def local_time(string):
+    """
+    Convert a log line's timestamp to local time and apply formatting.
+    """
     string2 = string.split(' ')
     convert = string2[0]
+    setColor = str()
+    if 'ERROR' in string:
+        setColor = '[red]'
+
+    elif 'WARN' in string:
+        setColor = '[dark_orange]'
     
     if config.get('U_GPU_PLOTTER', False):
         string2 = string.split('  ')[1].strip()
@@ -255,33 +301,41 @@ def local_time(string):
         datestamp = datestamp.astimezone(tz=local_tz)
   
         if c.hour_24:
-            formatted_timestamp = datestamp.strftime("%m-%d %H:%M:%S|")
+            formatted_timestamp = datestamp.strftime("%m-%d %H:%M:%S|" + setColor)
         else:
             formatted_timestamp = datestamp.strftime(
-                "%m-%d %I:%M:%S %p|").replace(' PM', 'pm').replace(' AM', 'am')
+                "%m-%d %I:%M:%S %p|").replace(' PM', 'pm').replace(' AM', 'am') + setColor
 
         if config.get('U_GPU_PLOTTER', False):
-            return formatted_timestamp + ' ' + string.replace(string.split('  ')[0],'')
+            return formatted_timestamp + ' ' + string.replace(string.split(' ')[0],'')
         else:
-            return formatted_timestamp + ' ' + ' '.join(string2).replace(string.split('  ')[0],'')
+            combined = formatted_timestamp + ' ' + ' '.join(string2).replace(string.split(' ')[0],'')
+
+            return combined.replace('  ',' ')
     else:
         return string
 
 def calculate_rewards_per_hour(farm_rewards):
-    dt = datetime.now(timezone.utc)
-    utc_time = dt.replace(tzinfo=timezone.utc)
-    utc_timestamp = utc_time.timestamp()
-    one_day_ago = utc_timestamp - 86400
+    """
+    Calculate the average rewards per hour over the past 24 hours.
+    """
+    one_day_ago = datetime.now(timezone.utc).timestamp() - 86400
     recent_rewards = [r for r in farm_rewards if r > one_day_ago]
     return len(recent_rewards) / 24  
 
 def rewards_per_day_per_tib(farm_rewards, farm, total_plotted_tib):
+    """
+    Calculate rewards per day per TiB of plotted space.
+    """
     one_day_ago = datetime.now().timestamp() - 86400
     recent_rewards = [r for r in farm_rewards.get(farm, []) if r > one_day_ago]
     total_rewards_last_24_hours = len(recent_rewards)
     return total_rewards_last_24_hours / total_plotted_tib
 
 def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping):
+    """
+    Parse a single log line and update various metrics and states.
+    """
     trigger = False
     parsed_data = {
         'line_plain': '', 
@@ -324,18 +378,17 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         for x in range(c.l3_concurrency * 2):
             c.l3_timestamps.append(line_timestamp)
         c.dropped_drives = []
+        # c.l3_concurrency = 2 #######
     
     if "ERROR" in line_plain:
         c.errors.pop(0)
-        c.errors.append(local_time(line_plain.replace(
-            '\n', '').replace(' ERROR', '[b red]')))
+        c.errors.append(local_time(line_plain.replace('\n', '')))
 
-    if "WARN" in line_plain:
+    elif "WARN" in line_plain:
         c.warnings.pop(0)
-        c.warnings.append(local_time(line_plain.replace(
-            '\n', '').replace(' WARN', '[b yellow]')))
+        c.warnings.append(local_time(line_plain.replace('\n', '')))
     
-    elif 'arm errored and stopped' in line_plain and parsed_datetime > monitorstartTime:
+    if 'arm errored and stopped' in line_plain and parsed_datetime > monitorstartTime:
         if '}' in line_plain:    
             farm = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}")]
         elif 'farm_index=' in line_plain: 
@@ -349,9 +402,12 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
     elif 'buffer of stream grows beyond limit' in line_plain:
         pass
     elif 'is likely already in use' in line_plain:
-        pass
+        line_plain = line_plain + ' ' + recommendTxt + "Check that your Farmer is not running, and that you aren't currently scrubbing that drive\n"
     elif 'Failed to subscribe' in line_plain:
         pass
+    
+    elif 'Invalid scalar' in line_plain:
+        line_plain = line_plain + ' ' + recommendTxt + "Run 'subspace-farmer scrub /path/to/farm' \n"
     elif "ID: " in line_plain:
         farm_id = line_plain.split(' ID: ')[1]
         farm_index = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find('}')]
@@ -368,7 +424,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.dropped_drives.append(farm)
         stop_error_notification(farm)  
         
-    elif 'subspace_farmer::commands::farm: Farm' in line_plain and 'cache worker exited' not in line_plain and 'error' not in line_plain:
+    elif ('subspace_farmer::commands::farm: Farm' in line_plain or 'subspace_farmer::commands::cluster::farmer: Farm' in line_plain) and ('cache worker exited' not in line_plain and 'error' not in line_plain):
         farm = line_plain[line_plain.find(
             indexconst) + len(indexconst):line_plain.find("}")]
         
@@ -382,6 +438,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
             indexconst) + len(indexconst):line_plain.find("}")]
         prove_type = 'WC'
         c.prove_method[farm] = prove_type
+        line_plain = line_plain + recommendTxt + 'Benchmark your drives, use decent quality SSDs'
     elif 'ConcurrentChunks' in line_plain:
         prove_type = 'CC'
         c.prove_method[farm] = prove_type
@@ -393,18 +450,43 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.prove_method[farm] = prove_type
     
     elif "lotting sector" in line_plain:
-        if len(c.l3_timestamps) >= c.l3_concurrency:
-            del(c.l3_timestamps[0])
-        c.l3_timestamps.append(line_timestamp)
-        l3_sum = 0
+        
+        if c.l3_concurrency <= 1:
+            # Append the timestamp of each detected sector plot completion
+            c.l3_timestamps.append(line_timestamp)
 
-        for x in range(c.l3_concurrency):
-            l3_sum += c.l3_timestamps[x + c.l3_concurrency] - c.l3_timestamps[x]
+            # Keep only the latest 100 timestamps
+            if len(c.l3_timestamps) > 100:
+                c.l3_timestamps.pop(0)
 
-        if c.l3_concurrency != 0:
-            c.l3_farm_sector_time = l3_sum / (c.l3_concurrency * c.l3_concurrency)
-        else:
-            c.l3_farm_sector_time = 0
+            # Calculate sector time if there are at least two timestamps
+            if len(c.l3_timestamps) > 1:
+                # Calculate time differences between consecutive timestamps
+                time_diffs = [
+                    c.l3_timestamps[i] - c.l3_timestamps[i - 1] 
+                    for i in range(1, len(c.l3_timestamps))
+                ]
+                
+                # Calculate the average of the time differences
+                l3_sum = sum(time_diffs) / len(time_diffs)
+                
+                # Update the average sector time
+                c.l3_farm_sector_time = l3_sum
+            else:
+                # Set sector time to 0 if there is only one or no timestamps yet
+                c.l3_farm_sector_time = 0
+
+        elif c.l3_concurrency > 1:
+            if len(c.l3_timestamps) >= c.l3_concurrency:
+                del(c.l3_timestamps[0])
+            c.l3_timestamps.append(line_timestamp)
+            l3_sum = 0
+
+            for x in range(c.l3_concurrency):
+                l3_sum += c.l3_timestamps[x + c.l3_concurrency] - c.l3_timestamps[x]
+
+            c.l3_farm_sector_time = l3_sum / (c.l3_concurrency * c.l3_concurrency) if c.l3_concurrency != 0 else 0
+            
         
         trigger = True
 
@@ -424,6 +506,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
                 farm_skips[farm] = 0
             farm_skips[farm] += 1
             c.farm_skips[farm] = farm_skips[farm]
+        line_plain = line_plain + recommendTxt + "Run 'subspace-farmer benchmark {audit|prove} /path/to/farm/'"
     
     elif reward_phrase in line_plain:
         farm = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}:")]
@@ -440,8 +523,7 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
             c.farm_rewards[farm] = farm_rewards[farm]
         
         if parsed_datetime > monitorstartTime:
-            send(config['FARMER_NAME'] +
-                 '| WINNER! You received a Vote reward!')
+            send(config['FARMER_NAME'] + '| WINNER! You received a Vote reward!')
         
         trigger = True
         vmem = str(psutil.virtual_memory().percent)
@@ -454,54 +536,70 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
             send(config['FARMER_NAME'] + '| Plot complete: ' +
                  line_plain[line_plain.find(
                      indexconst) + len(indexconst):line_plain.find("}:")] + ' 100%!')
-        
+
     if trigger:
         trigger = False
  
-    parsed_data['line_plain'] = local_time(line_plain)
+    parsed_data['line_plain'] = local_time(line_plain).replace('  ',' ')
+        
     return parsed_data
 
+def reopen_log_file(log_file_path, enc):
+    """
+    Reopen the log file if it has been rotated out.
+    """
+    while True:
+        try:
+            with log_file_path.open('r', encoding=enc) as log_file:
+                while True:
+                    line = log_file.readline()
+                    if not line:
+                        time.sleep(0.1)
+                        continue
+                    yield line
+        except FileNotFoundError:
+            print("Log file not found. Waiting for it to be recreated...")
+            time.sleep(10)
+
 def read_log_file():
+    """
+    Continuously read and process the log file, handling rotation.
+    """
     log_file_path = Path(config['FARMER_LOG'])
     farm_id_mapping = {}
-    if config.get('TOGGLE_ENCODING', True):
-        enc = 'utf-8'
-    else:
-        enc = 'utf-16'
-    with log_file_path.open('r', encoding=enc) as log_file:
-        while True:
-            try:
-                line = log_file.readline()
-                if not line:
-                    time.sleep(0.1)
-                    continue
-                line_plain = line.encode('ascii', 'ignore').decode().strip()
-                ansi_escape = re.compile(
-                    r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-                line_plain = ansi_escape.sub('', line_plain)
-                if line_plain == '\n' or line_plain == '':
-                    continue
-                parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
-                                            drive_directory, farm_skips, farm_recent_skips,
-                                             system_stats, farm_id_mapping)
-                vmem = str(psutil.virtual_memory().percent)
-                c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
+    enc = 'utf-8' if config.get('TOGGLE_ENCODING', True) else 'utf-16'
+
+    for line in reopen_log_file(log_file_path, enc):
+        try:
+            line_plain = line.encode('ascii', 'ignore').decode().strip()
+            ansi_escape = re.compile(
+                r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+            line_plain = ansi_escape.sub('', line_plain)
+            if line_plain == '\n' or line_plain == '':
+                continue
+            parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
+                                        drive_directory, farm_skips, farm_recent_skips,
+                                        system_stats, farm_id_mapping)
+            vmem = str(psutil.virtual_memory().percent)
+            c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
                 
-                print(parsed_data['line_plain'].replace('\n', ' '))
-            except UnicodeDecodeError as e:
-                print(f"Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!): {e}")
-                time.sleep(10)
-            except KeyboardInterrupt:
-                print('Fine, be that way, quitter!')
-                quit()
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                
-                console = Console()
-                console.print_exception(show_locals=True)
-                time.sleep(10)
+            print(parsed_data['line_plain'] + '\r')
+        except UnicodeDecodeError as e:
+            print(f"Decode error encountered (Toggle TOGGLE_ENCODING in the config.yaml file!): {e}")
+            time.sleep(10)
+        except KeyboardInterrupt:
+            print('Fine, be that way, quitter!')
+            quit()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            console = Console()
+            console.print_exception(show_locals=True)
+            time.sleep(10)
 
 def send(msg=None):
+    """
+    Send a notification message via configured methods (Discord, Pushover).
+    """
     if config['SEND_DISCORD'] and config['DISCORD_WEBHOOK'] and msg:
         data = {"content": msg}
         response = requests.post(config['DISCORD_WEBHOOK'], json=data)
@@ -518,6 +616,30 @@ def send(msg=None):
                          "message": msg,
                      }), {"Content-type": "application/x-www-form-urlencoded"})
         conn.getresponse()
+
+def save_data_to_file():
+    """
+    Save current state data to a file.
+    """
+    data = {
+        'system_stats': c.system_stats,
+        'disk_farms': c.disk_farms,
+        'reward_count': c.reward_count,
+        'farm_rewards': c.farm_rewards,
+        'farm_recent_rewards': c.farm_recent_rewards,
+        'farm_skips': c.farm_skips,
+        'farm_recent_skips': c.farm_recent_skips,
+        'drive_directory': c.drive_directory,
+        'errors': c.errors,
+        'total_error_count': c.total_error_count,
+        'curr_farm': c.curr_farm,
+        'farm_metrics': c.farm_metrics,
+        'audits': c.audits,
+        'proves': c.proves
+    }
+    x = True
+    # with open('data_to_viewer.txt', 'w') as f:
+    #     json.dump(data, f, indent=4)
 
 read_log_file()
 threading.Thread(target=read_log_file, daemon=True, name='Read_log').start()
