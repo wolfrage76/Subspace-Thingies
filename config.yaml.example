@@ -1,0 +1,126 @@
+# NEW:
+SHOW_DIRECTORY: True # Show farm path or not
+
+
+# Fill this out and copy it over to BOTH the monitor and viewer directories as it it will be the same for both
+
+LANGUAGE: 'en'
+# en = English
+# lol = lol
+# cn = Chinese
+# ua = Ukrainian 
+# vi = Vietnamese
+# fr = French
+#
+# Those below have only been Google translated so no promises they aren't gibberish.  Most probably is.  
+# Let me know if you can do translations for any of them! 
+#
+# es = Spanish
+# ja = Japanese
+# fr = French
+# de = German
+# ko = Korean
+# ru = Russian
+
+
+###############
+
+ ########################################################################
+# Must be the same in both Monitor and Viewer folders for ALL systems    #
+ ########################################################################
+
+# REQUIRED:
+FRONT_END_IP: "192.168.1.209" # The IP the Viewer is running on -- 127.0.0.1, 192.168.1.69, whatever
+FRONT_END_PORT: "8016" # Port the View frontend is using 
+
+ ######################################################################################
+# Farmer Backend Config - Change for each Farmer place in that Farmer's Monitor folder #
+ ######################################################################################
+
+# REQUIRED: (Log parsing will become optional, but not yet)
+FARMER_NAME: "Moya" # How this farmer will be referred to as
+FARMER_LOG: '/home/wofl/Subspace/farmlog.txt' # Parse this Farmer log file - Windows use double \\'s '
+
+# REQUIRED:
+# You need to add this to your Farmer launch command: --prometheus-listen-on <localIP>:<PORT>
+FARMER_IP: '192.168.1.209' # This is the IP from above
+FARMER_PORT: '8181' # This is the Port from above
+
+
+ ##########################################################
+# Frontend Viewer Config  - Only needed fpr Viewer folder   #
+ ##########################################################
+
+THEME: 'default' # name of theme (filename without the .yaml) from ./themes that you want to use.
+
+# Note: Leaving NODE_IP and/or NODE_PORT empty will disable node data display AND wallet monitor
+
+# You need to add this to your Node launch command: --rpc-listen-on <LocalIP>:<Port> 
+NODE_IP: "192.168.1.208" # Your node IP from above -- 127.0.0.1, 192.168.1.69, whatever
+NODE_PORT: "9944" # Port the node is using from above. 9944 is the default.
+    
+# Wallet Monitor - Queries your node for balance changes and can notify you #
+WALLET:  # "stXXXXXXXXXXXXXXXXXXXXXXX" # Blank disables wallet monitoring
+WAIT_PERIOD: 480 # wallet check interval seconds
+
+# % to account for your cache size when calculating sizes. Farmer default is 1. 
+        ## Don't change unless you know what you are doing. ##
+# Cache size will not be counted if set to 0. Do not use a % symbol, just a number.
+CACHE_SIZE: 1 
+
+# By default, the tool now parses the log to pull only the last sector's time for each plot.  This
+# appears to be more accurate overall than the metrics method of taking an average of many hundreds
+# of sector times, where a single interruption, or replots, can distort the numbers until the next restart.
+# Using only last sector time will certainly make the impact of any changes made apparent much more quickly.
+# Set to False if you want to go back to the previous method of very long term averaging provided
+# by the metrics.
+LAST_SECTOR_ONLY: True
+
+
+ #######################################################
+# Notifications - Use both in Monitor and Viewer folder #
+ #######################################################
+ 
+SEND_DISCORD: False
+SEND_PUSHOVER: False
+
+# General notifications go here #
+DISCORD_WEBHOOK: # "https://discord.com/api/webhooks/yyyyyyyyyyyyyy" 
+
+# As above, but only for wallet notifications. Defaults to DISCORD_WEBHOOK if blank.
+DISCORD_WALLET_NOTIFICATIONS: # "https://discord.com/api/webhooks/xxxxxx" 
+
+PUSHOVER_APP_TOKEN: "xxxxxxxxxxxxx" # yeah, I need to implement better Pushover stuff
+PUSHOVER_USER_KEY: "xxxxxxxxxxxx"
+
+
+
+
+
+ #########################
+###   END USER CONFIG   ###
+ #########################
+
+
+
+
+ #########################
+###  Seriously, go away  ###
+ #########################
+
+
+
+####Unused currently####
+SEND_REPORT: False # Send Farmer image via Discord
+REPORT_FREQ: 3600
+
+# Internal #
+USE_BANNERS: True # allows grabbing footer banner for information
+
+ ################Experimental################
+
+TOGGLE_ENCODING: True # If disk list doesn't appear, or shows a Unicode or UTF-16 error, toggle this setting
+
+
+# Is Deprecated, or will be soon - Leave Alone! #
+HOUR_24: False 

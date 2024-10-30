@@ -1,6 +1,8 @@
-# Subspace-Thingies
+# Autonomys-Thingies
 
-## My tools and utils for the Subspace Network.
+
+## My tools and utils for the Autonomys Network.
+
 
 ![image](https://github.com/wolfrage76/Subspace-Thingies/assets/75458290/b6152d9f-be70-483c-9279-ec6b8c8a6083)
 
@@ -13,7 +15,7 @@
 
 More features coming!
 
-Ping me on the Subspace Discord (Wolfrage) if you have any questions. No DMs though -- DMs are the Devil's handjob.
+Ping me on the Autonomys Discord (Wolfrage) if you have any questions. No DMs though -- DMs are the Devil's handjob.
 
 Installation:
  - You must add `--rpc-listen-on <LocalIP>:<Port>` to your NODE launch command - port 9944 is default
