@@ -23,6 +23,7 @@ import http.client
 import urllib
 from rich.live import Live
 import os
+import pynvml
 
 install()
 
@@ -39,11 +40,11 @@ with open("config.yaml", encoding='utf-8') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 c.theme = config.get('THEME', 'default')
-if c.theme == None:    
+if c.theme == None:
     theme_file = 'utilities/fallback_theme.yaml'
 else:
     theme_file = 'themes/' + c.theme + ".yaml"
-    
+
 with open(theme_file) as f:
     c.theme_data = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -64,24 +65,23 @@ c.running = True
 
 def clean_thread():
     asyncio.run(cleanup_stale_farms(120))
-    
+
 def utility_thread():
     asyncio.run(utility_run(600))
 
 async def utility_run(timeout=900,):  # 900 seconds = 15 minutes
 
     while c.running & config.get('USE_BANNERS', True):
-      try:  
+      try:
         url = 'http://subspacethingy.ifhya.com/info'
         response = requests.get(url)
         data = response.json()
         c.banners = data.get('info', lang.get('defaultbanner', 'See more community built tools at:') + " http://subspace.ifhya.com")
         c.ver = data.get('latestver', 'Unknown')
-   
+
       except Exception as e:
           pass
       await asyncio.sleep(timeout)
-
 
 def wallet_thread():
     wallet.WalletMon()
@@ -116,11 +116,11 @@ async def cleanup_stale_farms(timeout=600,):  # 900 seconds = 15 minutes. Is lat
         warning = str()
         stale_farms = [farm for farm, data in c.remote_farms.items(
         ) if current_time - data['last_update'] > timeout]
-        
+
         c.warning_farms = stale_farms
         if len(c.warning_farms) > 0:
-            send( lang.get('farmers', 'Farmers') + " Warning: Inactivity detected for: \n" + warning) 
-               
+            send( lang.get('farmers', 'Farmers') + " Warning: Inactivity detected for: \n" + warning)
+
         # Check twice within the timeout period
         await asyncio.sleep(timeout / 2)
 
@@ -130,7 +130,7 @@ def send(msg=None):
 
     if config.get('SEND_DISCORD', False) and config.get('DISCORD_WEBHOOK', False) and msg:
 
-        
+
         data = {"content": msg}
         response = requests.post(config.get('DISCORD_WEBHOOK', None), json=data)
         success_list = [204]
@@ -140,7 +140,7 @@ def send(msg=None):
     # Pushover
 
     if config.get('SEND_PUSHOVER') and config.get('PUSHOVER_APP_TOKEN') and config.get('PUSHOVER_USER_KEY') and msg:
-        
+
         conn = http.client.HTTPSConnection("api.pushover.net:443")
         conn.request("POST", "/1/messages.json",
                      urllib.parse.urlencode({
@@ -199,10 +199,10 @@ def make_layout() -> Layout:
     )
 
     layout["side"].split(Layout(name="box1"))
-    layout['side'].visible = (c.view_state == 1 or c.view_state == 2)
+    layout['side'].visible = (c.view_state == 1 or c.view_state == 2 or c.view_state == 4)
     layout["bodysum"].split(Layout(name="sum1"))
-    layout['bodysum'].visible = (c.view_state == 1 or c.view_state ==3)
-    
+    layout['bodysum'].visible = (c.view_state == 1 or c.view_state == 3 or c.view_state == 4)
+
 
     return layout
 
@@ -238,18 +238,18 @@ def create_footer(layout):
 
     ver = c.ver
     footer_txt.add_row(Align.left(color('FOOTER_TEXT') + lang.get('latest', 'Latest') + ': ' + ver), Align.center(color('FOOTER_TEXT') + c.banners))
-    
+
     footer = Panel(footer_txt, title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
-                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '🡰 ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '🡲' + color('FOOTER_ACCENT')  +  ' ]: ' + 
-                   color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' + 
-                   color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') + 
-                   lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' + 
-                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + 
-                   color('FOOTER_MENU') +  '3' +  color('FOOTER_ACCENT') + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +  
-                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' + 
-                   color('FOOTER_MENU') + '-' + color('FOOTER_ACCENT')  + ']: ' + color('FOOTER_MENU') + lang.get('cycle_theme', 'Cycle Theme')  + ' ' + color('FOOTER_ACCENT') + 
+                   subtitle=color('FOOTER_ACCENT') + '[' + color('FOOTER_MENU') + '<- ' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '->' + color('FOOTER_ACCENT')  +  ' ]: ' +
+                   color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' +
+                   color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') +
+                   lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' +
+                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '3' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU')+
+                   color('FOOTER_MENU') +  '4' +  color('FOOTER_ACCENT') + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +
+                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' +
+                   color('FOOTER_MENU') + '-' + color('FOOTER_ACCENT')  + ']: ' + color('FOOTER_MENU') + lang.get('cycle_theme', 'Cycle Theme')  + ' ' + color('FOOTER_ACCENT') +
                    ' [' + color('FOOTER_MENU') + 'Q' + color('FOOTER_ACCENT') +  ']' + color('FOOTER_MENU') + lang.get('quit', 'uit'), subtitle_align='right',height=3)
- 
+
     return footer
 
 
@@ -270,37 +270,37 @@ class Header:
             peercnt = color('HEADER_LOW')  + str(peers) + color('HEADER_TEXT')
         else:
             peercnt =  color('HEADER_BAD') + str(peers) + color('HEADER_TEXT')
-        
+
         ul = c.ul  or '0'
         dl = c.dl or '0'
-        
+
         grid = Table.grid(expand=True)
         grid.add_column(justify="left")
         grid.add_column(justify="center")
         grid.add_column(justify="center")
         grid.add_column(justify="center")
         grid.add_column(justify="right")
-       
+
         if config.get('NODE_IP') and config.get('NODE_PORT'):
             peerCount = lang.get('peers', 'Peers')  + ": " + peercnt
-            
+
             ulDl = '' #f'   ({ul}kb/s |  {dl}kb/s) '
             if c.is_syncing:
                 sync = '[blink]:warning: ' + color('HEADER_TEXT')  + '[' + color('HEADER_BAD')  + lang.get('unsynced', 'Unsynced')  + color('HEADER_TEXT')  +  '] :warning:[/blink] - '
-            else: 
+            else:
                 sync = color('HEADER_TEXT') + ':zap:[' + color('HEADER_GOOD') + lang.get('synced', 'Synced')  + color('HEADER_TEXT') + '] - '
-                
+
             blocks = sync + color('HEADER_TEXT') + lang.get('block', 'Block') + f': #{c.best_block}'.ljust(9)
         else:
             peerCount = ''
-            ulDl = 'Subspace Farm Monitor Thingy'
+            ulDl = 'Autonomys Farm Monitor Thingy'
             sync =''
             blocks = ''
-        
+
         pause = ''
         if c.paused:
-            pause = '[blink]' + color('ERROR')  +lang.get('pause','pause') + color('HEADER_TEXT') 
-            
+            pause = '[blink]' + color('ERROR')  +lang.get('pause','pause') + color('HEADER_TEXT')
+
         grid.add_row( color('HEADER_TEXT') + lang.get('uptime', 'Up') + ': ' + getUptime(),
                      (peerCount + ulDl).ljust(3)
                      , ' ' + pause + ' ', blocks, balance_info.rjust(9) + "  ",
@@ -389,8 +389,8 @@ socketthread = threading.Thread(
 
 def color(data=None, offline=False):
     specials = ['SUMMARY_FRAME', 'FARMER_FRAME', 'HEADER_BACKGROUND', 'FARMER_STATS_FRAME','FOOTER_FRAME', 'FARMER_STATS_FRAME', 'SUMMARY_GLOBAL_FRAME']
-    
-    
+
+
     if offline and data not in specials:
         return '[' + c.theme_data.get('ERROR', 'red') + ']'
     elif offline and data in specials:
@@ -401,17 +401,18 @@ def color(data=None, offline=False):
         return c.theme_data.get('HEADER_TEXT') + ' on ' + c.theme_data.get('HEADER_BACKGROUND')
     elif data in specials:
         return c.theme_data.get(str(data), 'b white')
+    elif data == 'STATUS_REPLOTTING':
+        return '[' + c.theme_data.get('STATUS_REPLOTTING', 'b blue' ) + ']'
     else:
         return '[' + c.theme_data.get(str(data), 'b white') + ']'
-    
-    #return color_build
+
 
 def color_by_status(percent, replot=False, offline=False):
-    
+
     if offline:
         return color('ERROR', offline)
     colors = [color('STATUS_REPLOTTING'), color('STATUS_100'),color('STATUS_90'), color('STATUS_75'), color('STATUS_50'),color('STATUS_25'), color('STATUS_15') , color('STATUS_0')]
-    if replot: 
+    if replot:
         return colors[0]
     elif percent == 100:
         return colors[1]
@@ -426,7 +427,7 @@ def color_by_status(percent, replot=False, offline=False):
     elif percent >= 15:
         return colors[6]
     else:
-        return colors[7]    
+        return colors[7]
 
 
 def convert_to_percent(load_tuple):
@@ -449,25 +450,25 @@ def build_ui():
 
     layout["header"].update(Header())
     layout["body"].visible = False
-    layout["side"].visible = (c.view_state == 1 or c.view_state == 2)
+    layout["side"].visible = (c.view_state == 1 or c.view_state == 2 or c.view_state == 4)
     layout["box1"].update(Panel("", border_style=color('FARMER_FRAME'), title=color('FARMER_TILE') + "Waiting for Farmers...",
                                 subtitle=color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%" + ' | ' + color('STATUS_REPLOTTING') + 'Replotting'))
-    
-    layout["bodysum"].visible = (c.view_state == 1 or c.view_state == 3)
+
+    layout["bodysum"].visible = (c.view_state == 1 or c.view_state == 3 or c.view_state == 4)
     layout["sum1"].update(Panel("", border_style=color('SUMMARY_FRAME'), title=color('SUMMARY_TILE') +"Waiting for Farmers...",
                                 subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
     footer_txt = Table.grid(expand=True)
-    footer_txt.add_row(Align.left(lang.get('latest', 'Latest') + c.ver + ' '),  Align.center(c.banners))  
+    footer_txt.add_row(Align.left(lang.get('latest', 'Latest') + c.ver + ' '),  Align.center(c.banners))
 
     layout["footer"].update(create_footer(layout))
-    
+
     return layout
 
 
 def format_time(minutes, seconds):
     return f"{str(minutes).zfill(2)}:{str(seconds).zfill(2)}"
 
-def calculate_average_plotting_time_for_farmer(farmer_metrics):
+""" def calculate_average_plotting_time_for_farmer(farmer_metrics):
     total_plotting_time = 0
     total_sector_count = 0
 
@@ -475,8 +476,8 @@ def calculate_average_plotting_time_for_farmer(farmer_metrics):
         tnp = float(disk_metrics.get('subspace_farmer_sector_notplotted_count', {}).get('value', 0))
         tse = float(disk_metrics.get('subspace_farmer_sector_expired_count', {}).get('value', 0))
         tae = float(disk_metrics.get('subspace_farmer_sectors_total_sectors_AboutToExpire', {}).get('value', 0))
-        
-        if (tnp + tse + tae) > 0:    
+
+        if (tnp + tse + tae) > 0:
             plotting_time_sum = float(disk_metrics.get('subspace_farmer_farm_sector_plotting_time_seconds_sum', {}).get('value', 0))
             sector_count = float(disk_metrics.get('subspace_farmer_farm_sector_plotting_time_seconds_count', {}).get('value', 0))
         else:
@@ -491,11 +492,13 @@ def calculate_average_plotting_time_for_farmer(farmer_metrics):
     else:
         average_plotting_time = 0
 
-    return average_plotting_time
+    return average_plotting_time """
 
 
 def seconds_to_mm_ss(seconds):
-    
+    if seconds < 1:
+        return f"{int(seconds * 1000)}ms"
+
     minutes = seconds // 60
     seconds = seconds % 60
     return str(int(minutes)).zfill(2) + ':' + str(int(seconds)).zfill(2)
@@ -509,7 +512,7 @@ def hours_to_dh_m(hours):
         return f"{int(days)}d {int(hours)}h"
     else:
         return f"{int(hours)}h {int(minutes)}m"
-    
+
 
 
 def create_summary_layout(layout):
@@ -517,7 +520,7 @@ def create_summary_layout(layout):
     c.remote_farms = c.remote_farms or {}
     c.farm_names = c.farm_names or []
     c.remote_farms = c.remote_farms or {}
-    
+
     # Initialize variables for global stats
     global_drive_count = 0
     global_farm_plotted = 0.0
@@ -539,21 +542,21 @@ def create_summary_layout(layout):
     global_sec_hr_total = 0.0
     global_last_sector_time = 0.0
     longest_eta = 0
-    
-    
+
+
     while c.running:
-        
+
         progress_table2 = Table.grid(expand=True)
         progress_table2.add_column(width=12)
         global_table = Table.grid(expand=True)
         global_table.add_column(width=12)
         #c.sum_size = {}
         #c.sum_plotted = {}
-        
+
         for farmer_index in range(len(c.farm_names)):
             drive_count = 0
             calc_avg = 0.0
-            
+
             is_completed = []
             is_replotting = []
             farm_expired = 0.0
@@ -570,6 +573,12 @@ def create_summary_layout(layout):
                 progress_items.add_column(width=14)
                 progress_items.add_column(width=6)
                 farmer_name = c.farm_names[farmer_index % len(c.farm_names)]
+
+                if farmer_name in c.warning_farms:
+                    offline = True
+                else:
+                    offline = False
+
                 farm_info = c.remote_farms.get(farmer_name, {})
 
                 farmer_data = farm_info.get('data', {})
@@ -589,14 +598,14 @@ def create_summary_layout(layout):
                 #and total_sectors.get('NotPlotted', 0) == 0
                 for disk in farmer_data.get("disk_farms", []):
                     #farm_notplotted = 0
-                    
+
                     total_sectors['Expired'] = 0
                     total_sectors['NotPlotted'] = 0
                     total_sectors['Plotted'] = 0
                     total_sectors['AboutToExpire'] = 0
-                    
+
                     disk_metrics = farmer_data.get('farm_metrics', {}).get(disk, {})
-                    
+
                     for state in ["Plotted", "Expired", "AboutToExpire", "NotPlotted"]:
                         key = f"subspace_farmer_farm_sectors_total_Sectors_{state}"
                         total_sectors[state] += float(disk_metrics.get(key, {}).get('value', 0))
@@ -609,48 +618,49 @@ def create_summary_layout(layout):
 
                     if total_sectors.get('Plotted',0) + total_sectors.get('NotPlotted',0) + total_sectors.get('Expired', 0) + total_sectors.get('AboutToExpire', 0) == 0:
                         continue
-                 
+
                     if total_sectors.get('NotPlotted',0) == 0 and total_sectors.get('Expired', 0) == 0 and total_sectors.get('AboutToExpire', 0) == 0:
                         is_completed.append(disk)
                     #else:
-                    #    farm_last_sector_time += c.last_sector_time.get(farmer_name, {}).get(disk, 0) 
-                    
+                    #    farm_last_sector_time += c.last_sector_time.get(farmer_name, {}).get(disk, 0)
+
                     if total_sectors.get('Expired', 0) > 0 or total_sectors.get('AboutToExpire', 0) > 0:
                         is_replotting.append(disk)
-   
+
                     drive_count += 1
 
 
                 total = sum(farmer_data.get('farm_rewards', {}).values())
-                skips = sum(farmer_data.get('farm_skips').values())  
+                skips = sum(farmer_data.get('farm_skips').values())
                 recenttotal = sum(farmer_data.get('farm_recent_rewards', {}).values())
-                recentskips = sum(farmer_data.get('farm_recent_skips').values())  
+                recentskips = sum(farmer_data.get('farm_recent_skips').values())
 
-    
+
                 nocount = (drive_count - (len(is_completed)))
                 if nocount <=0:
                     calc_avg = 0
                 else:
                     calc_avg = farmer_data['l3_farm_sector_time']
-                
+                   # calc_avg = c.last_sector_time[farmer_name] # ?
+
                 if (farm_notplotted + farm_expired + farm_about_expire) != 0 and farmer_data.get('farm_metrics') and calc_avg > 0:
                     sec_hr = 3600 / calc_avg
                     eta = (farm_notplotted + farm_expired + farm_about_expire) / sec_hr
                 else:
                     sec_hr = 0
                     eta = 0
-                
+
                 if eta > longest_eta:
                     longest_eta = eta
-                    
+
                 sec_day = (sec_hr * 24)  * 0.9843111634 # GiB to actual sector size
-                
+
                 if (farm_notplotted + farm_plotted + farm_about_expire + farm_expired == 0)  :
                     sumipds = 0
                 else:
                     sumipds = farm_plotted / (farm_notplotted + farm_plotted + farm_about_expire + farm_expired) * 100
-                
-                
+
+
                 global_drive_count += drive_count
                 global_farm_plotted += farm_plotted
                 global_farm_notplotted += farm_notplotted
@@ -660,8 +670,8 @@ def create_summary_layout(layout):
                 global_recenttotal_rewards += recenttotal
                 global_skips += skips
                 global_recentskips += recentskips
-                global_sec_day_total += sec_day 
-                global_sec_hr_total += sec_hr 
+                global_sec_day_total += sec_day
+                global_sec_hr_total += sec_hr
                 total_nocount += nocount  # Accumulate non-completed drives for weighted average calculation
                 total_calc_avg += calc_avg * nocount  # Weighted sum for average calculation
 
@@ -671,7 +681,7 @@ def create_summary_layout(layout):
                 else:
                     tibs = f'{hits_day / (farm_plotted * (1 / (2**10)) ):.2f}'
                 global_hhr_sum += c.rewards_per_hr.get(farmer_name, 0)
-                h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + tibs
+                h_tib = '  ' + color('SUMMARY_ACCENT', offline)  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE', offline) + tibs
                 if global_farm_plotted == 0:
                     global_h_tibs = '0.0'
                 else:
@@ -679,52 +689,47 @@ def create_summary_layout(layout):
                 global_h_tib = '  ' + color('SUMMARY_ACCENT')  + lang.get('single_hits', 'H')  + '/TiB/' + day +  ': ' + color('SUMMARY_VALUE') + global_h_tibs
 
                 hhr_formated = f'{c.rewards_per_hr.get(farmer_name, 0):.2f}'
-               
-                if farmer_name in c.warning_farms:
-                    offline = True
-                else:
-                    offline = False
-               
+
                 hhr =  color('SUMMARY_ACCENT', offline) + ' ' + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT', offline) +'/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE', offline) + hhr_formated
-                
+
                 global_hhr_formated = f'{float(global_hhr_sum):.2f}'
                 global_hhr =  ' '+ color('SUMMARY_ACCENT')   + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT')  + '/' + lang.get('hour', 'hr')+ ': ' + color('SUMMARY_VALUE')   + global_hhr_formated
-                
 
-                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE')+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
+
+                progress_items.add_row( color('SUMMARY_VALUE', offline) + convert_to_tib(str(farm_plotted) + ' GB').rjust(5) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE', offline)  + convert_to_tib(str(farm_notplotted + farm_plotted + farm_expired + farm_about_expire) + ' GB') + color('SUMMARY_ACCENT', offline) +' TiB ',color('SUMMARY_ACCENT', offline) + '('  + color('SUMMARY_VALUE', offline) +  '+' + str(convert_to_tib(str(sec_day)  + ' GB')) + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_VALUE',offline)+ day + ') ', color('SUMMARY_ACCENT', offline) +  lang.get('avgsector', '   Avg Sector') +': ' + color('SUMMARY_VALUE', offline)  + seconds_to_mm_ss(calc_avg) , color('SUMMARY_ACCENT', offline) + ' ETA: ' + color('SUMMARY_VALUE', offline) + hours_to_dh_m(eta) + ' ', create_progress_bar(sumipds, 5))
 
                 progress_table2.add_row(Panel(
                 progress_items, title_align='left', title=color('SUMMARY_TITLE', offline) + farmer_name + color('SUMMARY_ACCENT', offline) + ' (' + color_by_status(sumipds, False, offline) + str(drive_count)
-                + 'x ' +  lang.get('plots', 'Plots') + ' - ' + str(round(sumipds, 1)) + '%' + color('SUMMARY_ACCENT', offline) + ')' , border_style=color('FARMER_FRAME', offline), subtitle_align='right', subtitle= color('SUMMARY_REWARDS', offline) 
-                + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_MISSES', offline) +lang.get('single_misses', 'M') + color('SUMMARY_ACCENT', offline) +  ': ' 
+                + 'x ' +  lang.get('plots', 'Plots') + ' - ' + str(round(sumipds, 1)) + '%' + color('SUMMARY_ACCENT', offline) + ')' , border_style=color('FARMER_FRAME', offline), subtitle_align='right', subtitle= color('SUMMARY_REWARDS', offline)
+                + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT', offline) + '/' + color('SUMMARY_MISSES', offline) +lang.get('single_misses', 'M') + color('SUMMARY_ACCENT', offline) +  ': '
                 + color('SUMMARY_REWARDS', offline) + str(recenttotal) + color('SUMMARY_ACCENT', offline) +'/' + color('SUMMARY_MISSES', offline) + str(recentskips) + ' ' + color('SUMMARY_ACCENT', offline) + hhr + h_tib),)
-                
+
             except Exception as e:
                 console.print(lang.get('an_error_occured', "An error occurred ") + ' ' + str(e) )
                 console.print_exception()
                 time.sleep(10)
-        
+
         if global_sec_hr_total > 0:
             global_avg_sector_time = 3600 / global_sec_hr_total if (total_nocount > 0) else 0
         else:
             global_avg_sector_time = 0
         # Calculate global percentages and other stats as needed
         global_sumipds = (global_farm_plotted / (global_farm_notplotted + global_farm_plotted + global_farm_expired + global_farm_about_expire) * 100 if global_farm_notplotted + global_farm_plotted != 0 else 0)
-        
-        
+
+
 # Add a row for global stats at the top of progress_table2
-        
+
         global_progress_items = Table.grid(expand=False)
         global_progress_items.add_column(width=30)
         global_progress_items.add_column(width=18)
         global_progress_items.add_column(width=14)
-        
-       
+
+
 
         global_progress_items.add_row(color('SUMMARY_VALUE') + convert_to_tib(str(global_farm_plotted) + ' GB') + color('SUMMARY_ACCENT') +'/' + color('SUMMARY_VALUE')  + convert_to_tib(str(global_farm_notplotted + global_farm_plotted + global_farm_expired + global_farm_about_expire) + ' GB')+ color('SUMMARY_ACCENT')  + ' TiB ' +color('SUMMARY_VALUE') +  color('SUMMARY_VALUE') + '(+' + str(convert_to_tib(str(global_sec_day_total) + ' GB')) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_VALUE') + day + color('SUMMARY_ACCENT') + ')',  color('SUMMARY_ACCENT') + lang.get('avgsector', 'Avg') + ': ' + color('SUMMARY_VALUE') + seconds_to_mm_ss(global_avg_sector_time), color('SUMMARY_VALUE') +  color('SUMMARY_ACCENT') + ' ETA: ' +  color('SUMMARY_VALUE')  + hours_to_dh_m(longest_eta), create_progress_bar(global_sumipds, 12))
-        
 
-        
+
+
         global_table.add_row(Panel(
             global_progress_items, title_align='left', title=f"{color('SUMMARY_GLOBAL_TITLE') + lang.get('global_stats', 'Global Stats')} "  + color('SUMMARY_VALUE') + "(" + color_by_status(global_sumipds) + str(global_drive_count) + 'x ' + lang.get('plots', 'Plots') + ' - ' + str(round(global_sumipds,1)) + '%' + color('SUMMARY_ACCENT') +')' , border_style=color('SUMMARY_GLOBAL_FRAME'), subtitle_align='right', subtitle=color('SUMMARY_REWARDS') + lang.get('single_hits', 'H') + color('SUMMARY_ACCENT') + '/'+ color('SUMMARY_MISSES') + lang.get('single_misses', 'M') + ': ' + color('SUMMARY_REWARDS') + str(global_recenttotal_rewards) + color('SUMMARY_ACCENT') + '/' + color('SUMMARY_MISSES') + str(global_recentskips) + ' ' + str(global_hhr) + str(global_h_tib)))
 
@@ -733,17 +738,17 @@ def create_summary_layout(layout):
 
 
         layout["sum1"].update(Panel(global_table, border_style=color('SUMMARY_FRAME'), title= color('SUMMARY_FRAME_TITLE') + str(len(c.remote_farms)) + ' ' + lang.get('farmers', 'Farmers'), subtitle= color('STATUS_0') + "<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100%"))
-        
+
         time.sleep(.1)
         return layout
 
- 
- 
+
+
 def format_s_ms(milliseconds):
     if float(milliseconds) < 1000:
         if float(milliseconds) > 200:
             return color('WARNING') + f"{milliseconds}ms"
-        else:    
+        else:
             return f"{milliseconds}ms"
     else:
         seconds = milliseconds / 1000.0
@@ -751,9 +756,9 @@ def format_s_ms(milliseconds):
             return color('ERROR') + f"{seconds:.2f}s"
         else:
             return color('WARNING') + f"{seconds:.2f}s"
-        
 
-        
+
+
 def update_farmer_index():
     cooldown_period = 7  # Cooldown period in seconds after a manual update
     while c.running:
@@ -766,25 +771,24 @@ def update_farmer_index():
                 c.current_farmer_index = (c.current_farmer_index + 1) % len(c.farm_names)
                 time.sleep(5)  # Regular update interval
         time.sleep(.1)
-                
-                
-def create_main_layout():     
-            
+
+
+def create_main_layout():
+   
     layout = c.layout
-    layout["side"].visible = c.view_state in {1, 2}
-    layout["bodysum"].visible = c.view_state in {1, 3}
+    layout["side"].visible = c.view_state in {1, 2,4}
+    layout["bodysum"].visible = c.view_state in {1, 3,4 }
     c.layout = layout
     c.farm_names = c.farm_names or []
     c.remote_farms = c.remote_farms or {}
-
     try:
-            
-        if len(c.farm_names) > 0:
-            farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
-            farm_info = c.remote_farms.get(farmer_name, {})
-            farmer_data = farm_info.get('data', {})
-                
 
+        if len(c.farm_names) > 0:
+         farmer_name = c.farm_names[c.current_farmer_index % len(c.farm_names)]
+         farm_info = c.remote_farms.get(farmer_name, {})
+         farmer_data = farm_info.get('data', {})
+
+         if c.view_state != 4: 
             c.warnings = farmer_data.get('warnings', [])
             c.errors = farmer_data.get('errors', [])
 
@@ -795,7 +799,7 @@ def create_main_layout():
                                         "[progress.percentage]" + color('PERCENT') + "{task.percentage:>5.1f}%"),
                                     BarColumn(bar_width=8),)
 
-    
+
             if farmer_data.get('farm_rewards', {}).values():
                 total = sum(farmer_data.get('farm_rewards', []).values())
             else:
@@ -809,56 +813,57 @@ def create_main_layout():
                 recenttotal = sum(farmer_data.get('farm_recent_rewards', []).values())
             else:
                 recenttotal = 0
-                
+
             if farmer_data.get('farm_recent_skips', {}).values():
                 recentskips = sum(farmer_data.get('farm_recent_skips', {}).values())
             else:
                 recentskips = 0
 
-            
+            if farmer_name in c.warning_farms:
+                offline = True
+            else:
+                offline = False
+
+
             ipds = 0.0
             psd = 0.0
             remspace = 0.0
             c.psTotal = 0.0
             c.psdTotal = 0.0
             c.remTotal = 0.0
-            
+
             for farm in sorted(filter(None, farmer_data.get("disk_farms")), key=int):
                 is_completed = []
                 is_replotting = []
                 total_sectors = defaultdict(float)
-                total_sectors['Expired'] = 0
-                total_sectors['NotPlotted'] = 0
-                total_sectors['Plotted'] = 0
-                total_sectors['AboutToExpire'] = 0
+                total_sectors['Expired'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Expired', {}).get('value', 0)) 
+                total_sectors['NotPlotted'] = float(farmer_data['farm_metrics'][farm]['subspace_farmer_farm_sectors_total_Sectors_NotPlotted'].get('value', 0))
+                total_sectors['Plotted'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted').get('value', 0))
+                total_sectors['AboutToExpire'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_AboutToExpire', {}).get('value', 0))
 
-                                    
-                if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted'):
-                    
-                    psd = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted').get('value', 0))
-                else: psd = 0
-                
-                if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_NotPlotted'):
-                        remspace = float(farmer_data['farm_metrics'][farm]['subspace_farmer_farm_sectors_total_Sectors_NotPlotted'].get('value', 0))
-                else:
-                    remspace = 0
-                
-                replotspace = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Expired', {}).get('value', 0)) + float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_AboutToExpire', {}).get('value', 0)) 
 
+                psd = total_sectors['Plotted']
+
+                # if farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_NotPlotted'):
+                remspace = total_sectors['NotPlotted']
+                # totExpired = 
+                #totAboutToExpire = 
+                replotspace = total_sectors['Expired'] + total_sectors['AboutToExpire']
                 
+
                 ps = remspace + psd + replotspace
                 c.psTotal += ps
                 c.psdTotal += psd
                 c.remTotal += remspace
-                
-                
+
+
                 if psd == 0 or ps == 0:
                     ipds = 0
                 else:
                     ipds = (psd / ps) * 100
                 if farmer_data.get('farm_metrics', {}).get(farm, {}):
                     sector = farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_sector_total_sectors', {}).get('value', 0)
-                else: 
+                else:
                     sector = 0
                 sector = '#' + str(sector)
 
@@ -866,28 +871,28 @@ def create_main_layout():
                 c.farm_recent_rewards[farmer_name][farm] = c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)
 
                 disk_metrics = farmer_data.get('farm_metrics', {}).get(farm, {})
-                
+
                 for state in ["Plotted", "Expired", "AboutToExpire", "NotPlotted"]:
                     key = f"subspace_farmer_sectors_total_sectors_{state}"
                     total_sectors[state] += float(disk_metrics.get(key, {}).get('value', 0))
-                
+
                 if total_sectors.get('NotPlotted', 0) == 0 and total_sectors.get('AboutToExpire', 0) == 0 and total_sectors.get('Expired', 0) == 0 and total_sectors.get('Plotted', 0) > 0 :
                     is_completed.append(farm)
-                    
-                if total_sectors.get('AboutToExpire', 0) > 0 or total_sectors.get('Expired', 0) > 0:
-                    is_replotting.append(farm)
 
-                
+                if total_sectors.get('AboutToExpire', 0) > 0 or total_sectors.get('Expired', 0) > 0:
+                  is_replotting.append(farm)
+
+
                 if farm in is_completed and farm not in is_replotting:
                     ipds = 100
                     averageTime = "--:-- "
                     sector = '-----'
 
                 prove = ''
-                
-                
+
+
                 proving_avg =  '{:.2f}'.format(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)).lstrip('0')
-                
+
                 if proving_avg == '.00':
                     proving = '----'
                 else:
@@ -896,21 +901,21 @@ def create_main_layout():
                     elif float(proving_avg) >= 4:
                         proving = '[blink]' + color('ERROR') + str(round(float(farmer_data.get('proves', {}).get(farm, 0.0)),2)) + 's'
                     elif float(proving_avg) > 2:
-                        proving = color('WARNING') + str(float(farmer_data.get('proves', {}).get(farm, 0.0))) + 's'
+                        proving = color('WARNING') + str(round(float(farmer_data.get('proves', {}).get(farm, 0.0)))) + 's'
                     else:
                         proving = proving_avg + 's'
-                        
+
                 auditing_avg = int(float(farmer_data.get('audits', {}).get(farm, 0.0)))
 
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'WS':
                     prove = '  [b yellow][[blink][b dark_orange]WS[/blink][b yellow]] '
                 if farmer_data.get('prove_method', {}).get(farm, str()) == 'CC':
-                    pass  
+                    pass
                 farmid = farm
                 farmid = c.drive_directory.get(farmer_name, {}).get(farm, '')
                 if farmid == '':
                     continue
-                
+
                 if c.view_xtras:
                     sectortxt = ''
                     averageTime = ''
@@ -919,9 +924,15 @@ def create_main_layout():
                     sectortxt = ''
                     averageTime = ''
                     e = False
-                    
+
                 if ps > 0: # Remove dropped drives from display
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) +  (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving)).rjust(5), completed=ipds)
+                    if c.view_xtras:
+                        showPath = (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) + ' '
+                    else:
+                        showPath = (farm + ':').ljust(3)  + ' '
+                        
+                        
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + showPath + (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving)).rjust(5), completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -931,7 +942,7 @@ def create_main_layout():
 
             progress_table = Table.grid(expand=True)
 
-            
+
             progress2 = Progress(
                 "{task.description}",
                 SpinnerColumn(),
@@ -957,27 +968,55 @@ def create_main_layout():
             tmp = Table.grid()
             tmp.add_column(width=13)
             tmp.add_column()
-            tmp.add_row(progress2,' ' + color('FARMER_ACCENT') + ' ' + lang.get('cpu','CPU') + ': ' + color('FARMER_VALUE') + farmer_data.get('system_stats').get('cpu') + "%  " + color('FARMER_ACCENT') + lang.get('ram','RAM') + ": " + color('FARMER_VALUE') + farmer_data.get('system_stats').get('ram').replace(' ', color('FARMER_ACCENT') + '/' + color('FARMER_VALUE')) + '  '  + color('FARMER_ACCENT') + lang.get('load','Load') + ': ' + color('FARMER_VALUE') +farmer_data.get('system_stats').get('load', 0.0))
+            tmp.add_row(progress2,' ' + color('FARMER_ACCENT') + ' ' + lang.get('cpu','CPU') + ': ' + color('FARMER_VALUE') + farmer_data.get('system_stats', {}).get('cpu','0') + "%  " + color('FARMER_ACCENT') + lang.get('ram','RAM') + ": " + color('FARMER_VALUE') + farmer_data.get('system_stats').get('ram', '0').replace(' ', color('FARMER_ACCENT') + '/' + color('FARMER_VALUE')) + '  '  + color('FARMER_ACCENT') + lang.get('load','Load') + ': ' + color('FARMER_VALUE') +farmer_data.get('system_stats').get('load', '0.0'))
 
             progress_table.add_row(Panel(
                 tmp, border_style=color('FARMER_STATS_FRAME'), subtitle_align='right' , subtitle=color('FARMER_ACCENT') + lang.get('rewards', 'Rewards') + ': ' + color('FARMER_REWARDS') + str(recenttotal) + color('FARMER_ACCENT') + '/' + color('FARMER_MISSES') + str(recentskips),))
-            
+
             progress_table.add_row(job_progress, )
             UpTime = getUptime(farmer_data['startTime'])
             if UpTime == '--:--:--':
                 frame_color = color('FARMER_VALUE', True)
-            else: 
+            else:
                 frame_color = color('FARMER_VALUE')
-            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME'), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE') + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
-            
+            layout["box1"].update(Panel(progress_table, border_style=color('FARMER_FRAME',offline), title=color('FARMER_ACCENT') + f"{lang.get('farmer', 'Farmer')}: " + color('FARMER_VALUE', offline) + farmer_name + color('FARMER_ACCENT') + " [" + frame_color + lang.get('uptime', 'Up') + ": " + UpTime + color('FARMER_ACCENT') + "] ", subtitle=color('STATUS_0') +"<25% | " + color('STATUS_25') + '>25% | ' + color('STATUS_75') +  '>75% | ' + color('STATUS_100') +  "100% | "+ color('STATUS_REPLOTTING')  + lang.get('replotting', 'Replotting')  ))
+
             time.sleep(.02)
-            
+         else:
+            if c.view_state == 4:
+    
+    
+            # Parse and display GPU metrics
+                gpu_metrics = c.gpu
+                gpu_table = Table(title="GPU Metrics [" + farmer_name + "]", show_header=True, header_style="bold magenta",)
+                gpu_table.add_column("GPU", justify="center")
+                #gpu_table.add_column("Name", justify="center")
+                gpu_table.add_column("Memory", justify="center")
+                gpu_table.add_column("GPU Usage", justify="center")
+                gpu_table.add_column("Temp", justify="center")
+                gpu_table.add_column("Fan", justify="center")
+                gpu_table.add_column("Power", justify="center")
+                
+
+                for gpu in gpu_metrics:
+                    gpu_table.add_row(
+                        str(gpu.get("gpuID", "N/A")),
+                      #  gpu.get("name", "N/A"),
+                        str(gpu.get("memUsed", "N/A")) + "/" + str(gpu.get("memTot", "N/A")) + "(" + str(gpu.get("memUtil", "N/A")) + ")",
+                        str(gpu.get("gpuUtil", "N/A")) + "%",
+                        str(gpu.get("temperature", "N/A")) + "°C",
+                        str(gpu.get("fan_speed", "N/A")) + "%",
+                        str(gpu.get("power_usage", "N/A")) + "W/" + str(gpu.get("power_limit", "N/A")) + "W",
+                    )
+
+                layout["box1"].update(Panel(gpu_table, title="GPU Metrics", border_style="green"))
+                time.sleep(.02)
     except Exception as e:
         console.print_exception()
         error_msg = lang.get('an_error_occurred', 'An error occured') + ' ' + lang.get('retrying_seconds', 'Pausing ## seconds').replace('##', '10') + '\n' + str(e)
-        
+
         console.print(error_msg)
-        time.sleep(10)
+        time.sleep(5)
 
 cleanthread = threading.Thread(
     target=clean_thread, name='Cleaning', daemon=True)
@@ -1001,50 +1040,50 @@ async def main():
     layout = build_ui()  # Build and retrieve the UI layout
     layout["main"].update(make_waiting_message())
     c.layout = layout
-    
-    kb = KBHit(lambda: layout.update(layout), create_main_layout)   
+
+    kb = KBHit(lambda: layout.update(layout), create_main_layout)
     kb.start()
-    
+
     if config.get('WALLET', False) and config.get('NODE_IP', False) and config.get('NODE_PORT', False):
         walletthread.start()
-        
+
     if config.get('NODE_IP', False) and config.get('NODE_PORT', False):
         nodethread.start()
-    
+
     socketthread.start()
     uithread.start()
 
     cleanthread.start()
     utilthread.start()
-    
+
     index_thread = threading.Thread(target=update_farmer_index, name='IndexUpdater', daemon=True)
     index_thread.start()
 
-   
-    
+
+
     try:
 
-        with Live(layout, refresh_per_second=4, screen=True) as live:
+        with Live(layout, refresh_per_second=10, screen=True) as live:
             while c.running:
                 if not c.running:
                     print('Toodles!')
                     break
 
                 layout["body"].visible = False
-                layout["side"].visible = c.view_state in {1, 2}
-                layout["bodysum"].visible = c.view_state in {1, 3}
+                layout["side"].visible = c.view_state in {1, 2, 4}
+                layout["bodysum"].visible = c.view_state in {1, 3, 4}
                 layout["footer"].update(create_footer(
                     create_summary_layout(layout)))
-                
-                live.refresh()
-                
+
+                # live.refresh()
+
                 c.layout = layout
                 time.sleep(.1)
-                
+
     except KeyboardInterrupt:
         print(lang.get('exiting_requested', 'Exiting as requested...') +" Toodles!")
         kb.stop()  # Stop the background thread
-        kb.join()  # Wait for the thread to finish     
+        kb.join()  # Wait for the thread to finish
 
         uithread.join()
         walletthread.join()
@@ -1053,14 +1092,14 @@ async def main():
         socketthread.join()
         utilthread.join()
         index_thread.join()
- 
-        os._exit(0) 
+
+        os._exit(0)
 
     kb.stop()
-    
-    os._exit(0) 
 
-  
+    os._exit(0)
+
+
 
 if __name__ == "__main__":
 
