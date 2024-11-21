@@ -83,9 +83,11 @@ class KBHit(Thread):
                 elif ord(key) == ord('1'):
                     c.view_state = 1
                 elif ord(key) == ord('2'):
-                    c.view_state = 2
+                    c.view_state = 2        
                 elif ord(key) == ord('3'):
                     c.view_state = 3
+                elif ord(key) == ord('4'):
+                    c.view_state = 4 # Display GPU information
                 elif ord(key) == 9:  # Tab key
                     c.view_xtras = not c.view_xtras
                 elif ord(key) == ord('+'):

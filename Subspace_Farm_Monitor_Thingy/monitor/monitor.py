@@ -15,9 +15,12 @@ from rich.console import Console
 import http.client
 import urllib
 import os
+import subprocess
 import json
+import pynvml
 
 # Initialize state
+ErrorLogging = False
 last_notification_time = {}
 notification_count = {}
 c.system_stats = {}
@@ -73,15 +76,16 @@ def process_farmer_metrics(metrics, farm_id_mapping):
         'subspace_farmer_sector_index',
         'subspace_farmer_farm_sector_plotting_time_seconds_count',
         'subspace_farmer_farm_sector_plotting_time_seconds_sum',
-        'subspace_farmer_sectors_total_sectors_Plotted',
-        'subspace_farmer_sectors_total_sectors_Expired',
-        'subspace_farmer_sectors_total_sectors_AboutToExpire',
         'subspace_farmer_farm_auditing_time_seconds_sum',
         'subspace_farmer_farm_auditing_time_seconds_count',
         'subspace_farmer_farm_proving_time_seconds_count',
         'subspace_farmer_farm_proving_time_seconds_sum',
         'subspace_farmer_sectors_total_sectors_Plotting',
-        'subspace_farmer_sector_expired_count'
+        'subspace_farmer_sector_expired_count',
+        'subspace_farmer_farm_sectors_total_Sectors_Expired',
+        'subspace_farmer_farm_sectors_total_Sectors_AboutToExpire',
+        'subspace_farmer_farm_sectors_total_Sectors_Plotted',
+        'subspace_farmer_farm_sectors_total_Sectors_NotPlotted'
     ]
     
     total_plotting_time_sum = 0
@@ -93,6 +97,7 @@ def process_farmer_metrics(metrics, farm_id_mapping):
         if 'subspace_farmer_farm_sector_plotting_time_seconds_sum' in metric:
             test1.append(float(metric.split()[-1]))
             total_plotting_time_sum += float(metric.split()[-1])
+            
         elif 'subspace_farmer_farm_sector_plotting_time_seconds_count' in metric:
             test2.append(float(metric.split()[-1]))
             total_plotting_time_count += float(metric.split()[-1])
@@ -130,11 +135,13 @@ def process_farmer_metrics(metrics, farm_id_mapping):
         c.global_time = total_plotting_time_sum / total_plotting_time_count
     else:
         c.global_time = 0  # If no plotting has occurred
-    test1
-    test2
+    if ErrorLogging:
+        print("metrics_dict")
     return metrics_dict
-
+    
 def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
+    c.gpu = get_gpu_info()
+    
     """
     Retrieve farmer metrics from the farmer service.
     """
@@ -159,13 +166,64 @@ def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
 
             for log_file in log_files[max_logs:]:
                 os.remove(log_file)
-
+        if ErrorLogging:
+            print('Metrics\n\n')
         return metrics
     except requests.exceptions.RequestException as e:
         c.startTime = 0
         c.connected_farmer = False
         time.sleep(wait)
         return [] 
+    
+    
+def get_gpu_info():
+    try:
+        # Initialize NVML
+        pynvml.nvmlInit()
+        
+        gpu_count = pynvml.nvmlDeviceGetCount()
+        gpu_info_list = []
+        
+        for i in range(gpu_count):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            name = pynvml.nvmlDeviceGetName(handle)
+            memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            utilization = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            temperature = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+            fan_speed = pynvml.nvmlDeviceGetFanSpeed(handle)
+            power_usage = pynvml.nvmlDeviceGetPowerUsage(handle) // 1000  # Convert from milliwatts to watts
+            power_limit = pynvml.nvmlDeviceGetEnforcedPowerLimit(handle) // 1000  # Convert from milliwatts to watts
+            clock_graphics = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS)
+            clock_memory = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_MEM)
+            pcie_tx_bytes = pynvml.nvmlDeviceGetPcieThroughput(handle, pynvml.NVML_PCIE_UTIL_TX_BYTES)  # PCIe TX throughput
+            pcie_rx_bytes = pynvml.nvmlDeviceGetPcieThroughput(handle, pynvml.NVML_PCIE_UTIL_RX_BYTES)  # PCIe RX throughput
+            
+            gpu_info = {
+                "gpuID": i,
+                "name": name,
+                "memUsed": memory_info.used // 1024 // 1024,
+                "memTot": memory_info.total // 1024 // 1024,
+                "gpuUtil": utilization.gpu,
+                "memUtil": utilization.memory,
+                "temperature": temperature,
+                "fan_speed": fan_speed,
+                "power_usage": power_usage,
+                "power_limit": power_limit,
+               # "Graphics Clock (MHz)": clock_graphics,
+               # "Memory Clock (MHz)": clock_memory,
+               # "PCIe TX Throughput (Bytes/sec)": pcie_tx_bytes,
+               # "PCIe RX Throughput (Bytes/sec)": pcie_rx_bytes
+            }
+            
+            gpu_info_list.append(gpu_info)
+        
+        # Shutdown NVML
+        pynvml.nvmlShutdown()
+        
+        return gpu_info_list
+    except pynvml.NVMLError as error:
+        print(f"Failed to get GPU information: {error}")
+        return []
     
 def update_farm_metrics(farm_id_mapping):
     """
@@ -187,19 +245,31 @@ def update_farm_metrics(farm_id_mapping):
             all_metrics[disk_index] = metrics
            
     c.farm_metrics = all_metrics
+    if ErrorLogging:
+        print('All Metrics')
 
 def socket_client_thread():
     """
     Periodically attempt to reconnect the WebSocket client.
     """
+    
+    
     while True:
         websocket_client.main()
+        if ErrorLogging:
+            print('Websocket thread\n\n')
         time.sleep(15)
 
 def update_metrics_periodically(interval=10):
     """
     Periodically update farm metrics and reward information.
+    
     """
+    
+    # update_system_stats()
+    
+    if ErrorLogging:
+            print('Update metrics periodically\n\n')
     while True:
         c.rewards_per_hr = 0
         for disk_index in disk_farms:
@@ -209,7 +279,7 @@ def update_metrics_periodically(interval=10):
             c.rewards_per_hr += calculate_rewards_per_hour(c.farm_reward_times[disk_index])
             
         update_farm_metrics(c.farm_id_mapping)
-        # save_data_to_file()
+        save_data_to_file()
         time.sleep(interval)
 
 metrics_thread = threading.Thread(target=update_metrics_periodically, daemon=True)
@@ -256,64 +326,45 @@ def datetime_valid(dt_str):
     except ValueError:
         return False
 
-def convert_to_utc_with_offset_zulu(date_time_str, utc_offset=0):
+def convert_to_utc_with_offset_zulu(datetime_string, utc_offset=0):
     """
     Convert a local datetime string to UTC with a Zulu suffix.
     """
-    if not isinstance(date_time_str, str):
-       return date_time_str
+    if not isinstance(datetime_string, str):
+        return datetime_string
     if not isinstance(utc_offset, int):
         utc_offset = 0
+
     try:
-        local_dt = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S.%f")
+        local_datetime = datetime.strptime(datetime_string, "%Y-%m-%d %H:%M:%S.%f")
     except ValueError:
-        return date_time_str
+        return datetime_string
     
-    offset = timedelta(hours=utc_offset - 12)
-    utc_dt = local_dt - offset
-    return utc_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+    offset_delta = timedelta(hours=utc_offset - 12)
+    utc_datetime = local_datetime - offset_delta
+    
+    return utc_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
 
 def local_time(string):
     """
     Convert a log line's timestamp to local time and apply formatting.
     """
-    string2 = string.split(' ')
+    string2 = string.split(' ', 1)
     convert = string2[0]
-    setColor = str()
-    if 'ERROR' in string:
-        setColor = '[red]'
-
-    elif 'WARN' in string:
-        setColor = '[dark_orange]'
-    
-    if config.get('U_GPU_PLOTTER', False):
-        string2 = string.split('  ')[1].strip()
-        convert = string.split('  ')[0].strip()
-        convert = convert_to_utc_with_offset_zulu(convert, config.get('TIMEZONE_OFFSET', 0)) + '+00:00'
-        convert = convert.replace('INFO','').strip()
-        
-    if datetime_valid(convert):
-        if convert.endswith('Z'):
-            convert = convert[:-1] + '+00:00'
-        datestamp = parse(convert)
-
-        local_tz = dateutil.tz.tzlocal()
-        datestamp = datestamp.astimezone(tz=local_tz)
-  
-        if c.hour_24:
-            formatted_timestamp = datestamp.strftime("%m-%d %H:%M:%S|" + setColor)
-        else:
-            formatted_timestamp = datestamp.strftime(
-                "%m-%d %I:%M:%S %p|").replace(' PM', 'pm').replace(' AM', 'am') + setColor
-
-        if config.get('U_GPU_PLOTTER', False):
-            return formatted_timestamp + ' ' + string.replace(string.split(' ')[0],'')
-        else:
-            combined = formatted_timestamp + ' ' + ' '.join(string2).replace(string.split(' ')[0],'')
-
-            return combined.replace('  ',' ')
-    else:
+    if not datetime_valid(convert):
         return string
+
+    setColor = '[red]' if 'ERROR' in string else '[dark_orange]' if 'WARN' in string else ''
+
+    datestamp = parse(convert)
+    local_tz = dateutil.tz.tzlocal()
+    datestamp = datestamp.astimezone(tz=local_tz)
+
+    formatted_timestamp = datestamp.strftime("%m-%d %H:%M:%S|" + setColor)
+    if not c.hour_24:
+        formatted_timestamp = formatted_timestamp.replace(' PM', 'pm').replace(' AM', 'am')
+
+    return formatted_timestamp + ' ' + string2[1]
 
 def calculate_rewards_per_hour(farm_rewards):
     """
@@ -332,14 +383,14 @@ def rewards_per_day_per_tib(farm_rewards, farm, total_plotted_tib):
     total_rewards_last_24_hours = len(recent_rewards)
     return total_rewards_last_24_hours / total_plotted_tib
 
-def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping):
+def parse_log_line(line_plain, current_farm, reward_count, farm_rewards, farm_recent_rewards, drive_directory, farm_skips, farm_recent_skips, system_stats, farm_id_mapping):
     """
     Parse a single log line and update various metrics and states.
     """
-    trigger = False
+    triggered = False
     parsed_data = {
         'line_plain': '', 
-        'curr_farm': curr_farm,
+        'current_farm': current_farm,
         'reward_count': reward_count,
         'farm_rewards': farm_rewards,
         'farm_recent_rewards': farm_recent_rewards,
@@ -349,36 +400,29 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         'system_stats': system_stats,
     }
 
-    if config.get("U_GPU_PLOTTER", False):
-        line_timestamp_str = line_plain.split()[0] + ' ' + line_plain.split()[1]
-    else:
-        line_timestamp_str = line_plain.split()[0]
     
-    farm = line_plain[line_plain.find(
-            indexconst) + len(indexconst):line_plain.find("}")]
+    line_timestamp_str = line_plain.split()[0]
+    
+    farm_index = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}")]
      
     if 'groups detected l3_cache_groups=' in line_plain:
         c.l3_concurrency = int(line_plain.split('groups detected l3_cache_groups=')[1])
     
     if datetime_valid(line_timestamp_str):
-        line_timestamp_str = line_timestamp_str.replace('INFO','').strip()
-        line_timestamp = dateutil.parser.parse(
-            line_timestamp_str).astimezone(timezone.utc).timestamp()
+        line_timestamp_str = line_timestamp_str.replace('INFO', '').strip()
+        line_timestamp = dateutil.parser.parse(line_timestamp_str).astimezone(timezone.utc).timestamp()
         parsed_datetime = line_timestamp 
     else:
         line_timestamp = None
         
     if 'Finished collecting already plotted pieces' in line_plain:
         c.startTime = line_timestamp
-        farm_id_mapping = {}
-        drive_directory = {}
-        curr_farm = None
-       
+        farm_id_mapping.clear()
+        drive_directory.clear()
+        current_farm = None
         c.l3_timestamps.clear()
-        for x in range(c.l3_concurrency * 2):
-            c.l3_timestamps.append(line_timestamp)
+        c.l3_timestamps.extend([line_timestamp] * (c.l3_concurrency * 2))
         c.dropped_drives = []
-        # c.l3_concurrency = 2 #######
     
     if "ERROR" in line_plain:
         c.errors.pop(0)
@@ -389,160 +433,125 @@ def parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recen
         c.warnings.append(local_time(line_plain.replace('\n', '')))
     
     if 'arm errored and stopped' in line_plain and parsed_datetime > monitorstartTime:
-        if '}' in line_plain:    
-            farm = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}")]
-        elif 'farm_index=' in line_plain: 
-            farm = line_plain.split('farm_index=')[1].split('error=')[0]
-        else:
-            farm = line_plain.split('farm=')[1].split('error=')[0]
-    
-        c.dropped_drives.append(farm)
-        stop_error_notification(farm)   
+        farm_index = extract_farm_index(line_plain)
+        c.dropped_drives.append(farm_index)
+        stop_error_notification(farm_index)   
    
-    elif 'buffer of stream grows beyond limit' in line_plain:
+    elif 'buffer of stream grows beyond limit' in line_plain or 'Failed to subscribe' in line_plain or 'DSN instance configured.' in line_plain or "enchmarking faster proving method" in line_plain:
         pass
+
     elif 'is likely already in use' in line_plain:
-        line_plain = line_plain + ' ' + recommendTxt + "Check that your Farmer is not running, and that you aren't currently scrubbing that drive\n"
-    elif 'Failed to subscribe' in line_plain:
-        pass
+        line_plain += f" {recommendTxt}Check that your Farmer is not running, and that you aren't currently scrubbing that drive\n"
     
     elif 'Invalid scalar' in line_plain:
-        line_plain = line_plain + ' ' + recommendTxt + "Run 'subspace-farmer scrub /path/to/farm' \n"
+        line_plain += f" {recommendTxt}Run 'subspace-farmer scrub /path/to/farm' \n"
+    
     elif "ID: " in line_plain:
         farm_id = line_plain.split(' ID: ')[1]
-        farm_index = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find('}')]
         if farm_index and farm_id:
             farm_id_mapping[farm_index] = farm_id
             c.farm_id_mapping[farm_index] = farm_id
-    elif 'DSN instance configured.' in line_plain:
-        pass
     
-    elif "enchmarking faster proving method" in line_plain:
-        pass
     elif 'Farm exited with error farm_index=' in line_plain and parsed_datetime > monitorstartTime:
-        farm = line_plain.split('Farm exited with error farm_index=')[0]
-        c.dropped_drives.append(farm)
-        stop_error_notification(farm)  
+        farm_index = line_plain.split('Farm exited with error farm_index=')[0]
+        c.dropped_drives.append(farm_index)
+        stop_error_notification(farm_index)  
         
     elif ('subspace_farmer::commands::farm: Farm' in line_plain or 'subspace_farmer::commands::cluster::farmer: Farm' in line_plain) and ('cache worker exited' not in line_plain and 'error' not in line_plain):
-        farm = line_plain[line_plain.find(
-            indexconst) + len(indexconst):line_plain.find("}")]
-        
-        if farm not in disk_farms:
-            disk_farms.add(farm)
-        curr_farm = farm
-        c.curr_farm = curr_farm
+        if farm_index not in disk_farms:
+            disk_farms.add(farm_index)
+        current_farm = farm_index
+        c.current_farm = current_farm
         
     elif 'using whole sector elapsed' in line_plain:
-        farm = line_plain[line_plain.find(
-            indexconst) + len(indexconst):line_plain.find("}")]
-        prove_type = 'WC'
-        c.prove_method[farm] = prove_type
-        line_plain = line_plain + recommendTxt + 'Benchmark your drives, use decent quality SSDs'
+        c.prove_method[farm_index] = 'WC'
+        line_plain += f"{recommendTxt}Benchmark your drives, use decent quality SSDs"
+    
     elif 'ConcurrentChunks' in line_plain:
-        prove_type = 'CC'
-        c.prove_method[farm] = prove_type
+        c.prove_method[farm_index] = 'CC'
         
     elif "found fastest_mode=" in line_plain:
-        farm = line_plain[line_plain.find(
-            indexconst) + len(indexconst):line_plain.find("}")]
         prove_type = line_plain.split('fastest_mode=')[1]
-        c.prove_method[farm] = prove_type
+        c.prove_method[farm_index] = prove_type
     
     elif "lotting sector" in line_plain:
-        
-        if c.l3_concurrency <= 1:
-            # Append the timestamp of each detected sector plot completion
-            c.l3_timestamps.append(line_timestamp)
+        update_sector_time(line_timestamp)
+        triggered = True
 
-            # Keep only the latest 100 timestamps
-            if len(c.l3_timestamps) > 100:
-                c.l3_timestamps.pop(0)
-
-            # Calculate sector time if there are at least two timestamps
-            if len(c.l3_timestamps) > 1:
-                # Calculate time differences between consecutive timestamps
-                time_diffs = [
-                    c.l3_timestamps[i] - c.l3_timestamps[i - 1] 
-                    for i in range(1, len(c.l3_timestamps))
-                ]
-                
-                # Calculate the average of the time differences
-                l3_sum = sum(time_diffs) / len(time_diffs)
-                
-                # Update the average sector time
-                c.l3_farm_sector_time = l3_sum
-            else:
-                # Set sector time to 0 if there is only one or no timestamps yet
-                c.l3_farm_sector_time = 0
-
-        elif c.l3_concurrency > 1:
-            if len(c.l3_timestamps) >= c.l3_concurrency:
-                del(c.l3_timestamps[0])
-            c.l3_timestamps.append(line_timestamp)
-            l3_sum = 0
-
-            for x in range(c.l3_concurrency):
-                l3_sum += c.l3_timestamps[x + c.l3_concurrency] - c.l3_timestamps[x]
-
-            c.l3_farm_sector_time = l3_sum / (c.l3_concurrency * c.l3_concurrency) if c.l3_concurrency != 0 else 0
-            
-        
-        trigger = True
-
-    elif 'Directory:' in line_plain and c.curr_farm:
-        drive_directory[c.curr_farm] = line_plain.split('Directory: ')[1]
-        c.curr_farm = None
+    elif 'Directory:' in line_plain and c.current_farm:
+        drive_directory[c.current_farm] = line_plain.split('Directory: ')[1]
+        c.current_farm = None
 
     elif ("solution skipped due to farming time limit" in line_plain) or ("Solution was ignored" in line_plain):
-        farm = line_plain[line_plain.find(
-            indexconst) + len(indexconst):line_plain.find("}")]
-        farm_skips = c.farm_skips
-        parsed_datetime = line_timestamp
-        c.farm_skip_times[farm].append(parsed_datetime)
-        
-        if farm:
-            if farm not in farm_skips:
-                farm_skips[farm] = 0
-            farm_skips[farm] += 1
-            c.farm_skips[farm] = farm_skips[farm]
-        line_plain = line_plain + recommendTxt + "Run 'subspace-farmer benchmark {audit|prove} /path/to/farm/'"
+        farm_skips = update_farm_skips(line_plain, line_timestamp, farm_skips)
+        line_plain += f"{recommendTxt}Run 'subspace-farmer benchmark {{audit|prove}} /path/to/farm/'"
     
     elif reward_phrase in line_plain:
-        farm = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}:")]
-        one_day_ago = datetime.now().timestamp() - 86400
         reward_count += 1
         c.reward_count = reward_count
-        parsed_datetime = line_timestamp
-        c.farm_reward_times[farm].append(parsed_datetime)
-        
-        if farm:
-            if farm not in farm_rewards:
-                farm_rewards[farm] = 0
-            farm_rewards[farm] += 1
-            c.farm_rewards[farm] = farm_rewards[farm]
-        
+        update_farm_rewards(line_plain, line_timestamp, farm_rewards)
         if parsed_datetime > monitorstartTime:
-            send(config['FARMER_NAME'] + '| WINNER! You received a Vote reward!')
+            send(f"{config['FARMER_NAME']}| WINNER! You received a Vote reward!")
+        triggered = True
         
-        trigger = True
-        vmem = str(psutil.virtual_memory().percent)
-        c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
         
     if 'nitial plotting complete' in line_plain:
-        parsed_datetime = line_timestamp
-        line_timestamp = parsed_datetime
         if line_timestamp and line_timestamp > monitorstartTime:
-            send(config['FARMER_NAME'] + '| Plot complete: ' +
-                 line_plain[line_plain.find(
-                     indexconst) + len(indexconst):line_plain.find("}:")] + ' 100%!')
+            send(f"{config['FARMER_NAME']}| Plot complete: {farm_index} 100%!")
 
-    if trigger:
-        trigger = False
+    if triggered:
+        triggered = False
  
-    parsed_data['line_plain'] = local_time(line_plain).replace('  ',' ')
+    parsed_data['line_plain'] = local_time(line_plain).replace('  ', ' ')
         
     return parsed_data
+
+def extract_farm_index(line_plain):
+    if '}' in line_plain:    
+        return line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}")]
+    elif 'farm_index=' in line_plain: 
+        return line_plain.split('farm_index=')[1].split('error=')[0]
+    else:
+        return line_plain.split('farm=')[1].split('error=')[0]
+
+def update_sector_time(line_timestamp):
+    c.l3_timestamps.append(line_timestamp)
+    if len(c.l3_timestamps) > 50:
+        c.l3_timestamps.pop(0)
+
+    if c.l3_concurrency <= 1:
+        if len(c.l3_timestamps) > 1:
+            time_diffs = [t - s for s, t in zip(c.l3_timestamps, c.l3_timestamps[1:])]
+            c.l3_farm_sector_time = sum(time_diffs) / len(time_diffs)
+        else:
+            c.l3_farm_sector_time = 0
+    else:
+        if len(c.l3_timestamps) >= c.l3_concurrency:
+            l3_sum = sum(c.l3_timestamps[i + c.l3_concurrency] - c.l3_timestamps[i] for i in range(len(c.l3_timestamps) - c.l3_concurrency))
+            c.l3_farm_sector_time = l3_sum / (c.l3_concurrency * c.l3_concurrency)
+
+def update_farm_skips(line_plain, line_timestamp, farm_skips):
+    farm_index = line_plain.rsplit(indexconst, 1)[-1].rsplit('}', 1)[0]
+    c.farm_skip_times.setdefault(farm_index, []).append(line_timestamp)
+    farm_skips.setdefault(farm_index, 0)
+    farm_skips[farm_index] += 1
+    c.farm_skips[farm_index] = farm_skips[farm_index]
+    return farm_skips
+
+def update_farm_rewards(line_plain, line_timestamp, farm_rewards):
+    farm_index_start = line_plain.find(indexconst) + len(indexconst)
+    farm_index_end = line_plain.find("}:")
+    if farm_index_start == -1 or farm_index_end == -1:
+        return
+
+    farm_index = line_plain[farm_index_start:farm_index_end]
+    c.farm_reward_times.setdefault(farm_index, []).append(line_timestamp)
+
+    current_rewards = farm_rewards.get(farm_index, 0)
+    farm_rewards[farm_index] = current_rewards + 1
+    c.farm_rewards[farm_index] = farm_rewards[farm_index]
+
+
 
 def reopen_log_file(log_file_path, enc):
     """
@@ -554,9 +563,11 @@ def reopen_log_file(log_file_path, enc):
                 while True:
                     line = log_file.readline()
                     if not line:
-                        time.sleep(0.1)
+                        time.sleep(0.2)
                         continue
                     yield line
+            if ErrorLogging:
+                print('Reopen Log\n\n')
         except FileNotFoundError:
             print("Log file not found. Waiting for it to be recreated...")
             time.sleep(10)
@@ -581,7 +592,7 @@ def read_log_file():
                                         drive_directory, farm_skips, farm_recent_skips,
                                         system_stats, farm_id_mapping)
             vmem = str(psutil.virtual_memory().percent)
-            c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2))}
+            c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2)), 'gpu': c.gpu}
                 
             print(parsed_data['line_plain'] + '\r')
         except UnicodeDecodeError as e:
@@ -600,22 +611,29 @@ def send(msg=None):
     """
     Send a notification message via configured methods (Discord, Pushover).
     """
-    if config['SEND_DISCORD'] and config['DISCORD_WEBHOOK'] and msg:
-        data = {"content": msg}
-        response = requests.post(config['DISCORD_WEBHOOK'], json=data)
-        success_list = [204]
-        if response.status_code not in success_list:
-            print('Error sending Discord: ' + str(response.status_code))
+    if not msg:
+        return
 
-    if config['SEND_PUSHOVER'] and config['PUSHOVER_APP_TOKEN'] and config['PUSHOVER_USER_KEY'] and msg:
-        conn = http.client.HTTPSConnection("api.pushover.net:443")
-        conn.request("POST", "/1/messages.json",
-                     urllib.parse.urlencode({
-                         "token": config['PUSHOVER_APP_TOKEN'],
-                         "user": config['PUSHOVER_USER_KEY'],
-                         "message": msg,
-                     }), {"Content-type": "application/x-www-form-urlencoded"})
-        conn.getresponse()
+    if config.get('SEND_DISCORD') and config.get('DISCORD_WEBHOOK'):
+        try:
+            response = requests.post(
+                config['DISCORD_WEBHOOK'], json={"content": msg}, timeout=10)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            print(f'Error sending Discord: {e}')
+
+    if config.get('SEND_PUSHOVER') and config.get('PUSHOVER_APP_TOKEN') and config.get('PUSHOVER_USER_KEY'):
+        try:
+            conn = http.client.HTTPSConnection("api.pushover.net", timeout=10)
+            conn.request("POST", "/1/messages.json",
+                         urllib.parse.urlencode({
+                             "token": config['PUSHOVER_APP_TOKEN'],
+                             "user": config['PUSHOVER_USER_KEY'],
+                             "message": msg,
+                         }), {"Content-type": "application/x-www-form-urlencoded"})
+            conn.getresponse().read()
+        except Exception as e:
+            print(f'Error sending Pushover: {e}')
 
 def save_data_to_file():
     """
@@ -637,9 +655,7 @@ def save_data_to_file():
         'audits': c.audits,
         'proves': c.proves
     }
-    x = True
-    # with open('data_to_viewer.txt', 'w') as f:
-    #     json.dump(data, f, indent=4)
+
 
 read_log_file()
 threading.Thread(target=read_log_file, daemon=True, name='Read_log').start()
