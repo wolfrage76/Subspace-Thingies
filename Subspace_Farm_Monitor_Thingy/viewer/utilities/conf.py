@@ -2,6 +2,7 @@ from collections import defaultdict
 import time
 
 # Initialize state
+gpu = {}
 parsed_skips = {}
 parsed_rewards = {}
 dropped_drives = {}
