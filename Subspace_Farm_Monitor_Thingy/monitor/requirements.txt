@@ -1,6 +1,8 @@
-psutil>=5.9.0
-python_dateutil>=2.8.1
-PyYAML>=6.0.1
-Requests
-rich
-websockets>=9.1
+pynvml>=11.5.3
+substrate_interface>=1.7.11
+psutil>=6.1.0
+PyYAML>=6.0.2
+Requests>=2.32.3
+rich>=13.9.4
+websockets>=14.1
+python_dateutil>=2.9.0.post0

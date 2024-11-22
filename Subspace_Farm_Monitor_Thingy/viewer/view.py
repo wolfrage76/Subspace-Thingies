@@ -1,4 +1,3 @@
-import psutil
 import asyncio
 import datetime
 from rich import print
@@ -23,7 +22,7 @@ import http.client
 import urllib
 from rich.live import Live
 import os
-import pynvml
+
 
 install()
 
@@ -237,6 +236,11 @@ def create_footer(layout):
     footer_txt.add_column(ratio=1)
 
     ver = c.ver
+    if c.gpu:
+        show4 =  color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + color('FOOTER_MENU') +  '4'
+    else:
+        show4 = str()
+        
     footer_txt.add_row(Align.left(color('FOOTER_TEXT') + lang.get('latest', 'Latest') + ': ' + ver), Align.center(color('FOOTER_TEXT') + c.banners))
 
     footer = Panel(footer_txt, title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
@@ -244,8 +248,8 @@ def create_footer(layout):
                    color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' +
                    color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') +
                    lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' +
-                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '3' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU')+
-                   color('FOOTER_MENU') +  '4' +  color('FOOTER_ACCENT') + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +
+                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '3' +
+                   show4 + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +
                    color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' +
                    color('FOOTER_MENU') + '-' + color('FOOTER_ACCENT')  + ']: ' + color('FOOTER_MENU') + lang.get('cycle_theme', 'Cycle Theme')  + ' ' + color('FOOTER_ACCENT') +
                    ' [' + color('FOOTER_MENU') + 'Q' + color('FOOTER_ACCENT') +  ']' + color('FOOTER_MENU') + lang.get('quit', 'uit'), subtitle_align='right',height=3)
@@ -430,7 +434,7 @@ def color_by_status(percent, replot=False, offline=False):
         return colors[7]
 
 
-def convert_to_percent(load_tuple):
+""" def convert_to_percent(load_tuple):
     num_log_cpus = psutil.cpu_count()
 
     percent_lst = []
@@ -442,7 +446,7 @@ def convert_to_percent(load_tuple):
     return tuple(percent_lst)
 
 
-load_tuple = psutil.getloadavg()
+load_tuple = psutil.getloadavg() """
 
 
 def build_ui():
@@ -991,7 +995,7 @@ def create_main_layout():
                 gpu_table = Table(title="GPU Metrics [" + farmer_name + "]", show_header=True, header_style="bold magenta",)
                 gpu_table.add_column("GPU", justify="center")
                 #gpu_table.add_column("Name", justify="center")
-                gpu_table.add_column("Memory", justify="center")
+                gpu_table.add_column("Memory (MB)", justify="center")
                 gpu_table.add_column("GPU Usage", justify="center")
                 gpu_table.add_column("Temp", justify="center")
                 gpu_table.add_column("Fan", justify="center")
@@ -1002,7 +1006,7 @@ def create_main_layout():
                     gpu_table.add_row(
                         str(gpu.get("gpuID", "N/A")),
                       #  gpu.get("name", "N/A"),
-                        str(gpu.get("memUsed", "N/A")) + "/" + str(gpu.get("memTot", "N/A")) + "(" + str(gpu.get("memUtil", "N/A")) + ")",
+                        str(gpu.get("memUsed", "N/A")) + "/" + str(gpu.get("memTot", "N/A")) + "(" + str(gpu.get("memUtil", "N/A")) + "%)",
                         str(gpu.get("gpuUtil", "N/A")) + "%",
                         str(gpu.get("temperature", "N/A")) + "°C",
                         str(gpu.get("fan_speed", "N/A")) + "%",

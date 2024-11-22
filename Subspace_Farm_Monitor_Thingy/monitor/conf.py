@@ -1,8 +1,8 @@
 from collections import defaultdict
 
 # Initialize state
-gpuStats = True
 gpu = {}
+gpuStats = True
 global_time = 0
 dropped_drives = []
 timezone_offset = 0

@@ -10,7 +10,7 @@ from rich.traceback import install
 install(show_locals=True)
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={}, drive_directory='', rewards_per_hr={}, proves={}, audits={}, l3_concurrency='', l3_farm_sector_time='', dropped_drives=[], gpu_metrics={}):
+    def __init__(self, farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={}, drive_directory='', rewards_per_hr={}, proves={}, audits={}, l3_concurrency='', l3_farm_sector_time='', dropped_drives=[], gpu_metrics=[]):
         self.dropped_drives = dropped_drives
         self.system_stats = system_stats
         self.drive_directory = drive_directory
@@ -33,7 +33,16 @@ class Farmer(object):
         self.gpu_metrics = gpu_metrics
 
 def make_farmer():
-    frmr = Farmer()
+    frmr = Farmer() # Init object
+
+    if c.gpuStats:
+        frmr.gpu_metrics = get_gpu_info()  # Add GPU metrics    
+    else:
+        c.gpu = {}   
+               
+    system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + str(psutil.virtual_memory().percent) + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2)), 'gpu': c.gpu}
+             
+    
     frmr.l3_concurrency = c.l3_concurrency
     frmr.l3_farm_sector_time = c.l3_farm_sector_time
     frmr.dropped_drives = c.dropped_drives
@@ -42,14 +51,7 @@ def make_farmer():
     frmr.rewards_per_hr = c.rewards_per_hr
     frmr.drive_directory = c.drive_directory
     frmr.prove_method = c.prove_method
-    if c.gpuStats:
-        frmr.gpu_metrics = get_gpu_info()  # Add GPU metrics
-    else:
-        frmr.gpu_metrics = {}
-    frmr.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + 
-                            str(psutil.virtual_memory().percent) + '%', 
-                            'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2)), 
-                            'gpu': frmr.gpu_metrics}
+    frmr.system_stats = system_stats
     
     frmr.disk_farms = c.disk_farms
     frmr.farmer_name = c.farmer_name
@@ -61,6 +63,8 @@ def make_farmer():
     frmr.farm_skips = c.farm_skips
     frmr.farm_recent_skips = c.farm_recent_skips
     frmr.farm_metrics = c.farm_metrics
+    
+
     return frmr
 
 def serialize_sets(obj):

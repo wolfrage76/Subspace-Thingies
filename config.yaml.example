@@ -1,5 +1,5 @@
 # NEW:
-SHOW_DIRECTORY: True # Show farm path or not
+SHOW_DIRECTORY: True # Show farm path or not.  Tab key can Toggle.
 
 
 # Fill this out and copy it over to BOTH the monitor and viewer directories as it it will be the same for both
@@ -38,7 +38,7 @@ FRONT_END_PORT: "8016" # Port the View frontend is using
  ######################################################################################
 
 # REQUIRED: (Log parsing will become optional, but not yet)
-FARMER_NAME: "Moya" # How this farmer will be referred to as
+FARMER_NAME: "McKenna" # How this farmer will be referred to as
 FARMER_LOG: '/home/wofl/Subspace/farmlog.txt' # Parse this Farmer log file - Windows use double \\'s '
 
 # REQUIRED:
@@ -46,6 +46,7 @@ FARMER_LOG: '/home/wofl/Subspace/farmlog.txt' # Parse this Farmer log file - Win
 FARMER_IP: '192.168.1.209' # This is the IP from above
 FARMER_PORT: '8181' # This is the Port from above
 
+GPUSTATS: True # Allow GPU Stats.  Set False if not GPU Plotting.
 
  ##########################################################
 # Frontend Viewer Config  - Only needed fpr Viewer folder   #
@@ -67,14 +68,6 @@ WAIT_PERIOD: 480 # wallet check interval seconds
         ## Don't change unless you know what you are doing. ##
 # Cache size will not be counted if set to 0. Do not use a % symbol, just a number.
 CACHE_SIZE: 1 
-
-# By default, the tool now parses the log to pull only the last sector's time for each plot.  This
-# appears to be more accurate overall than the metrics method of taking an average of many hundreds
-# of sector times, where a single interruption, or replots, can distort the numbers until the next restart.
-# Using only last sector time will certainly make the impact of any changes made apparent much more quickly.
-# Set to False if you want to go back to the previous method of very long term averaging provided
-# by the metrics.
-LAST_SECTOR_ONLY: True
 
 
  #######################################################

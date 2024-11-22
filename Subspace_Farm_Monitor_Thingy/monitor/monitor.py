@@ -1,4 +1,3 @@
-import psutil
 from pathlib import Path
 from datetime import timedelta, timezone, datetime
 import dateutil.parser
@@ -15,16 +14,14 @@ from rich.console import Console
 import http.client
 import urllib
 import os
-import subprocess
-import json
-import pynvml
 
 # Initialize state
 ErrorLogging = False
 last_notification_time = {}
 notification_count = {}
 c.system_stats = {}
-system_stats = c.system_stats
+system_stats = {}
+
 
 disk_farms = c.disk_farms
 reward_count = c.reward_count
@@ -49,6 +46,7 @@ c.front_end_port = config.get('FRONT_END_PORT', "8016")
 farmer_ip = config.get('FARMER_IP', "127.0.0.1")
 farmer_port = config.get('FARMER_PORT', "8181")
 cluster_enabled = config.get('CLUSTER_ENABLED' ,False)
+c.gpuStats = config.get('GPUSTATS', True)
 
 reward_phrase = 'reward_signing: Successfully signed reward hash'
 recommendTxt = '\n\t\t[blink][b yellow]Recommendation: [white]'
@@ -140,8 +138,7 @@ def process_farmer_metrics(metrics, farm_id_mapping):
     return metrics_dict
     
 def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
-    #c.gpu = get_gpu_info()
-    
+
     """
     Retrieve farmer metrics from the farmer service.
     """
@@ -179,8 +176,6 @@ def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
 
     
 def update_farm_metrics(farm_id_mapping):
-    
-    # c.gpu = get_gpu_info()
     
     """
     Update farm metrics and store them in the global configuration.
@@ -550,9 +545,9 @@ def read_log_file():
             parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
                                         drive_directory, farm_skips, farm_recent_skips,
                                         system_stats, farm_id_mapping)
-            vmem = str(psutil.virtual_memory().percent)
             
-            c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2)), 'gpu': c.gpu}
+            
+            
                 
             print(parsed_data['line_plain'] + '\r')
         except UnicodeDecodeError as e:
