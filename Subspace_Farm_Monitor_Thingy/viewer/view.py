@@ -781,6 +781,9 @@ def create_main_layout():
     c.layout = layout
     c.farm_names = c.farm_names or []
     c.remote_farms = c.remote_farms or {}
+    
+    gpu_metrics = c.gpu
+    
     try:
 
         if len(c.farm_names) > 0:
@@ -983,11 +986,8 @@ def create_main_layout():
 
             time.sleep(.02)
          else:
-            if c.view_state == 4:
-    
-    
             # Parse and display GPU metrics
-                gpu_metrics = c.gpu
+                
                 gpu_table = Table(title="GPU Metrics [" + farmer_name + "]", show_header=True, header_style="bold magenta",)
                 gpu_table.add_column("GPU", justify="center")
                 #gpu_table.add_column("Name", justify="center")
@@ -998,7 +998,7 @@ def create_main_layout():
                 gpu_table.add_column("Power", justify="center")
                 
 
-                for gpu in gpu_metrics:
+                for gpu in c.gpu:
                     gpu_table.add_row(
                         str(gpu.get("gpuID", "N/A")),
                       #  gpu.get("name", "N/A"),

@@ -140,7 +140,7 @@ def process_farmer_metrics(metrics, farm_id_mapping):
     return metrics_dict
     
 def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
-    c.gpu = get_gpu_info()
+    #c.gpu = get_gpu_info()
     
     """
     Retrieve farmer metrics from the farmer service.
@@ -176,56 +176,12 @@ def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
         return [] 
     
     
-def get_gpu_info():
-    try:
-        # Initialize NVML
-        pynvml.nvmlInit()
-        
-        gpu_count = pynvml.nvmlDeviceGetCount()
-        gpu_info_list = []
-        
-        for i in range(gpu_count):
-            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-            name = pynvml.nvmlDeviceGetName(handle)
-            memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-            utilization = pynvml.nvmlDeviceGetUtilizationRates(handle)
-            temperature = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
-            fan_speed = pynvml.nvmlDeviceGetFanSpeed(handle)
-            power_usage = pynvml.nvmlDeviceGetPowerUsage(handle) // 1000  # Convert from milliwatts to watts
-            power_limit = pynvml.nvmlDeviceGetEnforcedPowerLimit(handle) // 1000  # Convert from milliwatts to watts
-            clock_graphics = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS)
-            clock_memory = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_MEM)
-            pcie_tx_bytes = pynvml.nvmlDeviceGetPcieThroughput(handle, pynvml.NVML_PCIE_UTIL_TX_BYTES)  # PCIe TX throughput
-            pcie_rx_bytes = pynvml.nvmlDeviceGetPcieThroughput(handle, pynvml.NVML_PCIE_UTIL_RX_BYTES)  # PCIe RX throughput
-            
-            gpu_info = {
-                "gpuID": i,
-                "name": name,
-                "memUsed": memory_info.used // 1024 // 1024,
-                "memTot": memory_info.total // 1024 // 1024,
-                "gpuUtil": utilization.gpu,
-                "memUtil": utilization.memory,
-                "temperature": temperature,
-                "fan_speed": fan_speed,
-                "power_usage": power_usage,
-                "power_limit": power_limit,
-               # "Graphics Clock (MHz)": clock_graphics,
-               # "Memory Clock (MHz)": clock_memory,
-               # "PCIe TX Throughput (Bytes/sec)": pcie_tx_bytes,
-               # "PCIe RX Throughput (Bytes/sec)": pcie_rx_bytes
-            }
-            
-            gpu_info_list.append(gpu_info)
-        
-        # Shutdown NVML
-        pynvml.nvmlShutdown()
-        
-        return gpu_info_list
-    except pynvml.NVMLError as error:
-        print(f"Failed to get GPU information: {error}")
-        return []
+
     
 def update_farm_metrics(farm_id_mapping):
+    
+    # c.gpu = get_gpu_info()
+    
     """
     Update farm metrics and store them in the global configuration.
     """
@@ -256,8 +212,10 @@ def socket_client_thread():
     
     while True:
         websocket_client.main()
+        
         if ErrorLogging:
             print('Websocket thread\n\n')
+            
         time.sleep(15)
 
 def update_metrics_periodically(interval=10):
@@ -266,7 +224,7 @@ def update_metrics_periodically(interval=10):
     
     """
     
-    # update_system_stats()
+    
     
     if ErrorLogging:
             print('Update metrics periodically\n\n')
@@ -279,8 +237,9 @@ def update_metrics_periodically(interval=10):
             c.rewards_per_hr += calculate_rewards_per_hour(c.farm_reward_times[disk_index])
             
         update_farm_metrics(c.farm_id_mapping)
-        save_data_to_file()
+        # save_data_to_file()
         time.sleep(interval)
+        
 
 metrics_thread = threading.Thread(target=update_metrics_periodically, daemon=True)
 metrics_thread.start()
@@ -592,6 +551,7 @@ def read_log_file():
                                         drive_directory, farm_skips, farm_recent_skips,
                                         system_stats, farm_id_mapping)
             vmem = str(psutil.virtual_memory().percent)
+            
             c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2)), 'gpu': c.gpu}
                 
             print(parsed_data['line_plain'] + '\r')
@@ -605,7 +565,7 @@ def read_log_file():
             print(f"An error occurred: {e}")
             console = Console()
             console.print_exception(show_locals=True)
-            time.sleep(10)
+            time.sleep(5)
 
 def send(msg=None):
     """

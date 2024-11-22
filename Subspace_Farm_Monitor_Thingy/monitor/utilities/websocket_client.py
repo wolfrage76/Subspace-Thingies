@@ -2,6 +2,8 @@ import asyncio
 import websockets
 import utilities.conf as c
 import json
+import pynvml
+
 from rich.traceback import install
 
 install(show_locals=True)
@@ -40,7 +42,7 @@ def make_farmer():
     frmr.drive_directory = c.drive_directory
     frmr.prove_method = c.prove_method
     frmr.system_stats = c.system_stats
-    frmr.gpu_metrics = c.system_stats.get('gpu', [])  # Add GPU metrics
+    frmr.gpu_metrics = get_gpu_info()  # Add GPU metrics
     frmr.disk_farms = c.disk_farms
     frmr.farmer_name = c.farmer_name
     frmr.warnings = c.warnings
@@ -58,7 +60,55 @@ def serialize_sets(obj):
         return list(obj)
     return obj
 
-
+def get_gpu_info():
+    try:
+        # Initialize NVML
+        pynvml.nvmlInit()
+        
+        gpu_count = pynvml.nvmlDeviceGetCount()
+        gpu_info_list = []
+        
+        for i in range(gpu_count):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            name = pynvml.nvmlDeviceGetName(handle)
+            memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            utilization = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            temperature = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+            fan_speed = pynvml.nvmlDeviceGetFanSpeed(handle)
+            power_usage = pynvml.nvmlDeviceGetPowerUsage(handle) // 1000  # Convert from milliwatts to watts
+            power_limit = pynvml.nvmlDeviceGetEnforcedPowerLimit(handle) // 1000  # Convert from milliwatts to watts
+            clock_graphics = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS)
+            clock_memory = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_MEM)
+            pcie_tx_bytes = pynvml.nvmlDeviceGetPcieThroughput(handle, pynvml.NVML_PCIE_UTIL_TX_BYTES)  # PCIe TX throughput
+            pcie_rx_bytes = pynvml.nvmlDeviceGetPcieThroughput(handle, pynvml.NVML_PCIE_UTIL_RX_BYTES)  # PCIe RX throughput
+            
+            gpu_info = {
+                "gpuID": i,
+                "name": name,
+                "memUsed": memory_info.used // 1024 // 1024,
+                "memTot": memory_info.total // 1024 // 1024,
+                "gpuUtil": utilization.gpu,
+                "memUtil": utilization.memory,
+                "temperature": temperature,
+                "fan_speed": fan_speed,
+                "power_usage": power_usage,
+                "power_limit": power_limit,
+               # "Graphics Clock (MHz)": clock_graphics,
+               # "Memory Clock (MHz)": clock_memory,
+               # "PCIe TX Throughput (Bytes/sec)": pcie_tx_bytes,
+               # "PCIe RX Throughput (Bytes/sec)": pcie_rx_bytes
+            }
+            
+            gpu_info_list.append(gpu_info)
+        
+        # Shutdown NVML
+        pynvml.nvmlShutdown()
+        
+        return gpu_info_list
+    except pynvml.NVMLError as error:
+        print(f"Failed to get GPU information: {error}")
+        return []
+    
 async def ws_client():
     reconnect_delay = 20
 
