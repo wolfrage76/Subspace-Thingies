@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 # Initialize state
+hddtemps = False
 gpuStats = True
 gpu = {}
 global_time = 0

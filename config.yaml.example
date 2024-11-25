@@ -47,6 +47,7 @@ FARMER_IP: '192.168.1.209' # This is the IP from above
 FARMER_PORT: '8181' # This is the Port from above
 
 GPUSTATS: True # Allow GPU Stats.  Set False if not GPU Plotting.
+HDDTEMPS: True # Display drive temps. NOTE: *REQUIRES* SUDO FOR SMARTTOOLS
 
  ##########################################################
 # Frontend Viewer Config  - Only needed fpr Viewer folder   #

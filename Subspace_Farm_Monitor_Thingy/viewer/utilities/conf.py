@@ -2,6 +2,9 @@ from collections import defaultdict
 import time
 
 # Initialize state
+
+formatted_data = {}
+drivestats = {}
 gpu = {}
 parsed_skips = {}
 parsed_rewards = {}

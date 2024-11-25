@@ -86,8 +86,9 @@ async def ws_server(websocket):
                     c.remote_farms[farmer_name]['last_update'] = time.time()
 
                 # Update farm-specific metrics
-                log_info(f"Updating metrics for farmer: {farmer_name}")
-                c.gpu = parsed_data.get('gpu_metrics', {})
+                # log_info(f"Updating metrics for farmer: {farmer_name}")
+                c.drivestats[farmer_name] = parsed_data.get('drivestats', {})
+                c.gpu[farmer_name] = parsed_data.get('gpu_metrics', {})
                 c.audits[farmer_name] = parsed_data.get('audits', {})
                 c.proves[farmer_name] = parsed_data.get('proves', {})
                 c.rewards_per_hr[farmer_name] = parsed_data.get('rewards_per_hr')
@@ -102,18 +103,18 @@ async def ws_server(websocket):
                 c.dropped_drives[farmer_name] = parsed_data.get('dropped_drives', [])
 
                 # Format parsed data and raw data for comparison
-                log_info(f"Formatting data for farmer: {farmer_name}")
+                # log_info(f"Formatting data for farmer: {farmer_name}")
                 formatted_data = json.dumps(parsed_data, indent=4)
                 raw_data = farm_data
                 
                 # Store formatted data for later use (e.g., logging or UI display)
                 if not hasattr(c, 'formatted_data'):
-                    log_info("Creating formatted_data attribute in conf module.")
+                #  log_info("Creating formatted_data attribute in conf module.")
                     c.formatted_data = {}
                 c.formatted_data[farmer_name] = {'formatted': formatted_data, 'raw': raw_data}
                 
                 # Log the formatted and raw data to a file
-                log_info(f"Farmer: {farmer_name}\nFormatted Data:\n{formatted_data}\nRaw Data:\n{raw_data}")
+                # log_info(f"Farmer: {farmer_name}\nFormatted Data:\n{formatted_data}\nRaw Data:\n{raw_data}")
                 
                 if errored:
                     log_info("WebSocket reconnected successfully.")

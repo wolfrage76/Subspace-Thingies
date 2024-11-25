@@ -39,6 +39,7 @@ indexconst = "{farm_index="
 with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
+c.hddtemps = config.get('HDDTEMPS', False)
 c.hour_24 = config.get('HOUR_24', False)
 c.farmer_name = config.get('FARMER_NAME', 'WolfrageRocks')
 c.front_end_ip = config.get('FRONT_END_IP', "127.0.0.1")
@@ -194,7 +195,7 @@ def update_farm_metrics(farm_id_mapping):
             c.audits[disk_index] = 1000 * (audit_sum / audit_count) if audit_count > 0 else 0
             
             all_metrics[disk_index] = metrics
-           
+
     c.farm_metrics = all_metrics
     if ErrorLogging:
         print('All Metrics')
@@ -358,7 +359,7 @@ def parse_log_line(line_plain, current_farm, reward_count, farm_rewards, farm_re
     line_timestamp_str = line_plain.split()[0]
     
     farm_index = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}")]
-     
+
     if 'groups detected l3_cache_groups=' in line_plain:
         c.l3_concurrency = int(line_plain.split('groups detected l3_cache_groups=')[1])
     
@@ -390,7 +391,7 @@ def parse_log_line(line_plain, current_farm, reward_count, farm_rewards, farm_re
         farm_index = extract_farm_index(line_plain)
         c.dropped_drives.append(farm_index)
         stop_error_notification(farm_index)   
-   
+        
     elif 'buffer of stream grows beyond limit' in line_plain or 'Failed to subscribe' in line_plain or 'DSN instance configured.' in line_plain or "enchmarking faster proving method" in line_plain:
         pass
 
@@ -455,7 +456,7 @@ def parse_log_line(line_plain, current_farm, reward_count, farm_rewards, farm_re
 
     if triggered:
         triggered = False
- 
+
     parsed_data['line_plain'] = local_time(line_plain).replace('  ', ' ')
         
     return parsed_data
@@ -581,11 +582,11 @@ def send(msg=None):
         try:
             conn = http.client.HTTPSConnection("api.pushover.net", timeout=10)
             conn.request("POST", "/1/messages.json",
-                         urllib.parse.urlencode({
-                             "token": config['PUSHOVER_APP_TOKEN'],
-                             "user": config['PUSHOVER_USER_KEY'],
-                             "message": msg,
-                         }), {"Content-type": "application/x-www-form-urlencoded"})
+                        urllib.parse.urlencode({
+                            "token": config['PUSHOVER_APP_TOKEN'],
+                            "user": config['PUSHOVER_USER_KEY'],
+                            "message": msg,
+                        }), {"Content-type": "application/x-www-form-urlencoded"})
             conn.getresponse().read()
         except Exception as e:
             print(f'Error sending Pushover: {e}')

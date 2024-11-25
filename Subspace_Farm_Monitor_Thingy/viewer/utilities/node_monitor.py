@@ -70,7 +70,7 @@ async def fetch_node_info():
                     c.best_block = best_block_number
                     c.is_syncing = is_syncing
 
-                    await asyncio.sleep(10)  # Wait before sending the next set of requests
+                    await asyncio.sleep(15)  # Wait before sending the next set of requests
 
         except websockets.ConnectionClosed as e:
             c.is_syncing = True

@@ -6,11 +6,12 @@ import pynvml
 import psutil
 
 from rich.traceback import install
+import utilities.drive_temps as drive_temps
 
 install(show_locals=True)
 
 class Farmer(object):
-    def __init__(self, farmer_name="Unknown", warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={}, drive_directory='', rewards_per_hr={}, proves={}, audits={}, l3_concurrency='', l3_farm_sector_time='', dropped_drives=[], gpu_metrics={}):
+    def __init__(self, farmer_name="Unknown", drivestats={},warnings=[], errors=[], startTime='', farm_rewards={}, farm_recent_rewards={}, disk_farms={}, farm_skips={}, farm_recent_skips={}, system_stats={}, farm_metrics={}, prove_method={}, drive_directory='', rewards_per_hr={}, proves={}, audits={}, l3_concurrency='', l3_farm_sector_time='', dropped_drives=[], gpu_metrics={}):
         self.dropped_drives = dropped_drives
         self.system_stats = system_stats
         self.drive_directory = drive_directory
@@ -31,9 +32,15 @@ class Farmer(object):
         self.l3_concurrency = l3_concurrency
         self.l3_farm_sector_time = l3_farm_sector_time
         self.gpu_metrics = gpu_metrics
+        self.drivestats = drivestats
 
 def make_farmer():
     frmr = Farmer()
+    if c.hddtemps:
+        frmr.drivestats = drive_temps.main()
+    else:
+        frmr.drivestats = {}
+        
     frmr.l3_concurrency = c.l3_concurrency
     frmr.l3_farm_sector_time = c.l3_farm_sector_time
     frmr.dropped_drives = c.dropped_drives
@@ -101,10 +108,10 @@ def get_gpu_info():
                 "fan_speed": fan_speed,
                 "power_usage": power_usage,
                 "power_limit": power_limit,
-               # "Graphics Clock (MHz)": clock_graphics,
-               # "Memory Clock (MHz)": clock_memory,
-               # "PCIe TX Throughput (Bytes/sec)": pcie_tx_bytes,
-               # "PCIe RX Throughput (Bytes/sec)": pcie_rx_bytes
+            # "Graphics Clock (MHz)": clock_graphics,
+            # "Memory Clock (MHz)": clock_memory,
+            # "PCIe TX Throughput (Bytes/sec)": pcie_tx_bytes,
+            # "PCIe RX Throughput (Bytes/sec)": pcie_rx_bytes
             }
             
             gpu_info_list.append(gpu_info)
