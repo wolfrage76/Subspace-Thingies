@@ -21,8 +21,8 @@ def send_notification(message, discord_url):
     if discord_url:
         data = {"content": message}
         response = requests.post(discord_url, json=data)
-        #if response.status_code not in [204]:
-           # print(f'Error sending Discord: {response.status_code}')
+        # if response.status_code not in [204]:
+            # print(f'Error sending Discord: {response.status_code}')
 
 
 def WalletMon():
@@ -76,9 +76,9 @@ def WalletMon():
                     url=f"ws://{nodeip}:{nodeport}")
             time.sleep(.2)
       except Exception as e: 
-          #print(lang.get('walet_error','Wallet Error'))   
-          time.sleep(60)       
+        #print(lang.get('walet_error','Wallet Error'))   
+        time.sleep(300)       
 
 
 # if __name__ == '__main__':
- #   WalletMon()
+    #   WalletMon()

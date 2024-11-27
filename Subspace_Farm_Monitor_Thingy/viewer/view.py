@@ -842,9 +842,9 @@ def create_main_layout():
                 is_completed = []
                 is_replotting = []
                 total_sectors = defaultdict(float)
-                total_sectors['Expired'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Expired', {}).get('value', 0)) 
-                total_sectors['NotPlotted'] = float(farmer_data['farm_metrics'][farm]['subspace_farmer_farm_sectors_total_Sectors_NotPlotted'].get('value', 0))
-                total_sectors['Plotted'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted').get('value', 0))
+                total_sectors['Expired'] =       float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Expired', {}).get('value', 0)) 
+                total_sectors['NotPlotted'] =    float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_NotPlotted', {}).get('value', 0)) 
+                total_sectors['Plotted'] =       float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted').get('value', 0))
                 total_sectors['AboutToExpire'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_AboutToExpire', {}).get('value', 0))
 
 
