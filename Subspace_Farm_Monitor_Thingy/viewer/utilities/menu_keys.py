@@ -111,7 +111,7 @@ class KBHit(Thread):
                     
                         
                 self.layout_update_callback()  # Update the layout immediately
-                time.sleep(.1)
+            time.sleep(.1)
 
     def stop(self):
         self.running = False
