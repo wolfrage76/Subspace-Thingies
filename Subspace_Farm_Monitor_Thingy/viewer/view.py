@@ -1,4 +1,3 @@
-import psutil
 import asyncio
 import datetime
 from rich import print
@@ -23,7 +22,7 @@ import http.client
 import urllib
 from rich.live import Live
 import os
-import pynvml
+
 
 install()
 
@@ -237,6 +236,11 @@ def create_footer(layout):
     footer_txt.add_column(ratio=1)
 
     ver = c.ver
+    if c.gpu:
+        show4 =  color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + color('FOOTER_MENU') +  '4'
+    else:
+        show4 = str()
+        
     footer_txt.add_row(Align.left(color('FOOTER_TEXT') + lang.get('latest', 'Latest') + ': ' + ver), Align.center(color('FOOTER_TEXT') + c.banners))
 
     footer = Panel(footer_txt, title= color('FOOTER_TEXT')+ "- [bold]BitcoinBart Was Here [/bold]-", border_style=color('FOOTER_FRAME'),
@@ -244,8 +248,8 @@ def create_footer(layout):
                    color('FOOTER_MENU') + 'Switch Farm ' + color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + lang.get('spacebar', 'Space') +color('FOOTER_ACCENT') +']: ' +
                    color('FOOTER_MENU') + lang.get('pause', 'Pause')+ color('FOOTER_ACCENT') + '  [' + color('FOOTER_MENU') +
                    lang.get('tab', 'Tab')+ color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('toggle_data', 'Toggle Data') + ' ' +
-                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '3' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU')+
-                   color('FOOTER_MENU') +  '4' +  color('FOOTER_ACCENT') + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +
+                   color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '1' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '2' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '3' +
+                   show4 + color('FOOTER_ACCENT') + ']: ' + color('FOOTER_MENU') + lang.get('change_display', 'Change Display') +
                    color('FOOTER_ACCENT') + ' [' + color('FOOTER_MENU') + '+' + color('FOOTER_ACCENT') + '|' + color('FOOTER_MENU') + '0' + color('FOOTER_ACCENT') +  '|' +
                    color('FOOTER_MENU') + '-' + color('FOOTER_ACCENT')  + ']: ' + color('FOOTER_MENU') + lang.get('cycle_theme', 'Cycle Theme')  + ' ' + color('FOOTER_ACCENT') +
                    ' [' + color('FOOTER_MENU') + 'Q' + color('FOOTER_ACCENT') +  ']' + color('FOOTER_MENU') + lang.get('quit', 'uit'), subtitle_align='right',height=3)
@@ -430,7 +434,7 @@ def color_by_status(percent, replot=False, offline=False):
         return colors[7]
 
 
-def convert_to_percent(load_tuple):
+""" def convert_to_percent(load_tuple):
     num_log_cpus = psutil.cpu_count()
 
     percent_lst = []
@@ -442,7 +446,7 @@ def convert_to_percent(load_tuple):
     return tuple(percent_lst)
 
 
-load_tuple = psutil.getloadavg()
+load_tuple = psutil.getloadavg() """
 
 
 def build_ui():
@@ -774,15 +778,14 @@ def update_farmer_index():
 
 
 def create_main_layout():
-   
+
     layout = c.layout
     layout["side"].visible = c.view_state in {1, 2,4}
     layout["bodysum"].visible = c.view_state in {1, 3,4 }
     c.layout = layout
     c.farm_names = c.farm_names or []
     c.remote_farms = c.remote_farms or {}
-    
-    gpu_metrics = c.gpu
+
     
     try:
 
@@ -839,9 +842,9 @@ def create_main_layout():
                 is_completed = []
                 is_replotting = []
                 total_sectors = defaultdict(float)
-                total_sectors['Expired'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Expired', {}).get('value', 0)) 
-                total_sectors['NotPlotted'] = float(farmer_data['farm_metrics'][farm]['subspace_farmer_farm_sectors_total_Sectors_NotPlotted'].get('value', 0))
-                total_sectors['Plotted'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted').get('value', 0))
+                total_sectors['Expired'] =       float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Expired', {}).get('value', 0)) 
+                total_sectors['NotPlotted'] =    float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_NotPlotted', {}).get('value', 0)) 
+                total_sectors['Plotted'] =       float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_Plotted').get('value', 0))
                 total_sectors['AboutToExpire'] = float(farmer_data.get('farm_metrics', {}).get(farm, {}).get('subspace_farmer_farm_sectors_total_Sectors_AboutToExpire', {}).get('value', 0))
 
 
@@ -883,7 +886,7 @@ def create_main_layout():
                     is_completed.append(farm)
 
                 if total_sectors.get('AboutToExpire', 0) > 0 or total_sectors.get('Expired', 0) > 0:
-                  is_replotting.append(farm)
+                    is_replotting.append(farm)
 
 
                 if farm in is_completed and farm not in is_replotting:
@@ -918,24 +921,30 @@ def create_main_layout():
                 farmid = c.drive_directory.get(farmer_name, {}).get(farm, '')
                 if farmid == '':
                     continue
-
+                
+                farmTemp = ''
                 if c.view_xtras:
-                    sectortxt = ''
                     averageTime = ''
-                    e = False
-                else:
-                    sectortxt = ''
-                    averageTime = ''
-                    e = False
 
+                else:
+                    averageTime = ''
+                    #if c.drivestats.get(farmer_name,{}).get(c.drive_directory.get(farmer_name,{}).get(farm, {}), {}):
+                if len(c.drivestats.get(farmer_name,{})) > 0:
+                    farmTemp = (c.drivestats.get(farmer_name,{}).get(c.drive_directory.get(farmer_name,{}).get(farm, {})).get('temperature', 'N/A')).ljust(6)
+                
+                
                 if ps > 0: # Remove dropped drives from display
+                    spacer = 3
+                    if len(c.drive_directory.get(farmer_name,{})) > 9:
+                        spacer = 4
                     if c.view_xtras:
-                        showPath = (farm + ':').ljust(3) + farmid.ljust(get_max_directory_length(farmer_name)) + ' '
+                        
+                        showPath = (farm + ':').ljust(spacer) + farmid.ljust(get_max_directory_length(farmer_name)) + ' '
                     else:
-                        showPath = (farm + ':').ljust(3)  + ' '
+                        showPath = (farm + ': ').ljust(spacer)  + farmTemp
                         
                         
-                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + showPath + (' (' + convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB)').ljust(18)  + ' ' + averageTime + color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving)).rjust(5), completed=ipds)
+                    job_progress.add_task(prove + color_by_status(ipds, farm in is_replotting) + showPath + (convert_to_tib(str(psd) + ' GB') + '/' + convert_to_tib(str(ps) + ' GB') + ' TiB').ljust(18)  + ' ' +  color('FARMER_REWARDS') + lang.get('single_hits','H') + color('FARMER_ACCENT') + '/'+ color('FARMER_MISSES') + lang.get('single_misses','M') + color('FARMER_MISSES') + ': ' + color('FARMER_REWARDS')  + str(c.farm_recent_rewards.get(farmer_name, {}).get(farm, 0)).rjust(2) + str(color('FARMER_ACCENT') + '/' + color('FARMER_MISSES'))  + str(c.farm_recent_skips.get(farmer_name, {}).get(farm, 0)).ljust(2) + color('FARMER_ACCENT') + ' A: ' + color('FARMER_VALUE') + format_s_ms((auditing_avg)).rjust(5) +  color('FARMER_ACCENT') + ' P: '+ color('FARMER_VALUE') + str(str(proving)).rjust(5), completed=ipds)
 
             if ipds > 0:
                 total_completed = ipds
@@ -991,18 +1000,18 @@ def create_main_layout():
                 gpu_table = Table(title="GPU Metrics [" + farmer_name + "]", show_header=True, header_style="bold magenta",)
                 gpu_table.add_column("GPU", justify="center")
                 #gpu_table.add_column("Name", justify="center")
-                gpu_table.add_column("Memory", justify="center")
+                gpu_table.add_column("Memory (MB)", justify="center")
                 gpu_table.add_column("GPU Usage", justify="center")
                 gpu_table.add_column("Temp", justify="center")
                 gpu_table.add_column("Fan", justify="center")
                 gpu_table.add_column("Power", justify="center")
                 
 
-                for gpu in c.gpu:
+                for gpu in c.gpu.get(farmer_name,{}):
                     gpu_table.add_row(
                         str(gpu.get("gpuID", "N/A")),
-                      #  gpu.get("name", "N/A"),
-                        str(gpu.get("memUsed", "N/A")) + "/" + str(gpu.get("memTot", "N/A")) + "(" + str(gpu.get("memUtil", "N/A")) + ")",
+                    #  gpu.get("name", "N/A"),
+                        str(gpu.get("memUsed", "N/A")) + "/" + str(gpu.get("memTot", "N/A")) + "(" + str(gpu.get("memUtil", "N/A")) + "%)",
                         str(gpu.get("gpuUtil", "N/A")) + "%",
                         str(gpu.get("temperature", "N/A")) + "°C",
                         str(gpu.get("fan_speed", "N/A")) + "%",

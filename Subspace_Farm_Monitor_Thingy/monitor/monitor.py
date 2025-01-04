@@ -1,4 +1,3 @@
-import psutil
 from pathlib import Path
 from datetime import timedelta, timezone, datetime
 import dateutil.parser
@@ -15,16 +14,14 @@ from rich.console import Console
 import http.client
 import urllib
 import os
-import subprocess
-import json
-import pynvml
 
 # Initialize state
 ErrorLogging = False
 last_notification_time = {}
 notification_count = {}
 c.system_stats = {}
-system_stats = c.system_stats
+system_stats = {}
+
 
 disk_farms = c.disk_farms
 reward_count = c.reward_count
@@ -42,6 +39,7 @@ indexconst = "{farm_index="
 with open("config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
+c.hddtemps = config.get('HDDTEMPS', False)
 c.hour_24 = config.get('HOUR_24', False)
 c.farmer_name = config.get('FARMER_NAME', 'WolfrageRocks')
 c.front_end_ip = config.get('FRONT_END_IP', "127.0.0.1")
@@ -49,6 +47,7 @@ c.front_end_port = config.get('FRONT_END_PORT', "8016")
 farmer_ip = config.get('FARMER_IP', "127.0.0.1")
 farmer_port = config.get('FARMER_PORT', "8181")
 cluster_enabled = config.get('CLUSTER_ENABLED' ,False)
+c.gpuStats = config.get('GPUSTATS', True)
 
 reward_phrase = 'reward_signing: Successfully signed reward hash'
 recommendTxt = '\n\t\t[blink][b yellow]Recommendation: [white]'
@@ -140,8 +139,7 @@ def process_farmer_metrics(metrics, farm_id_mapping):
     return metrics_dict
     
 def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
-    #c.gpu = get_gpu_info()
-    
+
     """
     Retrieve farmer metrics from the farmer service.
     """
@@ -180,8 +178,6 @@ def get_farmer_metrics(farmer_ip, farmer_port, wait=60):
     
 def update_farm_metrics(farm_id_mapping):
     
-    # c.gpu = get_gpu_info()
-    
     """
     Update farm metrics and store them in the global configuration.
     """
@@ -199,7 +195,7 @@ def update_farm_metrics(farm_id_mapping):
             c.audits[disk_index] = 1000 * (audit_sum / audit_count) if audit_count > 0 else 0
             
             all_metrics[disk_index] = metrics
-           
+
     c.farm_metrics = all_metrics
     if ErrorLogging:
         print('All Metrics')
@@ -363,7 +359,7 @@ def parse_log_line(line_plain, current_farm, reward_count, farm_rewards, farm_re
     line_timestamp_str = line_plain.split()[0]
     
     farm_index = line_plain[line_plain.find(indexconst) + len(indexconst):line_plain.find("}")]
-     
+
     if 'groups detected l3_cache_groups=' in line_plain:
         c.l3_concurrency = int(line_plain.split('groups detected l3_cache_groups=')[1])
     
@@ -395,7 +391,7 @@ def parse_log_line(line_plain, current_farm, reward_count, farm_rewards, farm_re
         farm_index = extract_farm_index(line_plain)
         c.dropped_drives.append(farm_index)
         stop_error_notification(farm_index)   
-   
+        
     elif 'buffer of stream grows beyond limit' in line_plain or 'Failed to subscribe' in line_plain or 'DSN instance configured.' in line_plain or "enchmarking faster proving method" in line_plain:
         pass
 
@@ -460,7 +456,7 @@ def parse_log_line(line_plain, current_farm, reward_count, farm_rewards, farm_re
 
     if triggered:
         triggered = False
- 
+
     parsed_data['line_plain'] = local_time(line_plain).replace('  ', ' ')
         
     return parsed_data
@@ -550,9 +546,9 @@ def read_log_file():
             parsed_data = parse_log_line(line_plain, curr_farm, reward_count, farm_rewards, farm_recent_rewards,
                                         drive_directory, farm_skips, farm_recent_skips,
                                         system_stats, farm_id_mapping)
-            vmem = str(psutil.virtual_memory().percent)
             
-            c.system_stats = {'ram': str(round(psutil.virtual_memory().used / (1024.0 ** 3))) + 'gb ' + vmem + '%', 'cpu': str(psutil.cpu_percent()), 'load': str(round(psutil.getloadavg()[1], 2)), 'gpu': c.gpu}
+            
+            
                 
             print(parsed_data['line_plain'] + '\r')
         except UnicodeDecodeError as e:
@@ -586,11 +582,11 @@ def send(msg=None):
         try:
             conn = http.client.HTTPSConnection("api.pushover.net", timeout=10)
             conn.request("POST", "/1/messages.json",
-                         urllib.parse.urlencode({
-                             "token": config['PUSHOVER_APP_TOKEN'],
-                             "user": config['PUSHOVER_USER_KEY'],
-                             "message": msg,
-                         }), {"Content-type": "application/x-www-form-urlencoded"})
+                        urllib.parse.urlencode({
+                            "token": config['PUSHOVER_APP_TOKEN'],
+                            "user": config['PUSHOVER_USER_KEY'],
+                            "message": msg,
+                        }), {"Content-type": "application/x-www-form-urlencoded"})
             conn.getresponse().read()
         except Exception as e:
             print(f'Error sending Pushover: {e}')
